@@ -1,9 +1,53 @@
+.company-header{
+    margin: auto;
+    width: 100%;
+}
+
 .company-header img{
+    display: block;
     width: 48px;
     height: 48px;
+    margin-left: auto;
+    margin-right: auto;
 } 
 
 
 .company-header h1{
-    margin-left: 5%;
+    text-align: center;
 } 
+
+.content{
+    margin-left: 5%;
+    margin-right: 5%;
+}
+
+.content form{
+    margin-left: 25%;
+    margin-right: 25%;
+}
+
+.input-container {
+    display: -ms-flexbox; /* IE10 */
+    display: flex;
+    width: 100%;
+    margin-bottom: 15px;
+}
+
+
+.icon {
+    padding: 11px;
+    background: dodgerblue;
+    color: white;
+    min-width: 50px;
+    text-align: center;
+}
+
+.input-field {
+    width: 100%;
+    padding: 10000px;
+    outline: none;
+}
+
+.input-field:focus {
+    border: 2px solid dodgerblue;
+}
