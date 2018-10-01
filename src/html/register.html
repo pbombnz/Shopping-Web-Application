@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Register</title>
+    <!--meta content="" -->
+    <!--style></style -->
+    <!-- Bootstrap library -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css" integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO"
+        crossorigin="anonymous">
+    <!-- Icon library -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+
+    <link rel="stylesheet" href="../css/login.css">
+
+</head>
+
+<body>
+    <div class="container">
+        <form>
+            <h3 class="text-center">General</h3>
+            <div class="row">
+                <div class="col">
+                    <label for="inputFirstName">First Name</label>
+                    <input type="text" class="form-control" id="inputFirstName" placeholder="John" required>
+                </div>
+                <div class="col">
+                    <label for="inputLastName">Last Name</label>
+                    <input type="text" class="form-control" id="inputLastName" placeholder="Smith" required>
+                </div>
+            </div>
+
+            <!-- Phone Numbers -->
+            <div class="row">
+                <div class="col">
+                    <label for="inputHomePh">Home Phone Number</label>
+                    <input type="tel" class="form-control" id="inputHomePh" placeholder="042222222" required>
+                </div>
+                <div class="col">
+                    <label for="inputMobilePh">Mobile Phone Number</label>
+                    <input type="tel" class="form-control" id="inputMobilePh" placeholder="0219999999" required>
+                </div>
+            </div>
+            <hr>
+            <!-- Login -->
+            <h3 class="text-center">Login</h3>
+            <label for="inputEmail">Email</label>
+            <input type="email" class="form-control" id="inputEmail" placeholder="palceholder@example.com" required>
+
+            <label for="inputPassword">Password</label>
+            <input type="password" class="form-control" id="inputPassword" required>
+
+            <label for="inputPasswordConfirm">Confirm Password</label>
+            <input type="password" class="form-control" id="inputPasswordConfirm" required>
+            
+            <hr>
+            <!-- Address -->
+            <h3 class="text-center">Delivery Address</h3>
+            <label for="inputAddress_Street1">Street Address #1</label>
+            <input type="text" class="form-control" id="inputAddress_Street1" required>
+            <label for="inputAddress_Street2">Street Address #2</label>
+            <input type="text" class="form-control" id="inputAddress_Street2" required >
+            <div class="row">
+                <div class="col-5">
+                    <label for="inputAddress_Suburb">Suburb</label>
+                    <input type="tel" class="form-control" id="inputAddress_Suburb" required>
+                </div>
+                <div class="col-5">
+                    <label for="inputAddress_City">City</label>
+                    <input type="tel" class="form-control" id="inputAddress_City" required>
+                </div>
+                <div class="col-2">
+                    <label for="inputAddress_PostCode">Post Code</label>
+                    <input type="text" class="form-control" id="inputAddress_PostCode" required>
+                </div>
+            </div> 
+            <hr>
+            <!-- Payment -->
+            <h3 class="text-center">Payment</h3>
+            <div class="row">
+                <div class="col">
+                    <label for="inputCard_Number">Card Number</label>
+                    <input type="text" class="form-control" id="inputCard_Number" required>
+                </div>
+                <div class="col-3">
+                    <label for="inputCard_NameOnCard">Name on Card</label>
+                    <input type="text" class="form-control" id="inputCard_NameOnCard" placeholder="J Smith" required>
+                </div>
+                <div class="col-2">
+                    <label for="inputCard_CVV">CVV</label>
+                    <input type="text" class="form-control" id="inputCard_CVV" required>
+                </div>
+                <div class="col-2">
+                    <label for="inputCard_Expiry">Expires</label>
+                    <input type="text" class="form-control" id="inputCard_Expiry" placeholder="MM/YYYY" required>
+                </div>
+            </div>
+            <hr>
+            <div class="row">
+                <div class="col">
+                    <button type="button" class="btn btn-outline-secondary">Clear All Fields</button>
+                </div>
+                <div class="col">
+                    <button type="submit" class="btn btn-primary float-right">Register</button>
+                </div>
+            </div>
+        </form>
+    </div>
+</body>
+
+</html>
