@@ -2,13 +2,13 @@ import { BrowserModule } from '@angular/platform-browser';
 import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
 import { HttpModule } from '@angular/http';
+import {NgbModule} from '@ng-bootstrap/ng-bootstrap';
 
 
 import { AppComponent } from './app.component';
 import { LoginComponent } from './login/login.component';
 import { RegisterComponent } from './register/register.component';
 import { ItemDetailsComponent } from './item-details/item-details.component';
-
 
 @NgModule({
   declarations: [
@@ -18,6 +18,7 @@ import { ItemDetailsComponent } from './item-details/item-details.component';
     ItemDetailsComponent
   ],
   imports: [
+    NgbModule.forRoot(),
     BrowserModule,
     HttpModule,
     RouterModule.forRoot([
