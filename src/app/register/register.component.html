@@ -1,5 +1,6 @@
 <div class="container">
-  <form [formGroup]="form" (ngSubmit)="onSubmit()">
+  <ngx-loading [show]="loading" [config]="{ fullScreenBackdrop: true, backdropBackgroundColour: 'rgba(0, 0, 0, 0.8)' }"></ngx-loading>
+  <form class="my-4" [formGroup]="form" (ngSubmit)="onSubmit()">
     <h3 class="text-center">General</h3>
     <div class="row">
       <div class="col">
@@ -116,6 +117,12 @@
       <div class="col">
         <button type="submit" class="btn btn-primary float-right">Register</button>
       </div>
+    </div>
+    <div *ngIf="!form.pristine && !form.valid" class="my-4 alert alert-danger" role="alert">
+      You cannot register an account until all the required fields are filled correctly.
+    </div>
+    <div *ngIf="error" class="my-4 alert alert-danger" role="alert">
+      Failed to communicate to server. Try again later.
     </div>
   </form>
 </div>

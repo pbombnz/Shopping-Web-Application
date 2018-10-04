@@ -1,5 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { FormGroup, FormControl, Validators } from '@angular/forms';
+import { HttpClient } from '@angular/common/http';
+
 import { CustomValidators } from 'ngx-custom-validators';
 import {ErrorMessage} from 'ng-bootstrap-form-validation';
 
@@ -9,7 +11,12 @@ import {ErrorMessage} from 'ng-bootstrap-form-validation';
   styleUrls: ['./register.component.css']
 })
 export class RegisterComponent implements OnInit {
+  loading = false;
+  error = false;
 
+  /**
+   * Custom error messages as CustomValidators does not have default messages.
+   */
   customErrorMessages: ErrorMessage[] = [
     {
       error: 'equalTo',
@@ -33,6 +40,7 @@ export class RegisterComponent implements OnInit {
     }
   ];
 
+  // Creating Register Form
   password: FormControl = new FormControl('', Validators.required);
   password_confirm: FormControl = new FormControl('', [Validators.required, CustomValidators.equalTo(this.password)]);
 
@@ -56,17 +64,35 @@ export class RegisterComponent implements OnInit {
   });
 
 
-  constructor( ) { }
+  constructor(private http: HttpClient) { }
 
   ngOnInit() {
   }
 
   clearAllFields() {
+    this.error = false;
+    this.loading = false;
     this.form.reset();
   }
 
   onSubmit() {
     console.log(this.form.valid);
+    console.log(this.form);
     console.log(this.form.value);
+
+    this.error = false;
+    this.loading = false;
+
+    //if (!this.form.valid) {
+    //  this.error = true;
+    //  return;
+    //}
+
+
+    this.loading = true;
+    this.http.get('https://httpbin.org/get').subscribe((res) => {
+      console.log(res);
+      this.loading = false;
+    });
   }
 }

@@ -24,6 +24,7 @@
     "core-js": "^2.5.4",
     "ng-bootstrap-form-validation": "^3.0.3",
     "ngx-custom-validators": "^6.1.0",
+    "ngx-loading": "^3.0.1",
     "rxjs": "~6.2.0",
     "zone.js": "~0.8.26"
   },
