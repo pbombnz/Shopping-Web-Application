@@ -9,53 +9,74 @@
         </div>
       </div>
       <div class="col">
-        <label for="inputLastName">Last Name</label>
-        <input type="text" class="form-control" id="inputLastName" placeholder="Smith" formControlName="lastName">
+        <div class="form-group">
+          <label for="inputLastName">Last Name</label>
+          <input type="text" class="form-control" id="inputLastName" placeholder="Smith" formControlName="lastName">
+        </div>
       </div>
     </div>
 
     <!-- Phone Numbers -->
     <div class="row">
       <div class="col">
-        <label for="inputHomePh">Home Phone Number</label>
-        <input type="tel" class="form-control" id="inputHomePh" placeholder="042222222" formControlName="homePhoneNumber">
+        <div class="form-group">
+          <label for="inputHomePh">Home Phone Number</label>
+          <input type="tel" class="form-control" id="inputHomePh" placeholder="042222222" formControlName="homePhoneNumber">
+        </div>
       </div>
       <div class="col">
-        <label for="inputMobilePh">Mobile Phone Number</label>
-        <input type="tel" class="form-control" id="inputMobilePh" placeholder="0219999999" formControlName="mobilePhoneNumber">
+        <div class="form-group">
+          <label for="inputMobilePh">Mobile Phone Number</label>
+          <input type="tel" class="form-control" id="inputMobilePh" placeholder="0219999999" formControlName="mobilePhoneNumber">
+        </div>
       </div>
     </div>
     <hr>
     <!-- Login -->
     <h3 class="text-center">Login</h3>
-    <label for="inputEmail">Email</label>
-    <input type="email" class="form-control" id="inputEmail" placeholder="palceholder@example.com" formControlName="email">
+    <div class="form-group">
+      <label for="inputEmail">Email</label>
+      <input type="email" class="form-control" id="inputEmail" placeholder="palceholder@example.com" formControlName="email">
+    </div>
 
-    <label for="inputPassword">Password</label>
-    <input type="password" class="form-control" id="inputPassword" formControlName="password">
-
-    <label for="inputPasswordConfirm">Confirm Password</label>
-    <input type="password" class="form-control" id="inputPasswordConfirm" formControlName="password_confirm">
+    <div class="form-group">
+      <label for="inputPassword">Password</label>
+      <input type="password" class="form-control" id="inputPassword" formControlName="password">
+    </div>
+    <div class="form-group" [customErrorMessages]="customErrorMessages">
+      <label for="inputPasswordConfirm">Confirm Password</label>
+      <input type="password" class="form-control" id="inputPasswordConfirm" formControlName="password_confirm">
+    </div>
 
     <hr>
     <!-- Address -->
     <h3 class="text-center">Delivery Address</h3>
-    <label for="inputAddress_Street1">Street Address #1</label>
-    <input type="text" class="form-control" id="inputAddress_Street1" formControlName="address_line1">
-    <label for="inputAddress_Street2">Street Address #2</label>
-    <input type="text" class="form-control" id="inputAddress_Street2" formControlName="address_line2">
+    <div class="form-group">
+      <label for="inputAddress_Street1">Street Address #1</label>
+      <input type="text" class="form-control" id="inputAddress_Street1" formControlName="address_line1">
+    </div>
+    <div class="form-group">
+      <label for="inputAddress_Street2">Street Address #2</label>
+      <input type="text" class="form-control" id="inputAddress_Street2" formControlName="address_line2">
+    </div>
     <div class="row">
       <div class="col-5">
-        <label for="inputAddress_Suburb">Suburb</label>
-        <input type="tel" class="form-control" id="inputAddress_Suburb" formControlName="address_suburb">
+        <div class="form-group">
+          <label for="inputAddress_Suburb">Suburb</label>
+          <input type="tel" class="form-control" id="inputAddress_Suburb" formControlName="address_suburb">
+        </div>
       </div>
       <div class="col-5">
-        <label for="inputAddress_City">City</label>
-        <input type="tel" class="form-control" id="inputAddress_City" formControlName="address_city">
+        <div class="form-group">
+          <label for="inputAddress_City">City</label>
+          <input type="tel" class="form-control" id="inputAddress_City" formControlName="address_city">
+        </div>
       </div>
       <div class="col-2">
-        <label for="inputAddress_PostCode">Post Code</label>
-        <input type="text" class="form-control" id="inputAddress_PostCode" formControlName="address_postCode">
+        <div class="form-group" [customErrorMessages]="customErrorMessages">
+          <label for="inputAddress_PostCode">Post Code</label>
+          <input type="text" class="form-control" id="inputAddress_PostCode" formControlName="address_postCode">
+        </div>
       </div>
     </div>
     <hr>
@@ -63,20 +84,28 @@
     <h3 class="text-center">Payment</h3>
     <div class="row">
       <div class="col">
-        <label for="inputCard_Number">Card Number</label>
-        <input type="text" class="form-control" id="inputCard_Number" formControlName="card_number">
+        <div class="form-group" [customErrorMessages]="customErrorMessages">
+          <label for="inputCard_Number">Card Number</label>
+          <input type="text" class="form-control" id="inputCard_Number" formControlName="card_number">
+        </div>
       </div>
       <div class="col-3">
-        <label for="inputCard_NameOnCard">Name on Card</label>
-        <input type="text" class="form-control" id="inputCard_NameOnCard" placeholder="J Smith" formControlName="card_name">
+        <div class="form-group">
+          <label for="inputCard_NameOnCard">Name on Card</label>
+          <input type="text" class="form-control" id="inputCard_NameOnCard" placeholder="J Smith" formControlName="card_name">
+        </div>
       </div>
       <div class="col-2">
-        <label for="inputCard_CVV">CVV</label>
-        <input type="text" class="form-control" id="inputCard_CVV" formControlName="card_cvv">
+        <div class="form-group" [customErrorMessages]="customErrorMessages">
+          <label for="inputCard_CVV">CVV</label>
+          <input type="text" class="form-control" id="inputCard_CVV" formControlName="card_cvv">
+        </div>
       </div>
       <div class="col-2">
-        <label for="inputCard_Expiry">Expires</label>
-        <input type="text" class="form-control" id="inputCard_Expiry" placeholder="MM/YYYY" formControlName="card_expiry">
+        <div class="form-group">
+          <label for="inputCard_Expiry">Expires</label>
+          <input type="text" class="form-control" id="inputCard_Expiry" placeholder="MM/YYYY" formControlName="card_expiry">
+        </div>
       </div>
     </div>
     <hr>
