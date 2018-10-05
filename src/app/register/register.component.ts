@@ -76,23 +76,28 @@ export class RegisterComponent implements OnInit {
   }
 
   onSubmit() {
+    // Debug
     console.log(this.form.valid);
     console.log(this.form);
     console.log(this.form.value);
 
+    // Reset Page Status
     this.error = false;
     this.loading = false;
 
+    // Do not continue if the form is not valid.
     if (!this.form.valid) {
-      this.error = true;
       return;
     }
 
-
-    this.loading = true;
-    this.http.get('https://httpbin.org/get').subscribe((res) => {
-      console.log(res);
+    // Connect to server and register
+    this.loading = true; // display Loader Screen
+    this.http.get('https://httpbin.org/get').subscribe((result) => {
+      console.log(result);
       this.loading = false;
+    }, (error) => {
+      this.loading = false;
+      this.error = true;
     });
   }
 }
