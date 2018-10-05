@@ -83,10 +83,10 @@ export class RegisterComponent implements OnInit {
     this.error = false;
     this.loading = false;
 
-    //if (!this.form.valid) {
-    //  this.error = true;
-    //  return;
-    //}
+    if (!this.form.valid) {
+      this.error = true;
+      return;
+    }
 
 
     this.loading = true;
