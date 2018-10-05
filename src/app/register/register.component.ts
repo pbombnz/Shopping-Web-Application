@@ -41,7 +41,7 @@ export class RegisterComponent implements OnInit {
   ];
 
   // Creating Register Form
-  password: FormControl = new FormControl('', Validators.required);
+  password: FormControl = new FormControl('', [Validators.required, Validators.minLength(5), Validators.maxLength(50)]);
   password_confirm: FormControl = new FormControl('', [Validators.required, CustomValidators.equalTo(this.password)]);
 
   form: FormGroup = new FormGroup({

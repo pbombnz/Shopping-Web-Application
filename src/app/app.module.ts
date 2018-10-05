@@ -7,6 +7,7 @@ import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import {NgbModule} from '@ng-bootstrap/ng-bootstrap';
 import { NgBootstrapFormValidationModule } from 'ng-bootstrap-form-validation';
 import { NgxLoadingModule } from 'ngx-loading';
+import { PasswordStrengthBarModule } from 'ng2-password-strength-bar';
 
 import { AppComponent } from './app.component';
 import { LoginComponent } from './login/login.component';
@@ -26,6 +27,7 @@ import { ItemDetailsComponent } from './item-details/item-details.component';
     HttpClientModule,
     FormsModule,
     ReactiveFormsModule,
+    PasswordStrengthBarModule,
     NgbModule.forRoot(),
     NgBootstrapFormValidationModule.forRoot(),
     NgBootstrapFormValidationModule,

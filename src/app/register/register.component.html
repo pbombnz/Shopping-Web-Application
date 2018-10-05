@@ -43,6 +43,10 @@
     <div class="form-group">
       <label for="inputPassword">Password</label>
       <input type="password" class="form-control" id="inputPassword" formControlName="password">
+      <ng2-password-strength-bar
+        [passwordToCheck]="password.value"
+        [barLabel]="'Password strength:'">
+      </ng2-password-strength-bar>
     </div>
     <div class="form-group" [customErrorMessages]="customErrorMessages">
       <label for="inputPasswordConfirm">Confirm Password</label>
