@@ -26,7 +26,7 @@
   <div class="collapse navbar-collapse" id="navbarSupportedContent" [ngbCollapse]="isCollapsed">
     <ul class="navbar-nav mr-auto">
       <li class="nav-item" routerLinkActive="active" [routerLinkActiveOptions]="{exact:true}">
-        <a class="nav-link" routerLink="/">All Items</a>
+        <a class="nav-link" [routerLink]="['/item-details']">All Items</a>
       </li>
       <li class="nav-item" routerLinkActive="active" [routerLinkActiveOptions]="{exact:true}">
         <a class="nav-link" [routerLink]="['/register']">Fruit</a>
