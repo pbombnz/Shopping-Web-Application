@@ -6,10 +6,21 @@ import { Component, OnInit } from '@angular/core';
   styleUrls: ['./item-details.component.css']
 })
 export class ItemDetailsComponent implements OnInit {
+  readonly min = 0;
+  readonly max = 50;
+
+  itemQuantity = 0;
 
   constructor() { }
 
   ngOnInit() {
   }
 
+  onQuantityMinusClick() {
+    this.itemQuantity--;
+  }
+
+  onQuantityPlusClick() {
+    this.itemQuantity++;
+  }
 }

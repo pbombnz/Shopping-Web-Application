@@ -1,29 +1,14 @@
-<div class="company-header">
-  <img src="assets/misc/logo-placeholder.png" class="rounded" alt="Company Logo">
-  <h1> Company Name </h1>
-</div>
-
-<div class="company-header">
-
-  <div class="text-nowrap" style="overflow: hidden; text-overflow: ellipsis;position:relative;display:inline-block;width:55%;">
-    <h1> Company Name </h1>
-  </div>
-
-  <div style="float:left;display:block;position:relative;width:40%;">
-    <img src="assets/misc/logo-placeholder.png" class="rounded" alt="Company Logo">
-  </div>
-
-</div>
-
-<div class="content">
-  <form>
+<div class="container">
+  <ngx-loading [show]="loading" [config]="{ fullScreenBackdrop: true, backdropBackgroundColour: 'rgba(0, 0, 0, 0.8)' }"></ngx-loading>
+  <h1>Login / Register</h1>
+  <hr>
+  <form class="m-5" [formGroup]="form" (ngSubmit)="onSubmit()">
     <div class="form-group">
       <div class="input-group">
         <span class="input-group-addon">
           <i class="fa fa-envelope icon"></i>
         </span>
-        <input type="email" class="form-control" id="exampleInputEmail1" aria-describedby="emailHelp" placeholder="Enter email">
-
+        <input type="email" class="form-control" id="inputEmail" aria-describedby="emailHelp" placeholder="Enter email" formControlName="email">
       </div>
     </div>
     <div class="form-group">
@@ -31,15 +16,27 @@
         <span class="input-group-addon">
           <i class="fa fa-key icon"></i>
         </span>
-        <input type="password" class="form-control" id="exampleInputPassword1" placeholder="Password">
+        <input type="password" class="form-control" id="inputPassword" placeholder="Password" formControlName="password">
       </div>
       <div class="input-group form-check">
-        <input type="checkbox" class="form-check-input" id="exampleCheck1">
-        <label class="form-check-label" for="exampleCheck1">Remember Me</label>
+        <input type="checkbox" class="form-check-input" id="inputRememberPassword" formControlName="rememberPassword">
+        <label class="form-check-label" for="inputRememberPassword">Remember Me</label>
       </div>
     </div>
-    <button type="submit" class="btn btn-primary">Submit</button>
-    <button type="submit" class="btn btn-primary">Forgot Password</button>
-    <button type="submit" class="btn btn-primary">Register</button>
+    <hr>
+    <div class="row">
+      <div class="col alert alert-danger" role="alert" *ngIf="loginFailed">
+        Cannot login! Please make sure you have the correct credentials to login.
+      </div>
+    </div>
+    <div class="row">
+      <div class="col-10">
+        <button type="button" class="btn btn-outline-primary mr-2">Forgot Password</button>
+        <button type="button" class="btn btn-outline-primary mr-2" [routerLink]="['/register']">Register</button>
+      </div>
+      <div class="col-2">
+        <button type="submit" class="btn btn-primary float-right">Login</button>
+      </div>
+    </div>
   </form>
 </div>
