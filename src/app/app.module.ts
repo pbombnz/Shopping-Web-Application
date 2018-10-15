@@ -39,7 +39,8 @@ import { BrowseItemsComponent } from './browse-items/browse-items.component';
     RouterModule.forRoot([
       { path: 'login', component: LoginComponent },
       { path: 'register', component: RegisterComponent },
-      { path: 'item-details', component: ItemDetailsComponent }
+      { path: 'item-details/:id', component: ItemDetailsComponent },
+      { path: 'browse', component: BrowseItemsComponent }
     ])
   ],
   providers: [],
