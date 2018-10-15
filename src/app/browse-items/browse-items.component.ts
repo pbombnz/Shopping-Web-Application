@@ -33,7 +33,7 @@ export class BrowseItemsComponent implements OnInit {
 
   items: any;
 
-  queryParam_category: undefined | number;
+  queryParam_category = -1;
 
   constructor(private router: Router, private activeRoute: ActivatedRoute) { }
 
@@ -46,7 +46,7 @@ export class BrowseItemsComponent implements OnInit {
         this.queryParam_category = Number.parseInt(queryParams.category, 10);
         this.items = this._items.filter((item) => item.item_category === this.queryParam_category);
       } else {
-        this.queryParam_category = undefined;
+        this.queryParam_category = -1;
         this.items = this._items;
       }
       this.items = this.items.sort((a, b) => a.item_name.localeCompare(b.item_name));
@@ -57,7 +57,7 @@ export class BrowseItemsComponent implements OnInit {
    * Usually would be retrieved from server. Currently hard-coded
    */
   getCategoryName(): string {
-    if (this.queryParam_category === undefined) {
+    if (this.queryParam_category === -1) {
       return 'All Items';
     }
 
