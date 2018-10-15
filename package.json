@@ -26,6 +26,7 @@
     "ng2-password-strength-bar": "^1.2.1",
     "ngx-custom-validators": "^6.1.0",
     "ngx-loading": "^3.0.1",
+    "pg": "^7.5.0",
     "rxjs": "~6.2.0",
     "zone.js": "~0.8.26"
   },
