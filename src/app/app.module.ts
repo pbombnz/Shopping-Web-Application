@@ -15,6 +15,7 @@ import { RegisterComponent } from './register/register.component';
 import { ItemDetailsComponent } from './item-details/item-details.component';
 import { HeaderComponent } from './header/header.component';
 import { BrowseItemsComponent } from './browse-items/browse-items.component';
+import { SearchBarComponent } from './search-bar/search-bar.component';
 
 @NgModule({
   declarations: [
@@ -23,7 +24,8 @@ import { BrowseItemsComponent } from './browse-items/browse-items.component';
     RegisterComponent,
     ItemDetailsComponent,
     HeaderComponent,
-    BrowseItemsComponent
+    BrowseItemsComponent,
+    SearchBarComponent
   ],
   imports: [
     BrowserModule,
