@@ -91,7 +91,7 @@ app.get('/api/items', async (req, res) => {
 app.get('/api/items/fruits', async (req, res) => {
   try {
     const client = await pool.connect()
-    var result = await client.query('SELECT * FROM items WHERE type=2 ');
+    var result = await client.query('SELECT * FROM items WHERE item_category=2 ');
 
     if (!result) {
       //not found
@@ -117,7 +117,7 @@ app.get('/api/items/fruits', async (req, res) => {
 app.get('/api/items/meats', async (req, res) => {
   try {
     const client = await pool.connect()
-    var result = await client.query('SELECT * FROM items WHERE type=1 ');
+    var result = await client.query('SELECT * FROM items WHERE item_category=1 ');
 
     if (!result) {
       //not found
@@ -143,7 +143,7 @@ app.get('/api/items/meats', async (req, res) => {
 app.get('/api/items/meats', async (req, res) => {
   try {
     const client = await pool.connect()
-    var result = await client.query('SELECT * FROM items WHERE type=3 ');
+    var result = await client.query('SELECT * FROM items WHERE item_category=3 ');
 
     if (!result) {
       //not found
