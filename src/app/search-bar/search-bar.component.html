@@ -1,0 +1,13 @@
+<ng-template #rt let-r="result" let-t="term">
+  <div [style.width.px]="inputRef.nativeElement.clientWidth - 50" (click)="onSearch(r, t)">
+    <img [src]="r.item_image" class="mr-1" style="width: 16px">
+    <ngb-highlight [result]="r.item_name" [term]="t"></ngb-highlight>
+  </div>
+</ng-template>
+
+<div class="p-2 border-bottom border-secondary" style="background-color: lightgrey">
+  <form class="form-inline my-2 my-lg-0 justify-content-center">
+    <input #input class="form-control mr-sm-2" [(ngModel)]="searchQuery" [ngbTypeahead]="search" [ngModelOptions]="{standalone: true}" type="search" [resultTemplate]="rt" [inputFormatter]="formatter" placeholder="Search Fruits, Vegetables and Meat..." aria-label="Search" style="width: 50%">
+    <button class="btn btn-outline-success my-2 my-sm-0" type="button">Search</button>
+  </form>
+</div>
