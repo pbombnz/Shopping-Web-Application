@@ -58,3 +58,6 @@ INSERT INTO category (category_name) VALUES
 ('meat'),
 ('fruits'),
 ('vegetable');
+
+INSERT INTO items (item_name, item_description, item_category, item_origin, item_price, item_stock_quantity, item_image) VALUES
+('Fresh Produce Apples Envy', 'Made in India', '2', 'India', 3.50, 100, '/src/assets/fruits/Fresh Produce Apples Envy $3.5.png');

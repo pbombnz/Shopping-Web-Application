@@ -4,7 +4,7 @@ const PORT = process.env.PORT || 5000
 
 const { Pool } = require('pg');
 const pool = new Pool({
-  connectionString: process.env.DATABASE_URL,
+  connectionString: process.env.DATABASE_URL || 'postgres://slktkjqdlguipy:4ded203b27e39f6f28b2f74b28aed511072850bd2b9e79d4f62e97002914b49e@ec2-54-221-225-11.compute-1.amazonaws.com:5432/d2fbk5kajtmgo9',
   ssl: true
 });
 
@@ -36,7 +36,33 @@ app.get('/', (req, res) => res.render('app.component.html'))
   app.get('/users', async (req, res) => {
     try {
       const client = await pool.connect()
-      var result = await client.query('SELECT * FROM ' + 'category');
+      var result = await client.query('SELECT * FROM category');
+  
+      if (!result) {
+        //not found
+        return res.json(404, 'No data found');
+      } else {
+        result.rows.forEach(row => {
+          console.log(row);
+        });
+        res.send(result.rows);
+      }
+      client.release();
+  
+    } catch (err) {
+      //bad request
+      console.error(err);
+      res.json(400);
+    }
+  
+    //ok
+    res.json(200);
+  });
+
+  app.get('/api/items', async (req, res) => {
+    try {
+      const client = await pool.connect()
+      var result = await client.query('SELECT * FROM items');
   
       if (!result) {
         //not found
