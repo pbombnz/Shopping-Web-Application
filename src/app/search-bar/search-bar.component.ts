@@ -78,7 +78,7 @@ export class SearchBarComponent implements OnInit {
             return of([]);
           }))
       ),*/
-      tap(() => this.searching = false);
+      tap(() => this.searching = false));
 
   constructor(private router: Router) { }
 
