@@ -14,6 +14,7 @@ import { LoginComponent } from './login/login.component';
 import { RegisterComponent } from './register/register.component';
 import { ItemDetailsComponent } from './item-details/item-details.component';
 import { HeaderComponent } from './header/header.component';
+import { CartPageComponent } from './cart-page/cart-page.component';
 
 @NgModule({
   declarations: [
@@ -21,7 +22,8 @@ import { HeaderComponent } from './header/header.component';
     LoginComponent,
     RegisterComponent,
     ItemDetailsComponent,
-    HeaderComponent
+    HeaderComponent,
+    CartPageComponent
   ],
   imports: [
     BrowserModule,
