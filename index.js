@@ -33,54 +33,509 @@ app
 app.get('/', (req, res) => res.render('app.component.html'))
   .listen(PORT, () => console.log(`Listening on ${PORT}`))
 
-  app.get('/users', async (req, res) => {
-    try {
-      const client = await pool.connect()
-      var result = await client.query('SELECT * FROM category');
-  
-      if (!result) {
-        //not found
-        return res.json(404, 'No data found');
-      } else {
-        result.rows.forEach(row => {
-          console.log(row);
-        });
-        res.send(result.rows);
-      }
-      client.release();
-  
-    } catch (err) {
-      //bad request
-      console.error(err);
-      res.json(400);
-    }
-  
-    //ok
-    res.json(200);
-  });
+app.get('/users', async (req, res) => {
+  try {
+    const client = await pool.connect()
+    var result = await client.query('SELECT * FROM category');
 
-  app.get('/api/items', async (req, res) => {
-    try {
-      const client = await pool.connect()
-      var result = await client.query('SELECT * FROM items');
-  
-      if (!result) {
-        //not found
-        return res.json(404, 'No data found');
-      } else {
-        result.rows.forEach(row => {
-          console.log(row);
-        });
-        res.send(result.rows);
-      }
-      client.release();
-  
-    } catch (err) {
-      //bad request
-      console.error(err);
-      res.json(400);
+    if (!result) {
+      //not found
+      return res.json(404, 'No data found');
+    } else {
+      result.rows.forEach(row => {
+        console.log(row);
+      });
+      res.send(result.rows);
     }
-  
-    //ok
-    res.json(200);
-  });
+    client.release();
+
+  } catch (err) {
+    //bad request
+    console.error(err);
+    res.json(400);
+  }
+
+  //ok
+  res.json(200);
+});
+
+// ~~~~~~~~~~GET API~~~~~~~~~~~~~//
+
+//============ ITEMS ============//
+app.get('/api/items', async (req, res) => {
+  try {
+    const client = await pool.connect()
+    var result = await client.query('SELECT * FROM items');
+
+    if (!result) {
+      //not found
+      return res.json(404, 'No data found');
+    } else {
+      result.rows.forEach(row => {
+        console.log(row);
+      });
+      res.send(result.rows);
+    }
+    client.release();
+
+  } catch (err) {
+    //bad request
+    console.error(err);
+    res.json(400);
+  }
+
+  //ok
+  res.json(200);
+});
+
+app.get('/api/items/fruits', async (req, res) => {
+  try {
+    const client = await pool.connect()
+    var result = await client.query('SELECT * FROM items WHERE type=2 ');
+
+    if (!result) {
+      //not found
+      return res.json(404, 'No data found');
+    } else {
+      result.rows.forEach(row => {
+        console.log(row);
+      });
+      res.send(result.rows);
+    }
+    client.release();
+
+  } catch (err) {
+    //bad request
+    console.error(err);
+    res.json(400);
+  }
+
+  //ok
+  res.json(200);
+});
+
+app.get('/api/items/meats', async (req, res) => {
+  try {
+    const client = await pool.connect()
+    var result = await client.query('SELECT * FROM items WHERE type=1 ');
+
+    if (!result) {
+      //not found
+      return res.json(404, 'No data found');
+    } else {
+      result.rows.forEach(row => {
+        console.log(row);
+      });
+      res.send(result.rows);
+    }
+    client.release();
+
+  } catch (err) {
+    //bad request
+    console.error(err);
+    res.json(400);
+  }
+
+  //ok
+  res.json(200);
+});
+
+app.get('/api/items/meats', async (req, res) => {
+  try {
+    const client = await pool.connect()
+    var result = await client.query('SELECT * FROM items WHERE type=3 ');
+
+    if (!result) {
+      //not found
+      return res.json(404, 'No data found');
+    } else {
+      result.rows.forEach(row => {
+        console.log(row);
+      });
+      res.send(result.rows);
+    }
+    client.release();
+
+  } catch (err) {
+    //bad request
+    console.error(err);
+    res.json(400);
+  }
+
+  //ok
+  res.json(200);
+}); 
+
+app.get('/api/items/:id', async (req, res) => {
+  try {
+    let id = req.params.id;
+    const client = await pool.connect()
+    var result = await client.query('SELECT * FROM items WHERE item_id='+id);
+
+    if (!result) {
+      //not found
+      return res.json(404, 'No data found');
+    } else {
+      result.rows.forEach(row => {
+        console.log(row);
+      });
+      res.send(result.rows);
+    }
+    client.release();
+
+  } catch (err) {
+    //bad request
+    console.error(err);
+    res.json(400);
+  }
+
+  //ok
+  res.json(200);
+}); 
+//===============================//
+
+
+//============ USERS ============//
+
+// Stub Endpoint
+app.get('/api/users/validate', async (req, res) => {
+  try {
+    let id = req.params.id;
+    const client = await pool.connect()
+    // var result = await client.query('SELECT * FROM users WHERE user_id='+id);
+    let result = false;
+
+    if (!result) {
+      //not found
+      return res.json(404, 'No data found');
+    } else {
+      result.rows.forEach(row => {
+        console.log(row);
+      });
+      res.send(result.rows);
+    }
+    client.release();
+
+  } catch (err) {
+    //bad request
+    console.error(err);
+    res.json(400);
+  }
+
+  //ok
+  res.json(200);
+}); 
+
+app.get('/api/users/:id', async (req, res) => {
+  try {
+    let id = req.params.id;
+    const client = await pool.connect()
+    var result = await client.query('SELECT * FROM users WHERE user_id='+id);
+
+    if (!result) {
+      //not found
+      return res.json(404, 'No data found');
+    } else {
+      result.rows.forEach(row => {
+        console.log(row);
+      });
+      res.send(result.rows);
+    }
+    client.release();
+
+  } catch (err) {
+    //bad request
+    console.error(err);
+    res.json(400);
+  }
+
+  //ok
+  res.json(200);
+}); 
+
+app.get('/api/users/:id/orders', async (req, res) => {
+  try {
+    let id = req.params.id;
+    const client = await pool.connect()
+    var result = await client.query('SELECT * FROM orders WHERE user_id='+id);
+
+    if (!result) {
+      //not found
+      return res.json(404, 'No data found');
+    } else {
+      result.rows.forEach(row => {
+        console.log(row);
+      });
+      res.send(result.rows);
+    }
+    client.release();
+
+  } catch (err) {
+    //bad request
+    console.error(err);
+    res.json(400);
+  }
+
+  //ok
+  res.json(200);
+}); 
+
+app.get('/api/users/:id/orders/:orderid', async (req, res) => {
+  try {
+    let id = req.params.id;
+    let orderId = req.params.orderid
+    const client = await pool.connect()
+    var result = await client.query('SELECT * FROM orders WHERE user_id='+id+' AND order_id='+orderId);
+
+    if (!result) {
+      //not found
+      return res.json(404, 'No data found');
+    } else {
+      result.rows.forEach(row => {
+        console.log(row);
+      });
+      res.send(result.rows);
+    }
+    client.release();
+
+  } catch (err) {
+    //bad request
+    console.error(err);
+    res.json(400);
+  }
+
+  //ok
+  res.json(200);
+}); 
+
+app.get('/api/users/:id/orders/delivered', async (req, res) => {
+  try {
+    let id = req.params.id;
+    const client = await pool.connect()
+    var result = await client.query('SELECT * FROM orders WHERE user_id='+id+'AND order_status=2');
+
+    if (!result) {
+      //not found
+      return res.json(404, 'No data found');
+    } else {
+      result.rows.forEach(row => {
+        console.log(row);
+      });
+      res.send(result.rows);
+    }
+    client.release();
+
+  } catch (err) {
+    //bad request
+    console.error(err);
+    res.json(400);
+  }
+
+  //ok
+  res.json(200);
+}); 
+
+app.get('/api/users/:id/orders/dispatched', async (req, res) => {
+  try {
+    let id = req.params.id;
+    const client = await pool.connect()
+    var result = await client.query('SELECT * FROM orders WHERE user_id='+id+'AND order_status=1');
+
+    if (!result) {
+      //not found
+      return res.json(404, 'No data found');
+    } else {
+      result.rows.forEach(row => {
+        console.log(row);
+      });
+      res.send(result.rows);
+    }
+    client.release();
+
+  } catch (err) {
+    //bad request
+    console.error(err);
+    res.json(400);
+  }
+
+  //ok
+  res.json(200);
+}); 
+
+app.get('/api/users/:id/cart', async (req, res) => {
+  try {
+    let id = req.params.id;
+    const client = await pool.connect()
+    var result = await client.query('SELECT * FROM orders WHERE user_id='+id+'AND order_status=0');
+
+    if (!result) {
+      //not found
+      return res.json(404, 'No data found');
+    } else {
+      result.rows.forEach(row => {
+        console.log(row);
+      });
+      res.send(result.rows);
+    }
+    client.release();
+
+  } catch (err) {
+    //bad request
+    console.error(err);
+    res.json(400);
+  }
+
+  //ok
+  res.json(200);
+}); 
+//===============================//
+
+// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~//
+
+
+
+// ~~~~~~~~~POST API~~~~~~~~~~~~~//
+app.post('/api/users/:id', async (req, res) => {
+  try {
+    let id = req.params.id;
+    const client = await pool.connect()
+    // var result = await client.query('SELECT * FROM users WHERE user_id='+id);
+    let result = false;
+
+    if (!result) {
+      //not found
+      return res.json(404, 'No data found');
+    } else {
+      result.rows.forEach(row => {
+        console.log(row);
+      });
+      res.send(result.rows);
+    }
+    client.release();
+
+  } catch (err) {
+    //bad request
+    console.error(err);
+    res.json(400);
+  }
+
+  //ok
+  res.json(200);
+}); 
+
+app.post('/api/addToCart', async (req, res) => {
+  try {
+    let id = req.params.id;
+    const client = await pool.connect()
+    // var result = await client.query('SELECT * FROM users WHERE user_id='+id);
+    let result = false;
+
+    if (!result) {
+      //not found
+      return res.json(404, 'No data found');
+    } else {
+      result.rows.forEach(row => {
+        console.log(row);
+      });
+      res.send(result.rows);
+    }
+    client.release();
+
+  } catch (err) {
+    //bad request
+    console.error(err);
+    res.json(400);
+  }
+
+  //ok
+  res.json(200);
+}); 
+// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~//
+
+
+
+// ~~~~~~~~~~PUT API~~~~~~~~~~~~~//
+app.put('/api/users/:id', async (req, res) => {
+  try {
+    let id = req.params.id;
+    const client = await pool.connect()
+    // var result = await client.query('SELECT * FROM users WHERE user_id='+id);
+    let result = false;
+
+    if (!result) {
+      //not found
+      return res.json(404, 'No data found');
+    } else {
+      result.rows.forEach(row => {
+        console.log(row);
+      });
+      res.send(result.rows);
+    }
+    client.release();
+
+  } catch (err) {
+    //bad request
+    console.error(err);
+    res.json(400);
+  }
+
+  //ok
+  res.json(200);
+}); 
+
+app.put('/api/makeOrder', async (req, res) => {
+  try {
+    let id = req.params.id;
+    const client = await pool.connect()
+    // var result = await client.query('SELECT * FROM users WHERE user_id='+id);
+    let result = false;
+
+    if (!result) {
+      //not found
+      return res.json(404, 'No data found');
+    } else {
+      result.rows.forEach(row => {
+        console.log(row);
+      });
+      res.send(result.rows);
+    }
+    client.release();
+
+  } catch (err) {
+    //bad request
+    console.error(err);
+    res.json(400);
+  }
+
+  //ok
+  res.json(200);
+}); 
+
+app.put('api/users/:id/cart/:itemid/appendQuantity/:qty', async (req, res) => {
+  try {
+    let id = req.params.id;
+    const client = await pool.connect()
+    // var result = await client.query('SELECT * FROM users WHERE user_id='+id);
+    let result = false;
+
+    if (!result) {
+      //not found
+      return res.json(404, 'No data found');
+    } else {
+      result.rows.forEach(row => {
+        console.log(row);
+      });
+      res.send(result.rows);
+    }
+    client.release();
+
+  } catch (err) {
+    //bad request
+    console.error(err);
+    res.json(400);
+  }
+
+  //ok
+  res.json(200);
+}); 
+// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~//

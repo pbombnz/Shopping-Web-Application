@@ -44,7 +44,8 @@ import { SearchBarComponent } from './search-bar/search-bar.component';
       { path: 'login', component: LoginComponent },
       { path: 'register', component: RegisterComponent },
       { path: 'item-details/:id', component: ItemDetailsComponent },
-      { path: 'browse', component: BrowseItemsComponent }
+      { path: 'browse', component: BrowseItemsComponent },
+      { path: 'cart-page', component: CartPageComponent }
     ])
   ],
   providers: [],
