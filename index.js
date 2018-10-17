@@ -27,10 +27,10 @@ app.use(function (req, res, next) {
 
 app
   .use(express.static(path.join(__dirname, 'src')))
-  .set('views', path.join(__dirname, 'views'))
+  .set('views', path.join(__dirname, 'app'))
   .set('view engine', 'ejs')
 
-app.get('/', (req, res) => res.render('pages/index'))
+app.get('/', (req, res) => res.render('app.component.html'))
   .listen(PORT, () => console.log(`Listening on ${PORT}`))
 
   app.get('/users', async (req, res) => {
