@@ -15,6 +15,8 @@ import { RegisterComponent } from './register/register.component';
 import { ItemDetailsComponent } from './item-details/item-details.component';
 import { HeaderComponent } from './header/header.component';
 import { CartPageComponent } from './cart-page/cart-page.component';
+import { BrowseItemsComponent } from './browse-items/browse-items.component';
+import { SearchBarComponent } from './search-bar/search-bar.component';
 
 @NgModule({
   declarations: [
@@ -23,7 +25,9 @@ import { CartPageComponent } from './cart-page/cart-page.component';
     RegisterComponent,
     ItemDetailsComponent,
     HeaderComponent,
-    CartPageComponent
+    CartPageComponent,
+    BrowseItemsComponent,
+    SearchBarComponent
   ],
   imports: [
     BrowserModule,
@@ -39,7 +43,8 @@ import { CartPageComponent } from './cart-page/cart-page.component';
     RouterModule.forRoot([
       { path: 'login', component: LoginComponent },
       { path: 'register', component: RegisterComponent },
-      { path: 'item-details', component: ItemDetailsComponent }
+      { path: 'item-details/:id', component: ItemDetailsComponent },
+      { path: 'browse', component: BrowseItemsComponent }
     ])
   ],
   providers: [],

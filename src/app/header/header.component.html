@@ -26,16 +26,16 @@
   <div class="collapse navbar-collapse" id="navbarSupportedContent" [ngbCollapse]="isCollapsed">
     <ul class="navbar-nav mr-auto">
       <li class="nav-item" routerLinkActive="active" [routerLinkActiveOptions]="{exact:true}">
-        <a class="nav-link" [routerLink]="['/item-details']">All Items</a>
+        <a class="nav-link" [routerLink]="['/browse']">All Items</a>
       </li>
       <li class="nav-item" routerLinkActive="active" [routerLinkActiveOptions]="{exact:true}">
-        <a class="nav-link" [routerLink]="['/register']">Fruit</a>
+        <a class="nav-link" [routerLink]="['/browse']" [queryParams]="{ category: 1 }">Fruit</a>
       </li>
       <li class="nav-item" routerLinkActive="active" [routerLinkActiveOptions]="{exact:true}">
-        <a class="nav-link" routerLink="/login">Vegetables</a>
+        <a class="nav-link" [routerLink]="['/browse']" [queryParams]="{ category: 2 }">Vegetables</a>
       </li>
       <li class="nav-item" routerLinkActive="active" [routerLinkActiveOptions]="{exact:true}">
-        <a class="nav-link" routerLink="/login">Meats</a>
+        <a class="nav-link" [routerLink]="['/browse']" [queryParams]="{ category: 0 }">Meats</a>
       </li>
     </ul>
     <form class="form-inline my-2 my-lg-0">
