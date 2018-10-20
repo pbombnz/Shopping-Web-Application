@@ -16,8 +16,13 @@ const PORT = process.env.PORT || 5000;
 const DIST_FOLDER = join(process.cwd(), 'dist');
 
 // Our index.html we'll use as our template
-const template = readFileSync(join(DIST_FOLDER, 'browser', 'index.html')).toString();
-
+let template2;
+try {
+  template2 = readFileSync(join(DIST_FOLDER, 'browser', 'index.html')).toString();
+} catch (e) {
+  template2 = null;
+}
+const template = template2;
 // * NOTE :: leave this as require() since this file is built Dynamically from webpack
 const { AppServerModuleNgFactory, LAZY_MODULE_MAP } = require('./dist/server/main.js');
 
@@ -52,6 +57,7 @@ app.use(function (req, res, next) {
   next();
 });
 
+if (template) {
 app.engine('html', (_, options, callback) => {
   renderModuleFactory(AppServerModuleNgFactory, {
     // Our index.html
@@ -69,6 +75,7 @@ app.engine('html', (_, options, callback) => {
 
 app.set('view engine', 'html');
 app.set('views', join(DIST_FOLDER, 'browser'));
+}
 
 /*app
   .use(express.static(path.join(__dirname, 'src')))
@@ -79,7 +86,7 @@ app.get('/', (req, res) => res.render('app.component.html'))*/
 
 app.listen(PORT, () => console.log(`Listening on ${PORT}`));
 
-app.get('/users', async (req, res) => {
+app.get('/api/users', async (req, res) => {
   try {
     const client = await pool.connect();
     var result = await client.query('SELECT * FROM category');
@@ -557,7 +564,7 @@ app.put('/api/makeOrder', async (req, res) => {
   res.json(200);
 });
 
-app.put('api/users/:id/cart/:itemid/appendQuantity/:qty', async (req, res) => {
+app.put('/api/users/:id/cart/:itemid/appendQuantity/:qty', async (req, res) => {
   try {
     let id = req.params.id;
     const client = await pool.connect();
