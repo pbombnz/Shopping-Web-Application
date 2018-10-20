@@ -30,7 +30,7 @@ import { SearchBarComponent } from './search-bar/search-bar.component';
     SearchBarComponent
   ],
   imports: [
-    BrowserModule,
+    BrowserModule.withServerTransition({ appId : 'nwen304-group-project'}),
     // HttpModule,
     HttpClientModule,
     FormsModule,

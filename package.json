@@ -4,10 +4,14 @@
   "scripts": {
     "ng": "ng",
     "start": "ng serve",
-    "build": "ng build",
+    "build": "npm run build:ssr",
     "test": "ng test",
     "lint": "ng lint",
-    "e2e": "ng e2e"
+    "e2e": "ng e2e",
+    "build:ssr": "npm run build:client-and-server-bundles && npm run webpack:server",
+    "serve:ssr": "node dist/server.js",
+    "build:client-and-server-bundles": "ng run nwen304-group-project:server && ng build --prod --output-hashing=none",
+    "webpack:server": "webpack --config webpack.server.config.js --progress --colors"
   },
   "private": true,
   "dependencies": {
@@ -19,8 +23,10 @@
     "@angular/http": "^6.1.0",
     "@angular/platform-browser": "^6.1.0",
     "@angular/platform-browser-dynamic": "^6.1.0",
+    "@angular/platform-server": "^7.0.0",
     "@angular/router": "^6.1.0",
     "@ng-bootstrap/ng-bootstrap": "^3.2.2",
+    "@nguniversal/module-map-ngfactory-loader": "^7.0.2",
     "core-js": "^2.5.4",
     "ng-bootstrap-form-validation": "^3.0.3",
     "ng2-password-strength-bar": "^1.2.1",
@@ -28,6 +34,7 @@
     "ngx-loading": "^3.0.1",
     "pg": "^7.5.0",
     "rxjs": "~6.2.0",
+    "ts-loader": "^5.2.2",
     "zone.js": "~0.8.26"
   },
   "devDependencies": {
@@ -49,6 +56,7 @@
     "protractor": "~5.4.0",
     "ts-node": "~7.0.0",
     "tslint": "~5.11.0",
-    "typescript": "~2.9.2"
+    "typescript": "~2.9.2",
+    "webpack-cli": "^3.1.2"
   }
 }
