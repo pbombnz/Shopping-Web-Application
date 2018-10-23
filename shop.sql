@@ -2,14 +2,14 @@ CREATE TABLE users (
     user_id serial NOT NULL PRIMARY KEY,
     first_name varchar(30) NOT NULL,
     last_name varchar(30) NOT NULL,
-    email varchar(30) NOT NULL,
-    password varchar(30) NOT NULL,
+    email varchar(254) NOT NULL UNIQUE,
+    password text NOT NULL,
     address_line1 varchar(100) NOT NULL,
     address_line2 varchar(100) NOT NULL,
     address_suburb varchar(100) NOT NULL,
     address_city varchar(100) NOT NULL,
     address_postcode integer NOT NULL,
-    phone varchar(30) NOT NULL    
+    phone varchar(30) NOT NULL,
 );
 
 CREATE TABLE orders (
