@@ -13,7 +13,7 @@ ADVICE: You can work on ECS lab machines, but please follow the instructions on 
 ### Method 1: Used in active development locally
 Recommended to use when you are actively testing and developing on either the front-end or back-end. This is because both stacks are operating independently allowing for faster compile/build times. In fact, if you are only developing on a single stack, you don't even have to execute the other one if the operations you are testing are independent of each other.
 
-1. Open a new terminal and run `node run server` from the application's root directory. This will build and run the API server. Navigate to `http://localhost:5000/` to access API services. Any code changes to the back-end code will mean you have to re-execute this command as the server requires rebuilding.
+1. Open a new terminal and run `npm run server` from the application's root directory. This will build and run the API server. Navigate to `http://localhost:5000/` to access API services. Any code changes to the back-end code will mean you have to re-execute this command as the server requires rebuilding.
 2. Open another terminal and run `npm start` from the application's root directory. This will run the client-side webserver. Navigate to `http://localhost:4200/` to access website.
 3. Done! 
 
