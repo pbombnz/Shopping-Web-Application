@@ -40,21 +40,20 @@ const pool = new Pool({
 });
 
 passport.serializeUser((user, done) => {
-  done(null, user.id);
+  console.log('passport.serializeUser(...)::');
+  console.log('user:', user);
+  done(null, user.user_id);
 });
 
 passport.deserializeUser(async (id, done) => {
   try {
     const client = await pool.connect();
-    var result = await client.query('SELECT * FROM users WHERE user_id=$1 LIMIT 1', [id]);
+    var result = await client.query('SELECT * FROM users WHERE user_id=$1 LIMIT 1', [parseInt(id, 10)]);
 
     if (!result) {
       // not found
       done(null, false);
     } else {
-      result.rows.forEach(row => {
-        console.log(row);
-      });
       done(null, result.rows[0]);
     }
     client.release();
@@ -66,32 +65,36 @@ passport.deserializeUser(async (id, done) => {
   }
 });
 
-passport.use('local', new LocalStrategy({}, async (email, password, done) => {
+passport.use(new LocalStrategy({
+  usernameField: 'email',
+  passwordField: 'password',
+  session: true
+}, async (email, password, cb) => {
   try {
     const client = await pool.connect();
     let user = await client.query('SELECT * FROM users WHERE email=$1 LIMIT 1', [email]);
 
     if (!user) {
       client.release();
-      return done(null, false);
+      return cb(null, false);
     }
 
-    user.rows.forEach(row => {
-      console.log(row);
-    });
+    // user.rows.forEach(row => {
+    //   console.log(row);
+    // });
     let userData = user.rows[0];
 
     if (!bcrypt.compareSync(password, userData.password)) {
       client.release();
-      return done(null, false);
+      return cb(null, false);
     }
     client.release();
-    return done(null, userData);
+    return cb(null, userData);
 
   } catch (err) {
     // bad request
     console.error(err);
-    return done(err, null);
+    return cb(err);
   }
 }));
 
@@ -149,7 +152,39 @@ app.use(passport.session());
 
 app.listen(PORT, () => console.log(`Listening on ${PORT}`));
 
-app.get('/api/users', async (req, res) => {
+/**
+ * Only authenticated user is allowed on these routes that uses this middleware function.
+ */
+function authRequired(req, res, next) {
+  if (req.isAuthenticated()/* && req.user*/) {
+      next();
+  } else {
+      res.status(403).end(); // Forbidden Request
+      // res.redirect('/login');
+  }
+}
+
+/**
+ * No authenticated user is allowed on these routes that uses this middleware function.
+ * Ususally used on /api/login route when they are already logged in.
+ */
+function authNotAllowed(req, res, next) {
+  if (!req.isAuthenticated()) {
+      next();
+  } else {
+    res.status(403).end(); // Forbidden Request
+    // res.redirect('/');
+  }
+}
+
+/**
+ * Any user is allowed on these routes that uses this middleware function.
+ */
+function authIgnore(req, res, next) {
+  next();
+}
+
+app.get('/api/users', authRequired, async (req, res) => {
   try {
     const client = await pool.connect();
     var result = await client.query('SELECT * FROM category');
@@ -511,11 +546,42 @@ app.get('/api/users/:id/cart', async (req, res) => {
 
 
 // ~~~~~~~~~POST API~~~~~~~~~~~~~//
-app.post('/api/users', async (req, res) => {
+app.get('/api/loggedin', authIgnore, (req, res) => {
+  if (req.isAuthenticated()) {
+    let userData = {
+      first_name: req.user.first_name,
+      last_name: req.user.last_name,
+      email: req.user.email
+    };
+    res.json({ authenticated: true, user: userData });
+  } else {
+    res.json({ authenticated: false });
+  }
+});
+
+app.post('/api/login', authNotAllowed, passport.authenticate('local', /*{ successRedirect : '/api/users'}*/), (req, res) => {
+  // console.log(req);
+  let userData = {
+    first_name: req.user.first_name,
+    last_name: req.user.last_name,
+    email: req.user.email
+  };
+  console.log('req.isAuthenticated(): ', req.isAuthenticated());
+  res.json(userData);
+  // res.redirect('/');
+});
+
+app.get('/api/logout', authRequired, (req, res) => {
+  // console.log(req);
+  req.logout();
+  res.status(200).json({ message: 'Logout successful.'});
+  // res.redirect('/');
+});
+
+app.post('/api/users', authRequired, async (req, res) => {
   try {
     const client = await pool.connect();
 
-    // tslint:disable-next-line:max-line-length
     const salt = bcrypt.genSaltSync(10);
     const encrpytedPassword = bcrypt.hashSync(req.body.password, salt);
 
@@ -527,23 +593,34 @@ app.post('/api/users', async (req, res) => {
 
     if (!result) {
       // cannot create user, contraint issue failed?
-      return res.status(500).json({ message: 'Could not create user because the some fields are invalid.' });
+      res.status(400).json({ message: 'Could not create user because the some fields are invalid.' });
     } else {
+      // Return newly created account information
       // result.rows.forEach(row => {
       //   console.log(row);
       // });
-      res.send(result.rows[0]); // Returns { user_id: ... }
+      // res.send(result.rows[0]); // Returns { user_id: ... }
+
+      // Return a success message
+      res.status(200)/*.json({ message: 'Successful registration' })*/;
     }
     client.release();
 
   } catch (err) {
     // bad request
     console.error(err);
-    res.status(400).json({ message: err.detail });
-  }
 
-  // ok
-  res.json(200);
+    let errorMessage: string;
+    const regex_alreadyExists = /^Key\s\((.+)\)=\(.+\) already exists\.$/;
+    const found = err.detail.match(regex_alreadyExists);
+    const capitalize = string => `${string.charAt(0).toUpperCase()}${string.slice(1)}`;
+    if (found) {
+      errorMessage = `${capitalize(found[1])} is already used by another account. Please choose a different ${found[1]}.`;
+    } else {
+      errorMessage = err.detail;
+    }
+    res.status(400).json({ message: errorMessage });
+  }
 });
 
 app.post('/api/addToCart', async (req, res) => {
