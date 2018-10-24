@@ -4,6 +4,9 @@ import { HttpClient } from '@angular/common/http';
 
 import { CustomValidators } from 'ngx-custom-validators';
 import {ErrorMessage} from 'ng-bootstrap-form-validation';
+import { APIService } from '../services/api.service';
+import { Router, ActivatedRoute } from '@angular/router';
+import { THIS_EXPR } from '@angular/compiler/src/output/output_ast';
 
 @Component({
   selector: 'app-register',
@@ -12,7 +15,7 @@ import {ErrorMessage} from 'ng-bootstrap-form-validation';
 })
 export class RegisterComponent implements OnInit {
   loading = false;
-  error = false;
+  error: any;
 
   /**
    * Custom error messages as CustomValidators does not have default messages.
@@ -45,34 +48,41 @@ export class RegisterComponent implements OnInit {
   password_confirm: FormControl = new FormControl('', [Validators.required, CustomValidators.equalTo(this.password)]);
 
   form: FormGroup = new FormGroup({
-    firstName: new FormControl('', Validators.required),
-    lastName: new FormControl('', Validators.required),
-    homePhoneNumber: new FormControl('', Validators.required),
-    mobilePhoneNumber: new FormControl('', Validators.required),
+    first_name: new FormControl('', Validators.required),
+    last_name: new FormControl('', Validators.required),
+    /*homePhoneNumber*/phone : new FormControl('', Validators.required),
+    // mobilePhoneNumber: new FormControl('', Validators.required),
     email: new FormControl('', [Validators.required, Validators.email]),
     password: this.password,
     password_confirm: this.password_confirm,
     address_line1: new FormControl('', Validators.required),
-    address_line2: new FormControl(),
+    address_line2: new FormControl(''),
     address_suburb: new FormControl('', Validators.required),
     address_city: new FormControl('', Validators.required),
-    address_postCode: new FormControl('', [Validators.required, CustomValidators.digits, CustomValidators.rangeLength([4, 4])]),
-    card_number: new FormControl('', [Validators.required, CustomValidators.creditCard]),
-    card_name: new FormControl('', [Validators.required, Validators.pattern('^[a-zA-Z ]+$')]),
-    card_cvv: new FormControl('', [Validators.required, CustomValidators.digits, CustomValidators.rangeLength([3, 3])]),
-    card_expiry: new FormControl('',  [Validators.required,  Validators.pattern('^[0-9]{2}\/[0-9]{4}$')]),
+    address_postcode: new FormControl('', [Validators.required, CustomValidators.digits, CustomValidators.rangeLength([4, 4])]),
+    // card_number: new FormControl('', [Validators.required, CustomValidators.creditCard]),
+    // card_name: new FormControl('', [Validators.required, Validators.pattern('^[a-zA-Z ]+$')]),
+    // card_cvv: new FormControl('', [Validators.required, CustomValidators.digits, CustomValidators.rangeLength([3, 3])]),
+    // card_expiry: new FormControl('',  [Validators.required,  Validators.pattern('^[0-9]{2}\/[0-9]{4}$')]),
   });
 
 
-  constructor(private http: HttpClient) { }
+  constructor(private router: Router, private activeRoute: ActivatedRoute, private http: HttpClient, private apiService: APIService) { }
 
   ngOnInit() {
   }
 
   clearAllFields() {
-    this.error = false;
+    this.error = undefined;
     this.loading = false;
     this.form.reset();
+  }
+
+  convertFormToBodyObject(): any {
+    const formValues: any = Object.assign({}, this.form.value);
+    delete formValues.password_confirm;
+    console.log(formValues);
+    return formValues;
   }
 
   onSubmit() {
@@ -82,7 +92,7 @@ export class RegisterComponent implements OnInit {
     console.log(this.form.value);
 
     // Reset Page Status
-    this.error = false;
+    this.error = undefined;
     this.loading = false;
 
     // Do not continue if the form is not valid.
@@ -92,12 +102,15 @@ export class RegisterComponent implements OnInit {
 
     // Connect to server and register
     this.loading = true; // display Loader Screen
-    this.http.get('https://httpbin.org/get').subscribe((result) => {
+
+    this.apiService.registerUser(this.convertFormToBodyObject()).subscribe((result) => {
       console.log(result);
+      this.router.navigate(['/login']);
       this.loading = false;
     }, (error) => {
+      console.log(error);
       this.loading = false;
-      this.error = true;
+      this.error = error;
     });
   }
 }

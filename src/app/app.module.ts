@@ -17,6 +17,7 @@ import { HeaderComponent } from './header/header.component';
 import { CartPageComponent } from './cart-page/cart-page.component';
 import { BrowseItemsComponent } from './browse-items/browse-items.component';
 import { SearchBarComponent } from './search-bar/search-bar.component';
+import { APIService } from './services/api.service';
 
 @NgModule({
   declarations: [
@@ -48,7 +49,7 @@ import { SearchBarComponent } from './search-bar/search-bar.component';
       { path: 'cart-page', component: CartPageComponent }
     ])
   ],
-  providers: [],
+  providers: [ APIService],
   bootstrap: [AppComponent]
 })
 export class AppModule { }
