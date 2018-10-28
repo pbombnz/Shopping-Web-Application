@@ -1,6 +1,10 @@
 import { Component, OnInit } from '@angular/core';
 import { Router, ActivatedRoute, ParamMap } from '@angular/router';
 
+import { Item } from './browse-items';
+import { BrowseItemsService } from './browse-items.service';
+
+
 @Component({
   selector: 'app-browse-items',
   templateUrl: './browse-items.component.html',
@@ -31,13 +35,18 @@ export class BrowseItemsComponent implements OnInit {
   {'item_id': 20, 'item_name': 'Beer - Steamwhistle', 'item_category': 1, 'item_origin': 'Greece', 'item_price': '11.14', 'item_stock_quantity': 59, 'item_image': 'assets/vegetables/beans.jpg' }
   ];
 
-  items: any;
+  // items: any;
+  items: Item[]
 
   queryParam_category = -1;
 
-  constructor(private router: Router, private activeRoute: ActivatedRoute) { }
+  constructor(private router: Router, private activeRoute: ActivatedRoute, private browseItemsService: BrowseItemsService) { }
 
   ngOnInit() {
+    // Get Items from our Database
+    this.getItems();
+    
+
     // Display items of a specifc catagory based on the query param. If no query param
     // is provided, display all items.
     this.activeRoute.queryParams.subscribe((queryParams) => {
@@ -51,6 +60,15 @@ export class BrowseItemsComponent implements OnInit {
       }
       this.items = this.items.sort((a, b) => a.item_name.localeCompare(b.item_name));
     });
+  }
+
+  /**
+   * Requests `Item` data from the browse-items service
+   */
+  getItems(): void {
+    this.browseItemsService.getItems()
+      .subscribe(items => this.items = items);
+    console.log(this.items);
   }
 
   /**
