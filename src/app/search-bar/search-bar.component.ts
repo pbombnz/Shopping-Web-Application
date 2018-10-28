@@ -3,6 +3,7 @@ import {Observable, of} from 'rxjs';
 import {debounceTime, distinctUntilChanged, tap, switchMap, catchError} from 'rxjs/operators';
 import { Router, ActivatedRoute, ParamMap } from '@angular/router';
 
+
 @Component({
   selector: 'app-search-bar',
   templateUrl: './search-bar.component.html',
@@ -83,5 +84,8 @@ export class SearchBarComponent implements OnInit {
   constructor(private router: Router) { }
 
   ngOnInit() {
+  
   }
+
+
 }

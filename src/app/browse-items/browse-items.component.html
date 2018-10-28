@@ -11,7 +11,7 @@
       <p class="text-center font-italic">Made in {{item.item_origin}}</p>
       <br>
       <div>
-        <p class="text-center">{{item.item_price | currency}} each</p>
+        <p class="text-center">{{item.item_price}} each</p>
         <p class="text-center font-weight-light bg-warning rounded" *ngIf="item.item_stock_quantity > 0 && item.item_stock_quantity <= 10 ">Stock availability is limited.</p>
         <p class="text-center font-weight-light bg-danger text-light rounded" *ngIf="item.item_stock_quantity == 0">No stock available.</p>
       </div>

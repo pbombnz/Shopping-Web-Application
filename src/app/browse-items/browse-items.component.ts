@@ -12,7 +12,7 @@ import { BrowseItemsService } from './browse-items.service';
 })
 export class BrowseItemsComponent implements OnInit {
 // tslint:disable:max-line-length
-  readonly _items: any[] = [
+   _items: any[] = [
     {'item_id': 1, 'item_name': 'V8 Splash Strawberry Banana', 'item_category': 1, 'item_origin': 'China', 'item_price': '3.91', 'item_stock_quantity': 68, 'item_image': 'assets/vegetables/beans.jpg' },
   {'item_id': 2, 'item_name': 'Island Oasis - Ice Cream Mix', 'item_category': 2, 'item_origin': 'Brazil', 'item_price': '1.60', 'item_stock_quantity': 40, 'item_image': 'assets/vegetables/beans.jpg' },
   {'item_id': 3, 'item_name': 'Pineapple - Canned, Rings', 'item_category': 2, 'item_origin': 'France', 'item_price': '19.14', 'item_stock_quantity': 26, 'item_image': 'assets/vegetables/beans.jpg' },
@@ -67,8 +67,8 @@ export class BrowseItemsComponent implements OnInit {
    */
   getItems(): void {
     this.browseItemsService.getItems()
-      .subscribe(items => this.items = items);
-    console.log(this.items);
+      .subscribe(items => this._items = items);
+    console.log(this._items);
   }
 
   /**
@@ -80,11 +80,14 @@ export class BrowseItemsComponent implements OnInit {
     }
 
     switch (this.queryParam_category) {
-        case 0:
-          return 'Meat';
         case 1:
-          return 'Fruits';
+          // return 'Fruits';
+          return 'Meat';
         case 2:
+          // return 'Vegetables';
+          return 'Fruits';
+        case 3:
+          // return 'Meat';
           return 'Vegetables';
         default:
           return 'All Items';
