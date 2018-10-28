@@ -3,6 +3,8 @@ import {Observable, of} from 'rxjs';
 import {debounceTime, distinctUntilChanged, tap, switchMap, catchError} from 'rxjs/operators';
 import { Router, ActivatedRoute, ParamMap } from '@angular/router';
 
+import { Item } from '../browse-items/browse-items';
+import { BrowseItemsService } from '../browse-items/browse-items.service';
 
 @Component({
   selector: 'app-search-bar',
@@ -19,7 +21,7 @@ export class SearchBarComponent implements OnInit {
   searchFailed = false;
 
   // tslint:disable:max-line-length
-  readonly _items: any[] = [
+  _items: any[] = [
     {'item_id': 1, 'item_name': 'V8 Splash Strawberry Banana', 'item_category': 1, 'item_origin': 'China', 'item_price': '3.91', 'item_stock_quantity': 68, 'item_image': 'assets/vegetables/beans.jpg' },
   {'item_id': 2, 'item_name': 'Island Oasis - Ice Cream Mix', 'item_category': 2, 'item_origin': 'Brazil', 'item_price': '1.60', 'item_stock_quantity': 40, 'item_image': 'assets/vegetables/beans.jpg' },
   {'item_id': 3, 'item_name': 'Pineapple - Canned, Rings', 'item_category': 2, 'item_origin': 'France', 'item_price': '19.14', 'item_stock_quantity': 26, 'item_image': 'assets/vegetables/beans.jpg' },
@@ -81,10 +83,12 @@ export class SearchBarComponent implements OnInit {
       ),*/
       tap(() => this.searching = false))
 
-  constructor(private router: Router) { }
+  constructor(private router: Router,private browseItemsService: BrowseItemsService) { }
 
   ngOnInit() {
-  
+    this.browseItemsService.getItems()
+      .subscribe(items => this._items = items);
+    console.log(this._items);
   }
 
 
