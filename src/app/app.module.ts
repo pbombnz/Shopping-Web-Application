@@ -9,6 +9,8 @@ import { NgBootstrapFormValidationModule } from 'ng-bootstrap-form-validation';
 import { NgxLoadingModule } from 'ngx-loading';
 import { PasswordStrengthBarModule } from 'ng2-password-strength-bar';
 
+import {BrowseItemsService} from './browse-items/browse-items.service'
+
 import { AppComponent } from './app.component';
 import { LoginComponent } from './login/login.component';
 import { RegisterComponent } from './register/register.component';
@@ -48,7 +50,7 @@ import { SearchBarComponent } from './search-bar/search-bar.component';
       { path: 'cart-page', component: CartPageComponent }
     ])
   ],
-  providers: [],
+  providers: [BrowseItemsService],
   bootstrap: [AppComponent]
 })
 export class AppModule { }
