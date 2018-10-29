@@ -117,12 +117,12 @@ INSERT INTO items (item_name, item_description, item_category, item_origin, item
 ('Kumara', ' ', 3, 'Australia', 6.50, 100, '/src/assets/vegetables/kumara.jpg'),
 ('Lettuce', ' ', 3, 'New Zealand', 3.50, 100, '/src/assets/vegetables/lettuce.jpg'),
 ('Okra', ' ', 3, 'Canada', 7.50, 100, '/src/assets/vegetables/okra.jpg'),
-('Onion Red', ' ', 3, 'New Zealand', 4.99, 100, '/src/assets/vegetables/onion-red.jpg'),
+('Onion Red', ' ', 3, 'New Zealand', 4.99, 100, '/src/assets/vegetables/onion-red.png'),
 ('Onion', ' ', 3, 'China', 5.99, 100, '/src/assets/vegetables/onion.jpg'),
 ('Potato', ' ', 3, 'Australia', 3.99, 100, '/src/assets/vegetables/potato.jpg'),
 ('Radish Red', ' ', 3, 'America', 5.99, 100, '/src/assets/vegetables/radish-red.jpg'),
 ('Rhubarb', ' ', 3, 'Fiji', 7.99, 100, '/src/assets/vegetables/rhubarb.jpg'),
-('Siverbeet', ' ', 3, 'China', 5.99, 100, '/src/assets/vegetables/silverbeet.jpg'),
+('Siverbeet', ' ', 3, 'China', 5.99, 100, '/src/assets/vegetables/silverbeet.png'),
 ('Spinach', ' ', 3, 'China', 3.99, 100, '/src/assets/vegetables/spinach.jpg'),
 ('Sweet Corn', ' ', 3, 'America', 3.50, 100, '/src/assets/vegetables/sweet-corn.jpg'),
-('Yams', ' ', 3, 'Japan', 6.99, 100, '/src/assets/vegetables/yams.jpg');
+('Yams', ' ', 3, 'Japan', 6.99, 100, '/src/assets/vegetables/yams.png');
