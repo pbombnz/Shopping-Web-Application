@@ -291,7 +291,7 @@ app.get('/api/items/meats', async (req, res) => {
   res.json(200);
 });
 
-app.get('/api/items/meats', async (req, res) => {
+app.get('/api/items/veges', async (req, res) => {
   try {
     const client = await pool.connect();
     var result = await client.query('SELECT * FROM items WHERE item_category=3 ');

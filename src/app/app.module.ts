@@ -1,13 +1,15 @@
 import { BrowserModule } from '@angular/platform-browser';
 import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
-// import { HttpModule } from '@angular/http';
+import { HttpModule } from '@angular/http';
 import { HttpClientModule } from '@angular/common/http';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import {NgbModule} from '@ng-bootstrap/ng-bootstrap';
 import { NgBootstrapFormValidationModule } from 'ng-bootstrap-form-validation';
 import { NgxLoadingModule } from 'ngx-loading';
 import { PasswordStrengthBarModule } from 'ng2-password-strength-bar';
+
+import {BrowseItemsService} from './browse-items/browse-items.service'
 
 import { AppComponent } from './app.component';
 import { LoginComponent } from './login/login.component';
@@ -32,7 +34,7 @@ import { APIService } from './services/api.service';
   ],
   imports: [
     BrowserModule.withServerTransition({ appId : 'nwen304-group-project'}),
-    // HttpModule,
+    HttpModule,
     HttpClientModule,
     FormsModule,
     ReactiveFormsModule,
@@ -49,7 +51,7 @@ import { APIService } from './services/api.service';
       { path: 'cart-page', component: CartPageComponent }
     ])
   ],
-  providers: [ APIService],
+  providers: [ APIService,BrowseItemsService],
   bootstrap: [AppComponent]
 })
 export class AppModule { }
