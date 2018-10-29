@@ -8,13 +8,13 @@
       <div class="col">
         <div class="form-group">
           <label for="inputFirstName">First Name</label>
-          <input type="text" class="form-control" id="inputFirstName" placeholder="John" formControlName="firstName">
+          <input type="text" class="form-control" id="inputFirstName" placeholder="John" formControlName="first_name">
         </div>
       </div>
       <div class="col">
         <div class="form-group">
           <label for="inputLastName">Last Name</label>
-          <input type="text" class="form-control" id="inputLastName" placeholder="Smith" formControlName="lastName">
+          <input type="text" class="form-control" id="inputLastName" placeholder="Smith" formControlName="last_name">
         </div>
       </div>
     </div>
@@ -23,16 +23,18 @@
     <div class="row">
       <div class="col">
         <div class="form-group">
-          <label for="inputHomePh">Home Phone Number</label>
-          <input type="tel" class="form-control" id="inputHomePh" placeholder="042222222" formControlName="homePhoneNumber">
+          <!--label for="inputHomePh">Home Phone Number</label-->
+          <!-- input type="tel" class="form-control" id="inputHomePh" placeholder="042222222" formControlName="homePhoneNumber" -->
+          <label for="phoneNumber">Phone Number (Mobile or Home)</label>
+          <input type="tel" class="form-control" id="phoneNumber" placeholder="041234567 or 0212345678" formControlName="phone">
         </div>
       </div>
-      <div class="col">
+      <!-- div class="col">
         <div class="form-group">
           <label for="inputMobilePh">Mobile Phone Number</label>
           <input type="tel" class="form-control" id="inputMobilePh" placeholder="0219999999" formControlName="mobilePhoneNumber">
         </div>
-      </div>
+      </div -->
     </div>
     <hr>
     <!-- Login -->
@@ -82,13 +84,13 @@
       <div class="col-2">
         <div class="form-group" [customErrorMessages]="customErrorMessages">
           <label for="inputAddress_PostCode">Post Code</label>
-          <input type="text" class="form-control" id="inputAddress_PostCode" formControlName="address_postCode">
+          <input type="text" class="form-control" id="inputAddress_PostCode" formControlName="address_postcode">
         </div>
       </div>
     </div>
     <hr>
     <!-- Payment -->
-    <h3 class="text-center">Payment</h3>
+    <!-- h3 class="text-center">Payment</h3>
     <div class="row">
       <div class="col">
         <div class="form-group" [customErrorMessages]="customErrorMessages">
@@ -115,7 +117,7 @@
         </div>
       </div>
     </div>
-    <hr>
+    <hr -->
     <div class="row">
       <div class="col">
         <button type="button" class="btn btn-outline-secondary" (click)="clearAllFields()">Clear All Fields</button>
@@ -128,7 +130,7 @@
       You cannot register an account until all the required fields are filled correctly.
     </div>
     <div *ngIf="error" class="my-4 alert alert-danger" role="alert">
-      Failed to communicate to server. Try again later.
+      {{error.error.message}}
     </div>
   </form>
 </div>

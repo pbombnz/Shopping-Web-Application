@@ -1,5 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { Router, ActivatedRoute, ParamMap } from '@angular/router';
+import { APIService } from '../services/api.service';
 
 @Component({
   selector: 'app-header',
@@ -10,7 +11,7 @@ export class HeaderComponent implements OnInit {
   title = 'Supermarket Shopping Site';
   isCollapsed = true;
 
-  constructor(private router: Router) { }
+  constructor(private router: Router, public apiService: APIService) { }
 
   ngOnInit() {
   }
@@ -19,4 +20,13 @@ export class HeaderComponent implements OnInit {
     this.router.navigate(['/login']);
   }
 
+  onUpdateUserDetailsButtonClicked() {}
+
+  onMyOrdersButtonClicked() {}
+
+  onLogoutButtonClicked() {
+    this.apiService.logout().subscribe((result) => {
+      this.router.navigate(['/']);
+    });
+  }
 }

@@ -39,7 +39,22 @@
       </li>
     </ul>
     <form class="form-inline my-2 my-lg-0">
-      <button class="btn btn-outline-light btn-sm my-2 my-sm-0" type="button" (click)="onLoginButtonClicked()">Login / Register</button>
+      <span *ngIf="!apiService.isAuthenticated()">
+        <button class="btn btn-outline-light btn-sm my-2 my-sm-0" type="button" (click)="onLoginButtonClicked()">Login
+          / Register</button>
+      </span>
+      <span *ngIf="apiService.isAuthenticated()">
+        <button class="btn btn-outline-light btn-sm my-2 mr-2 my-sm-0" type="button">Cart</button>
+        <div ngbDropdown class="d-inline-block" placement="bottom-right">
+          <button class="btn btn-outline-light btn-sm" id="dropdownBasic1" ngbDropdownToggle>{{apiService.getUserFirstName()}} {{apiService.getUserLastName()}}</button>
+          <div ngbDropdownMenu aria-labelledby="dropdownBasic1">
+            <button class="dropdown-item" (click)="onUpdateUserDetailsButtonClicked()">Update User Details</button>
+            <button class="dropdown-item" (click)="onMyOrdersButtonClicked()">My Orders</button>
+            <div class="dropdown-divider"></div>
+            <button class="dropdown-item" (click)="onLogoutButtonClicked()">Logout</button>
+          </div>
+        </div>
+      </span>
     </form>
   </div>
 </nav>
