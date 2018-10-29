@@ -67,8 +67,11 @@ export class BrowseItemsComponent implements OnInit {
    */
   getItems(): void {
     this.browseItemsService.getItems()
-      .subscribe(items => this._items = items);
-    console.log(this._items);
+      .subscribe(items => {
+        this._items = items;
+        this.items = items;
+        console.log(this._items);
+      });
   }
 
   /**
