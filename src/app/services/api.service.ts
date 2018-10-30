@@ -51,7 +51,7 @@ export class APIService {
     address_postcode: number
     phone: string,
   }): Observable<Object> {
-    return this.http.post('/api/users', body);
+    return this.http.post('/auth/local/register', body);
   }
 
   /**
@@ -78,19 +78,19 @@ export class APIService {
   }
 
   login(body: { email: string, password: string}): Observable<Object> {
-    return this.http.post('/api/login', body).pipe(
+    return this.http.post('/auth/local', body).pipe(
       tap(result => this.user = result)
     );
   }
 
   logout(): Observable<Object> {
-    return this.http.get('/api/logout').pipe(
+    return this.http.get('/auth/logout').pipe(
       tap(result => this.user = undefined)
     );
   }
 
   isLoggedIn(): Observable<boolean> {
-    return this.http.get('/api/loggedin').pipe(
+    return this.http.get('/auth/loggedin').pipe(
       tap((result: any) => this.user = result.authenticated ? result.user : undefined),
       map((result: any) => result.authenticated),
     );

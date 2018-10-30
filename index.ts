@@ -17,8 +17,6 @@ const cookieParser = require('cookie-parser');
 const bcrypt = require('bcryptjs');
 import { join } from 'path';
 import { readFileSync } from 'fs';
-import { createInject } from '@angular/compiler/src/core';
-import { async } from 'rxjs/internal/scheduler/async';
 const { Pool } = require('pg');
 const bodyParser = require('body-parser');
 const passport = require('passport');
@@ -42,12 +40,13 @@ const pool = new Pool({
 });
 
 passport.serializeUser((user, done) => {
-  console.log('passport.serializeUser(...)::');
+  console.log('Passport:: Serializing user....');
   console.log('user:', user);
   done(null, user.user_id);
 });
 
 passport.deserializeUser(async (id, done) => {
+  console.log('Passport:: Deserializing user....');
   try {
     const client = await pool.connect();
     var result = await client.query('SELECT * FROM users WHERE user_id=$1 LIMIT 1', [parseInt(id, 10)]);
@@ -72,6 +71,7 @@ passport.use(new LocalStrategy({
   passwordField: 'password',
   session: true
 }, async (email, password, cb) => {
+  console.log('Passport:: LocalStrategy: Callback executed.');
   try {
     const client = await pool.connect();
     let user = await client.query('SELECT * FROM users WHERE email=$1 LIMIT 1', [email]);
@@ -80,10 +80,6 @@ passport.use(new LocalStrategy({
       client.release();
       return cb(null, false);
     }
-
-    // user.rows.forEach(row => {
-    //   console.log(row);
-    // });
     let userData = user.rows[0];
 
     if (!bcrypt.compareSync(password, userData.password)) {
@@ -111,7 +107,7 @@ passport.use(new GoogleStrategy({
   clientSecret: GOOGLE_CLIENT_SECRET,
   callbackURL: '/auth/google/callback'
 }, async (accessToken, refreshToken, profile, done) => {
-    console.log('Passport Google Callback called.');
+    console.log('Passport:: GoogleStrategy: Callback executed.');
     console.log('profile: ', profile);
 
     // Check if user account has been already created.
@@ -188,19 +184,12 @@ app.use(session({
 }));
 app.use(passport.initialize());
 app.use(passport.session());
-/*app.use(function (req, res, next) {
-  // Website you wish to allow to connect
-  res.setHeader('Access-Control-Allow-Origin', '*');
-  // // Request methods you wish to allow
-  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS, PUT, PATCH, DELETE');
-  // Request headers you wish to allow ,
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Access-Control-Allow- Headers');
-  // Pass to next layer of middleware
-  next();
-});*/
-
 
 app.listen(PORT, () => console.log(`Listening on ${PORT}`));
+
+// =====================================
+// Authentication Routes and Functions
+// =====================================
 
 /**
  * Only authenticated user is allowed on these routes that uses this middleware function.
@@ -249,7 +238,6 @@ app.get('/auth/google', authNotAllowed, passport.authenticate('google', {
 //   login page.  Otherwise, the primary route function function will be called,
 //   which, in this example, will redirect the user to the home page.
 app.get('/auth/google/callback', passport.authenticate('google'), (req, res) => {
-  // res.send('yeah the route exists');
   console.log(req.user);
 
   if (req.user.address_line1 === '' || req.user.address_line2 === '' || req.user.address_suburb === ''
@@ -262,6 +250,146 @@ app.get('/auth/google/callback', passport.authenticate('google'), (req, res) => 
     res.redirect('/');
   }
 });
+
+// PUT /auth/google/register
+//   Used when the user has logged in with Google, but has yet to complete the entire
+//   registration process like filling in the address and phone number details. Below
+//   is a route that allows them to fill in these details.
+app.put('/auth/google/register', authRequired, async (req, res) => {
+  try {
+    const client = await pool.connect();
+
+    let result = await client.query('UPDATE users SET address_line1=$1, address_line2=$2, address_suburb=$3, ' +
+    'address_city=$4, address_postcode=$5, phone=$6 WHERE user_id=$7',
+      [ req.body.address_line1, req.body.address_line2, req.body.address_suburb, req.body.address_city, req.body.address_postcode,
+        req.body.phone, req.user.user_id]);
+
+    if (!result) {
+      // cannot update user information, contraint issue failed? user does not exists? other?
+      res.status(400).json({ message: 'Could not create user because the some fields are invalid.' });
+    } else {
+      // The user information has been updated on the SQL server successfully. Need to update
+      // session of user on Passport by relogging in.
+      let user = Object.assign({}, req.user);
+      user = Object.assign(user, {
+      address_line1: req.body.address_line2,
+      address_line2: req.body.address_line2,
+      address_suburb: req.body.address_suburb,
+      address_city: req.body.address_city,
+      address_postcode: req.body.address_postcode,
+      phone: req.body.phone
+      });
+      req.login(user, function(err) {
+        if (err) {
+          res.status(400).json({ message: err });
+        }
+        // Return a success message
+        res.status(204).end();
+      });
+    }
+    client.release();
+
+  } catch (err) {
+    // bad request
+    console.error(err);
+
+    let errorMessage: string;
+    const regex_alreadyExists = /^Key\s\((.+)\)=\(.+\) already exists\.$/;
+    const found = err.detail.match(regex_alreadyExists);
+    const capitalize = string => `${string.charAt(0).toUpperCase()}${string.slice(1)}`;
+    if (found) {
+      errorMessage = `${capitalize(found[1])} is already used by another account. Please choose a different ${found[1]}.`;
+    } else {
+      errorMessage = err.detail;
+    }
+    res.status(400).json({ message: errorMessage });
+  }
+});
+
+// GET /auth/loggedin
+//   Called when the Angular Application is loaded. Allows us to check if the client session id
+//   is still valid to use based on the response the server gives back. This also is helpful for
+//   to retreive back their valid sessionId if the user closes the browser.
+app.get('/auth/loggedin', authIgnore, (req, res) => {
+  if (req.isAuthenticated()) {
+    let userData = {
+      first_name: req.user.first_name,
+      last_name: req.user.last_name,
+      email: req.user.email,
+      googleAuth: req.user.google_id != null,
+    };
+    res.json({ authenticated: true, user: userData });
+  } else {
+    res.json({ authenticated: false });
+  }
+});
+
+// POST /auth/logout
+//   Logs the user out. This route is suitable to use for logging a user out regardless of
+//   the Strategy used for authentication.
+app.get('/auth/logout', authRequired, (req, res) => {
+  req.logout();
+  res.status(200).json({ message: 'Logout successful.'});
+});
+
+// POST /auth/local/register
+//   Registers a new user through local authentication approach, that is with the use of email
+//   and password. The body must contain all neccessary fields in order for this registration to
+//   be succesful.
+//
+//   Fields in Body required:
+//     first_name, last_name, email, encrpytedPassword, address_line1, address_line2,
+//     address_suburb, address_city, address_postcode, phone.
+app.post('/auth/local/register', authNotAllowed, async (req, res) => {
+  try {
+    const client = await pool.connect();
+
+    const salt = bcrypt.genSaltSync(10);
+    const encrpytedPassword = bcrypt.hashSync(req.body.password, salt);
+
+    let result = await client.query('INSERT INTO users(first_name, last_name, email, password, ' +
+      'address_line1, address_line2, address_suburb, address_city, address_postcode, phone) ' +
+      'VALUES($1, $2, $3, $4, $5, $6, $7, $8, $9, $10) RETURNING user_id',
+      [req.body.first_name, req.body.last_name, req.body.email, encrpytedPassword, req.body.address_line1, req.body.address_line2,
+       req.body.address_suburb, req.body.address_city, req.body.address_postcode, req.body.phone]);
+
+    if (!result) {
+      // cannot create user, contraint issue failed?
+      res.status(400).json({ message: 'Could not create user because the some fields are invalid.' });
+    } else {
+      // Return a success message
+      res.status(200).json({ message: 'Successful registration' });
+    }
+    client.release();
+
+  } catch (err) {
+    // bad request
+    console.error(err);
+
+    let errorMessage: string;
+    const regex_alreadyExists = /^Key\s\((.+)\)=\(.+\) already exists\.$/;
+    const found = err.detail.match(regex_alreadyExists);
+    const capitalize = string => `${string.charAt(0).toUpperCase()}${string.slice(1)}`;
+    if (found) {
+      errorMessage = `${capitalize(found[1])} is already used by another account. Please choose a different ${found[1]}.`;
+    } else {
+      errorMessage = err.detail;
+    }
+    res.status(400).json({ message: errorMessage });
+  }
+});
+
+// POST /auth/local
+//   Logs the user in via Local Strategy (via email/password).
+app.post('/auth/local', authNotAllowed, passport.authenticate('local'), (req, res) => {
+  let userData = {
+    first_name: req.user.first_name,
+    last_name: req.user.last_name,
+    email: req.user.email
+  };
+  res.json(userData);
+});
+
 
 app.get('/api/users', authRequired, async (req, res) => {
   try {
@@ -622,125 +750,7 @@ app.get('/api/users/:id/cart', async (req, res) => {
 
 
 // ~~~~~~~~~POST API~~~~~~~~~~~~~//
-app.get('/api/loggedin', authIgnore, (req, res) => {
-  if (req.isAuthenticated()) {
-    let userData = {
-      first_name: req.user.first_name,
-      last_name: req.user.last_name,
-      email: req.user.email
-    };
-    res.json({ authenticated: true, user: userData });
-  } else {
-    res.json({ authenticated: false });
-  }
-});
 
-app.post('/api/login', authNotAllowed, passport.authenticate('local', /*{ successRedirect : '/api/users'}*/), (req, res) => {
-  // console.log(req);
-  let userData = {
-    first_name: req.user.first_name,
-    last_name: req.user.last_name,
-    email: req.user.email
-  };
-  console.log('req.isAuthenticated(): ', req.isAuthenticated());
-  res.json(userData);
-  // res.redirect('/');
-});
-
-app.get('/api/logout', authRequired, (req, res) => {
-  // console.log(req);
-  req.logout();
-  res.status(200).json({ message: 'Logout successful.'});
-  // res.redirect('/');
-});
-
-app.put('/auth/google/register', authRequired, async (req, res) => {
-  try {
-    const client = await pool.connect();
-
-    let result = await client.query('UPDATE users SET address_line1=$1, address_line2=$2, address_suburb=$3, ' +
-    'address_city=$4, address_postcode=$5, phone=$6 WHERE user_id=$7',
-      [ req.body.address_line1, req.body.address_line2, req.body.address_suburb, req.body.address_city, req.body.address_postcode,
-        req.body.phone, req.user.user_id]);
-
-    if (!result) {
-      // cannot update user information, contraint issue failed? user does not exists? other?
-      res.status(400).json({ message: 'Could not create user because the some fields are invalid.' });
-    } else {
-      // Return a success message
-      let user = Object.assign({}, req.user);
-      user = Object.assign(user, {
-      address_line1: req.body.address_line2,
-      address_line2: req.body.address_line2,
-      address_suburb: req.body.address_suburb,
-      address_city: req.body.address_city,
-      address_postcode: req.body.address_postcode,
-      phone: req.body.phone
-      });
-      req.login(user, function(err) {
-        if (err) {
-          res.status(400).json({ message: err });
-        }
-        res.status(204).end();
-      });
-    }
-    client.release();
-
-  } catch (err) {
-    // bad request
-    console.error(err);
-
-    let errorMessage: string;
-    const regex_alreadyExists = /^Key\s\((.+)\)=\(.+\) already exists\.$/;
-    const found = err.detail.match(regex_alreadyExists);
-    const capitalize = string => `${string.charAt(0).toUpperCase()}${string.slice(1)}`;
-    if (found) {
-      errorMessage = `${capitalize(found[1])} is already used by another account. Please choose a different ${found[1]}.`;
-    } else {
-      errorMessage = err.detail;
-    }
-    res.status(400).json({ message: errorMessage });
-  }
-});
-
-app.post('/api/users', authRequired, async (req, res) => {
-  try {
-    const client = await pool.connect();
-
-    const salt = bcrypt.genSaltSync(10);
-    const encrpytedPassword = bcrypt.hashSync(req.body.password, salt);
-
-    let result = await client.query('INSERT INTO users(first_name, last_name, email, password, ' +
-      'address_line1, address_line2, address_suburb, address_city, address_postcode, phone) ' +
-      'VALUES($1, $2, $3, $4, $5, $6, $7, $8, $9, $10) RETURNING user_id',
-      [req.body.first_name, req.body.last_name, req.body.email, encrpytedPassword, req.body.address_line1, req.body.address_line2,
-       req.body.address_suburb, req.body.address_city, req.body.address_postcode, req.body.phone]);
-
-    if (!result) {
-      // cannot create user, contraint issue failed?
-      res.status(400).json({ message: 'Could not create user because the some fields are invalid.' });
-    } else {
-      // Return a success message
-      res.status(200)/*.json({ message: 'Successful registration' })*/;
-    }
-    client.release();
-
-  } catch (err) {
-    // bad request
-    console.error(err);
-
-    let errorMessage: string;
-    const regex_alreadyExists = /^Key\s\((.+)\)=\(.+\) already exists\.$/;
-    const found = err.detail.match(regex_alreadyExists);
-    const capitalize = string => `${string.charAt(0).toUpperCase()}${string.slice(1)}`;
-    if (found) {
-      errorMessage = `${capitalize(found[1])} is already used by another account. Please choose a different ${found[1]}.`;
-    } else {
-      errorMessage = err.detail;
-    }
-    res.status(400).json({ message: errorMessage });
-  }
-});
 
 app.post('/api/addToCart', async (req, res) => {
   try {
