@@ -8,7 +8,8 @@
         <span class="input-group-addon">
           <i class="fa fa-envelope icon"></i>
         </span>
-        <input type="email" class="form-control" id="inputEmail" aria-describedby="emailHelp" placeholder="Enter email" formControlName="email">
+        <input type="email" class="form-control" id="inputEmail" aria-describedby="emailHelp" placeholder="Enter email"
+          formControlName="email">
       </div>
     </div>
     <div class="form-group">
@@ -23,6 +24,7 @@
         <label class="form-check-label" for="inputRememberPassword">Remember Me</label>
       </div>
     </div>
+
     <hr>
     <div class="row">
       <div class="col alert alert-danger" role="alert" *ngIf="fail_login">
@@ -35,11 +37,17 @@
     <div class="row">
       <div class="col-10">
         <button type="button" class="btn btn-outline-primary mr-2">Forgot Password</button>
-        <button type="button" class="btn btn-outline-primary mr-2" [routerLink]="['/register']">Register</button>
+        <button type="button" class="btn btn-outline-primary mr-2" [routerLink]="['/register']">Register with Email</button>
       </div>
       <div class="col-2">
         <button type="submit" class="btn btn-primary float-right">Login</button>
       </div>
     </div>
   </form>
+  <hr>
+  <div class="d-flex justify-content-center align-items-center">
+    <a class="btn btn-social btn-google" style="color: white" href="/auth/google">
+      <i class="fa fa-google"></i> Sign in with Google
+    </a>
+  </div>
 </div>
