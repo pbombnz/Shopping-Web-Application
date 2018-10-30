@@ -39,7 +39,7 @@ export class APIService {
    *
    * @param body The information required to register a new user. Password is given in plaintext.
    */
-  registerUser(body: {
+  register(body: {
     first_name: string,
     last_name: string,
     email: string,
@@ -52,6 +52,29 @@ export class APIService {
     phone: string,
   }): Observable<Object> {
     return this.http.post('/api/users', body);
+  }
+
+  /**
+   * Register a new user that has already been authenticated with Google but has missing attributes
+   * that need to be filled in. Certain attributes have server-side/database-level validation. If they
+   * fail, an error is given in the response with details explaining the where the error occured.
+   *
+   * @param body The information required to register a new user. Password is given in plaintext.
+   */
+  registerWithGoogle(body: {
+    address_line1: string,
+    address_line2: string,
+    address_suburb: string,
+    address_city: string,
+    address_postcode: number
+    phone: string,
+  }): Observable<Object> {
+    return this.http.put('/auth/google/register', body);
+  }
+
+  loginWithGoogle(): Observable<Object> {
+    throw new Error('To access Google Authentication, create a button on a page link it to' +
+    '/auth/google. For example, "<a href="/auth/google">Sign in with Google</a>".');
   }
 
   login(body: { email: string, password: string}): Observable<Object> {

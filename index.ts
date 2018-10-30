@@ -9,6 +9,7 @@ import { renderModuleFactory } from '@angular/platform-server';
 import { enableProdMode } from '@angular/core';
 
 import * as express from 'express';
+const queryString = require('query-string');
 const cors = require('cors');
 const logger = require('morgan');
 const session = require('express-session');
@@ -22,6 +23,7 @@ const { Pool } = require('pg');
 const bodyParser = require('body-parser');
 const passport = require('passport');
 const LocalStrategy = require('passport-local').Strategy;
+const GoogleStrategy = require('passport-google-oauth').OAuth2Strategy;
 
 // * NOTE :: leave this as require() since this file is built Dynamically from webpack
 const { AppServerModuleNgFactory, LAZY_MODULE_MAP } = require('./dist/server/main.js');
@@ -97,6 +99,54 @@ passport.use(new LocalStrategy({
     return cb(err);
   }
 }));
+
+// Use the GoogleStrategy within Passport.
+//   Strategies in Passport require a `verify` function, which accept
+//   credentials (in this case, an accessToken, refreshToken, and Google
+//   profile), and invoke a callback with a user object.
+const GOOGLE_CLIENT_ID = '597159162011-j3an5tojb0ljjp1ncc1k6gmdsm285idu.apps.googleusercontent.com';
+const GOOGLE_CLIENT_SECRET = '1TMFesVBVViIvtN2lIvnMfPk';
+passport.use(new GoogleStrategy({
+  clientID: GOOGLE_CLIENT_ID,
+  clientSecret: GOOGLE_CLIENT_SECRET,
+  callbackURL: '/auth/google/callback'
+}, async (accessToken, refreshToken, profile, done) => {
+    console.log('Passport Google Callback called.');
+    console.log('profile: ', profile);
+
+    // Check if user account has been already created.
+    try {
+      const client = await pool.connect();
+      let query = await client.query('SELECT * FROM users WHERE google_id=$1', [profile.id]);
+
+      if (!query) {
+        // Failed SQL Call
+        client.release();
+        done('Database Error');
+      } else {
+        // Successful SQL Call
+        if (query.rows.length > 0) {
+          // Account Found. User has used Google ID login before.
+        } else {
+          // Account not found. Create an account for user.
+          query = await client.query('INSERT INTO users(first_name, last_name, email, google_id, ' +
+          'address_line1, address_line2, address_suburb, address_city, address_postcode, phone) ' +
+          'VALUES($1, $2, $3, $4, $5, $6, $7, $8, $9, $10) RETURNING *',
+          [profile.name.givenName, profile.name.familyName, profile.emails[0].value, profile.id, '', '', '', '', -1, '']);
+        }
+        const user = query.rows[0];
+        client.release();
+        done(null, user);
+      }
+    } catch (err) {
+      // bad request
+      console.error(err);
+      done(err);
+    }
+  }
+));
+
+
 
 // Faster server renders w/ Prod mode (dev mode never needed)
 enableProdMode();
@@ -184,6 +234,35 @@ function authIgnore(req, res, next) {
   next();
 }
 
+// GET /auth/google
+//   Use passport.authenticate() as route middleware to authenticate the
+//   request.  The first step in Google authentication will involve
+//   redirecting the user to google.com.  After authorization, Google
+//   will redirect the user back to this application at /auth/google/callback
+app.get('/auth/google', authNotAllowed, passport.authenticate('google', {
+  scope: ['profile', 'email']
+}));
+
+// GET /auth/google/callback
+//   Use passport.authenticate() as route middleware to authenticate the
+//   request.  If authentication fails, the user will be redirected back to the
+//   login page.  Otherwise, the primary route function function will be called,
+//   which, in this example, will redirect the user to the home page.
+app.get('/auth/google/callback', passport.authenticate('google'), (req, res) => {
+  // res.send('yeah the route exists');
+  console.log(req.user);
+
+  if (req.user.address_line1 === '' || req.user.address_line2 === '' || req.user.address_suburb === ''
+  || req.user.address_city === '' || req.user.address_postcode === -1 || req.user.phone === '') {
+    const query = queryString.stringify({
+      'googleAuth': true,
+    });
+    res.redirect('/register?' + query);
+  } else {
+    res.redirect('/');
+  }
+});
+
 app.get('/api/users', authRequired, async (req, res) => {
   try {
     const client = await pool.connect();
@@ -191,11 +270,11 @@ app.get('/api/users', authRequired, async (req, res) => {
 
     if (!result) {
       // not found
-      return res.json(404, 'No data found');
+      return res.status(404).json({ 'message': 'No data found' });
     } else {
-      result.rows.forEach(row => {
-        console.log(row);
-      });
+      // result.rows.forEach(row => {
+      //   console.log(row);
+      // });
       res.send(result.rows);
     }
     client.release();
@@ -203,11 +282,8 @@ app.get('/api/users', authRequired, async (req, res) => {
   } catch (err) {
     // bad request
     console.error(err);
-    res.json(400);
+    res.status(400);
   }
-
-  // ok
-  res.json(200);
 });
 
 // ~~~~~~~~~~GET API~~~~~~~~~~~~~//
@@ -578,6 +654,55 @@ app.get('/api/logout', authRequired, (req, res) => {
   // res.redirect('/');
 });
 
+app.put('/auth/google/register', authRequired, async (req, res) => {
+  try {
+    const client = await pool.connect();
+
+    let result = await client.query('UPDATE users SET address_line1=$1, address_line2=$2, address_suburb=$3, ' +
+    'address_city=$4, address_postcode=$5, phone=$6 WHERE user_id=$7',
+      [ req.body.address_line1, req.body.address_line2, req.body.address_suburb, req.body.address_city, req.body.address_postcode,
+        req.body.phone, req.user.user_id]);
+
+    if (!result) {
+      // cannot update user information, contraint issue failed? user does not exists? other?
+      res.status(400).json({ message: 'Could not create user because the some fields are invalid.' });
+    } else {
+      // Return a success message
+      let user = Object.assign({}, req.user);
+      user = Object.assign(user, {
+      address_line1: req.body.address_line2,
+      address_line2: req.body.address_line2,
+      address_suburb: req.body.address_suburb,
+      address_city: req.body.address_city,
+      address_postcode: req.body.address_postcode,
+      phone: req.body.phone
+      });
+      req.login(user, function(err) {
+        if (err) {
+          res.status(400).json({ message: err });
+        }
+        res.status(204).end();
+      });
+    }
+    client.release();
+
+  } catch (err) {
+    // bad request
+    console.error(err);
+
+    let errorMessage: string;
+    const regex_alreadyExists = /^Key\s\((.+)\)=\(.+\) already exists\.$/;
+    const found = err.detail.match(regex_alreadyExists);
+    const capitalize = string => `${string.charAt(0).toUpperCase()}${string.slice(1)}`;
+    if (found) {
+      errorMessage = `${capitalize(found[1])} is already used by another account. Please choose a different ${found[1]}.`;
+    } else {
+      errorMessage = err.detail;
+    }
+    res.status(400).json({ message: errorMessage });
+  }
+});
+
 app.post('/api/users', authRequired, async (req, res) => {
   try {
     const client = await pool.connect();
@@ -595,12 +720,6 @@ app.post('/api/users', authRequired, async (req, res) => {
       // cannot create user, contraint issue failed?
       res.status(400).json({ message: 'Could not create user because the some fields are invalid.' });
     } else {
-      // Return newly created account information
-      // result.rows.forEach(row => {
-      //   console.log(row);
-      // });
-      // res.send(result.rows[0]); // Returns { user_id: ... }
-
       // Return a success message
       res.status(200)/*.json({ message: 'Successful registration' })*/;
     }
