@@ -10,6 +10,8 @@ CREATE TABLE users (
     address_city varchar(100) NOT NULL,
     address_postcode integer NOT NULL,
     phone varchar(30) NOT NULL,
+    password_reset_token text DEFAULT NULL,
+    password_reset_token_expiry timestamp DEFAULT NULL,
 );
 
 CREATE TABLE orders (

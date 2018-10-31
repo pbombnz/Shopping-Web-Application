@@ -9,6 +9,9 @@ import { renderModuleFactory } from '@angular/platform-server';
 import { enableProdMode } from '@angular/core';
 
 import * as express from 'express';
+import * as nodemailer from 'nodemailer';
+import * as moment from 'moment';
+const crypto = require('crypto');
 const cors = require('cors');
 const logger = require('morgan');
 const session = require('express-session');
@@ -22,6 +25,16 @@ const { Pool } = require('pg');
 const bodyParser = require('body-parser');
 const passport = require('passport');
 const LocalStrategy = require('passport-local').Strategy;
+
+var transporter = nodemailer.createTransport({
+  service: 'yahoo', // no need to set host or port etc.
+  auth: {
+    user: 'nwen.supermarket@yahoo.com',
+    pass: 'w5mL0!JtmGsc'
+  },
+  debug: false,
+  logger: true
+});
 
 // * NOTE :: leave this as require() since this file is built Dynamically from webpack
 const { AppServerModuleNgFactory, LAZY_MODULE_MAP } = require('./dist/server/main.js');
@@ -208,6 +221,74 @@ app.get('/api/users', authRequired, async (req, res) => {
 
   // ok
   res.json(200);
+});
+
+app.post('/auth/forgot-password', authNotAllowed, async (req, res) => {
+  try {
+    const client = await pool.connect();
+    const isUserAccount = await client.query('SELECT * FROM users WHERE email=$1 LIMIT 1', [req.body.email]);
+
+    if (!isUserAccount) {
+      // not found
+      return res.status(400).json({ message: 'User account does not exists with specified email. Please create an account instead.' });
+    } else {
+      const userAccount = isUserAccount.rows[0];
+
+      // Checking if the user already has requested for a forgot password, and whether it is still valid or not.
+      // If either of those cases fail, create a new random token and an expiry date that expires in 24 hours.
+      if (userAccount.password_reset_token) {
+        client.release();
+      } else {
+        const token = await new Promise((resolve, reject) => {
+          crypto.randomBytes(64, function(err, buffer) {
+            if (err) {
+              reject('Error generating token');
+            }
+            resolve(buffer.toString('hex'));
+          });
+        });
+        // Create timestamp
+        const expiryDateMoment: moment.Moment = moment().utc().add(1, 'd');
+        let expiryDate: string = expiryDateMoment.format();
+
+        const result = await client.query('UPDATE users SET password_reset_token=$1, password_reset_token_expiry=$2 ' +
+          'WHERE user_id=$3', [token, expiryDate, userAccount.user_id]);
+
+        if (result) {
+          // If the SQL was successful, send an email to end-user with the reset password link.
+
+          // Setting up email parameters.
+          var mailOptions = {
+            from: 'NWEN304 Shopping Site <nwen.supermarket@yahoo.com>', // sender address
+            to: `nwen.supermarket@yahoo.com, ${userAccount.email}`, // list of receivers
+            subject: 'Shopping Site Password Reset', // Subject line
+            text: `Click link to reset password:
+            https://http://nwen304-project.herokuapp.com/password-reset?token=${token}`, // plaintext body
+            html: `Click link to reset password:
+            <b><a href="https://http://nwen304-project.herokuapp.com/password-reset?token=${token}">Link</a></b>` // html body
+          };
+
+          // send mail with defined transport object
+          transporter.sendMail(mailOptions, function(error, response) {
+            if (error) {
+              console.error(error);
+              res.status(400).json({ message: 'Email could not send. Make sure your email is correct.'});
+            } else {
+              res.status(204).end();
+            }
+          });
+        } else {
+          res.status(500).json({ message:
+            'Failed to create and save reset token and expiry date into database. Contact administrator for assistance.'});
+        }
+      }
+    }
+    client.release();
+  } catch (err) {
+    // bad request
+    console.error(err);
+    res.status(400);
+  }
 });
 
 // ~~~~~~~~~~GET API~~~~~~~~~~~~~//
