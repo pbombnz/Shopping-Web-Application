@@ -39,7 +39,7 @@ export class APIService {
    *
    * @param body The information required to register a new user. Password is given in plaintext.
    */
-  registerUser(body: {
+  register(body: {
     first_name: string,
     last_name: string,
     email: string,
@@ -51,23 +51,46 @@ export class APIService {
     address_postcode: number
     phone: string,
   }): Observable<Object> {
-    return this.http.post('/api/users', body);
+    return this.http.post('/auth/local/register', body);
+  }
+
+  /**
+   * Register a new user that has already been authenticated with Google but has missing attributes
+   * that need to be filled in. Certain attributes have server-side/database-level validation. If they
+   * fail, an error is given in the response with details explaining the where the error occured.
+   *
+   * @param body The information required to register a new user. Password is given in plaintext.
+   */
+  registerWithGoogle(body: {
+    address_line1: string,
+    address_line2: string,
+    address_suburb: string,
+    address_city: string,
+    address_postcode: number
+    phone: string,
+  }): Observable<Object> {
+    return this.http.put('/auth/google/register', body);
+  }
+
+  loginWithGoogle(): Observable<Object> {
+    throw new Error('To access Google Authentication, create a button on a page link it to' +
+    '/auth/google. For example, "<a href="/auth/google">Sign in with Google</a>".');
   }
 
   login(body: { email: string, password: string}): Observable<Object> {
-    return this.http.post('/api/login', body).pipe(
+    return this.http.post('/auth/local', body).pipe(
       tap(result => this.user = result)
     );
   }
 
   logout(): Observable<Object> {
-    return this.http.get('/api/logout').pipe(
+    return this.http.get('/auth/logout').pipe(
       tap(result => this.user = undefined)
     );
   }
 
   isLoggedIn(): Observable<boolean> {
-    return this.http.get('/api/loggedin').pipe(
+    return this.http.get('/auth/loggedin').pipe(
       tap((result: any) => this.user = result.authenticated ? result.user : undefined),
       map((result: any) => result.authenticated),
     );

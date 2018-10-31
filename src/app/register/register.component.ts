@@ -6,7 +6,7 @@ import { CustomValidators } from 'ngx-custom-validators';
 import {ErrorMessage} from 'ng-bootstrap-form-validation';
 import { APIService } from '../services/api.service';
 import { Router, ActivatedRoute } from '@angular/router';
-import { THIS_EXPR } from '@angular/compiler/src/output/output_ast';
+import { Observable } from 'rxjs';
 
 @Component({
   selector: 'app-register',
@@ -16,6 +16,8 @@ import { THIS_EXPR } from '@angular/compiler/src/output/output_ast';
 export class RegisterComponent implements OnInit {
   loading = false;
   error: any;
+
+  googleAuth = false;
 
   /**
    * Custom error messages as CustomValidators does not have default messages.
@@ -43,7 +45,7 @@ export class RegisterComponent implements OnInit {
     }
   ];
 
-  // Creating Register Form
+  // Creating Register Form (Normal Users)
   password: FormControl = new FormControl('', [Validators.required, Validators.minLength(5), Validators.maxLength(50)]);
   password_confirm: FormControl = new FormControl('', [Validators.required, CustomValidators.equalTo(this.password)]);
 
@@ -67,9 +69,27 @@ export class RegisterComponent implements OnInit {
   });
 
 
-  constructor(private router: Router, private activeRoute: ActivatedRoute, private http: HttpClient, private apiService: APIService) { }
+  constructor(private router: Router, private activeRoute: ActivatedRoute, private http: HttpClient, private apiService: APIService) {
+   }
 
   ngOnInit() {
+    this.activeRoute.queryParams.subscribe(params => {
+      if (!params.googleAuth) {
+        return;
+      }
+
+      this.googleAuth = (params.googleAuth === 'true');
+      if (this.googleAuth) {
+        this.form = new FormGroup({
+          phone : new FormControl('', Validators.required),
+          address_line1: new FormControl('', Validators.required),
+          address_line2: new FormControl(''),
+          address_suburb: new FormControl('', Validators.required),
+          address_city: new FormControl('', Validators.required),
+          address_postcode: new FormControl('', [Validators.required, CustomValidators.digits, CustomValidators.rangeLength([4, 4])]),
+        });
+      }
+    });
   }
 
   clearAllFields() {
@@ -103,9 +123,21 @@ export class RegisterComponent implements OnInit {
     // Connect to server and register
     this.loading = true; // display Loader Screen
 
-    this.apiService.registerUser(this.convertFormToBodyObject()).subscribe((result) => {
+    let registerObservable;
+    if (this.googleAuth) {
+      registerObservable = this.apiService.registerWithGoogle(this.convertFormToBodyObject());
+    } else {
+      registerObservable = this.apiService.register(this.convertFormToBodyObject());
+    }
+
+    registerObservable.subscribe((result) => {
+      console.log('WE IN BROTHER');
       console.log(result);
-      this.router.navigate(['/login']);
+      if (this.googleAuth) {
+        this.router.navigate(['/']);
+      } else {
+        this.router.navigate(['/login']);
+      }
       this.loading = false;
     }, (error) => {
       console.log(error);

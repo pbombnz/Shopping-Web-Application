@@ -1,9 +1,10 @@
 CREATE TABLE users (
     user_id serial NOT NULL PRIMARY KEY,
+    google_id text DEFAULT NULL,
     first_name varchar(30) NOT NULL,
     last_name varchar(30) NOT NULL,
     email varchar(254) NOT NULL UNIQUE,
-    password text NOT NULL,
+    password text DEFAULT NULL,
     address_line1 varchar(100) NOT NULL,
     address_line2 varchar(100) NOT NULL,
     address_suburb varchar(100) NOT NULL,
@@ -11,6 +12,8 @@ CREATE TABLE users (
     address_postcode integer NOT NULL,
     phone varchar(30) NOT NULL,
 );
+
+CREATE INDEX users_index_google_id on users(google_id);
 
 CREATE TABLE orders (
     order_id serial NOT NULL PRIMARY KEY,
