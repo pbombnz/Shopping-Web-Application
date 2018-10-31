@@ -427,71 +427,84 @@ app.get('/api/users', authRequired, async (req, res) => {
   }
 });
 
-app.post('/auth/forgot-password', authNotAllowed, async (req, res) => {
+app.put('/auth/forgot-password', authNotAllowed, async (req, res) => {
   try {
     const client = await pool.connect();
-    const isUserAccount = await client.query('SELECT * FROM users WHERE email=$1 LIMIT 1', [req.body.email]);
+    const userAccountResult = await client.query('SELECT * FROM users WHERE email=$1 LIMIT 1', [req.body.email]);
 
-    if (!isUserAccount) {
-      // not found
+    // Checks if any user is assoicated with specified email
+    if (!userAccountResult) {
+      // User not found
+      client.release();
       return res.status(400).json({ message: 'User account does not exists with specified email. Please create an account instead.' });
-    } else {
-      const userAccount = isUserAccount.rows[0];
+    }
 
-      // Checking if the user already has requested for a forgot password, and whether it is still valid or not.
-      // If either of those cases fail, create a new random token and an expiry date that expires in 24 hours.
-      if (userAccount.password_reset_token) {
+    const userAccount = userAccountResult.rows[0];
+
+    // Checking if the user already has requested for a forgot password before, and whether it is still valid or not.
+    // If either of those cases fail, create a new random token and an expiry date that expires in 24 hours.
+    if (userAccount.password_reset_token) {
+      const nowDate: moment.Moment = moment();
+      const tokenExpiryDate: moment.Moment = moment(userAccount.password_reset_token_expiry);
+
+      if (nowDate.isBefore(tokenExpiryDate)) {
         client.release();
-      } else {
-        const token = await new Promise((resolve, reject) => {
-          crypto.randomBytes(64, function(err, buffer) {
-            if (err) {
-              reject('Error generating token');
-            }
-            resolve(buffer.toString('hex'));
-          });
+        return res.status(400).json({
+          message: 'You have already requested password reset. Look in your spam/junk mail folder to see if the email is there.'
         });
-        // Create timestamp
-        const expiryDateMoment: moment.Moment = moment().utc().add(1, 'd');
-        let expiryDate: string = expiryDateMoment.format();
-
-        const result = await client.query('UPDATE users SET password_reset_token=$1, password_reset_token_expiry=$2 ' +
-          'WHERE user_id=$3', [token, expiryDate, userAccount.user_id]);
-
-        if (result) {
-          // If the SQL was successful, send an email to end-user with the reset password link.
-
-          // Setting up email parameters.
-          var mailOptions = {
-            from: 'NWEN304 Shopping Site <nwen.supermarket@yahoo.com>', // sender address
-            to: `nwen.supermarket@yahoo.com, ${userAccount.email}`, // list of receivers
-            subject: 'Shopping Site Password Reset', // Subject line
-            text: `Click link to reset password:
-            https://http://nwen304-project.herokuapp.com/password-reset?token=${token}`, // plaintext body
-            html: `Click link to reset password:
-            <b><a href="https://http://nwen304-project.herokuapp.com/password-reset?token=${token}">Link</a></b>` // html body
-          };
-
-          // send mail with defined transport object
-          transporter.sendMail(mailOptions, function(error, response) {
-            if (error) {
-              console.error(error);
-              res.status(400).json({ message: 'Email could not send. Make sure your email is correct.'});
-            } else {
-              res.status(204).end();
-            }
-          });
-        } else {
-          res.status(500).json({ message:
-            'Failed to create and save reset token and expiry date into database. Contact administrator for assistance.'});
-        }
       }
     }
+
+    // Getting here suggests that a new token and expiry need to be created.
+    const token = await new Promise((resolve, reject) => {
+      crypto.randomBytes(64, function(err, buffer) {
+        if (err) {
+          reject('Error generating token');
+        }
+        resolve(buffer.toString('hex'));
+      });
+    });
+    // Create timestamp
+    const expiryDateMoment: moment.Moment = moment().add(1, 'd');
+    let expiryDate: string = expiryDateMoment.format();
+
+    const result = await client.query('UPDATE users SET password_reset_token=$1, password_reset_token_expiry=$2 ' +
+      'WHERE user_id=$3', [token, expiryDate, userAccount.user_id]);
+
+    // If the SQL was successful, send an email to end-user with the reset password link, otherwise return an error.
+    if (!result) {
+      client.release();
+      return res.status(500).json({
+         message: 'Failed to create and save reset token and expiry date into database. Contact administrator for assistance.'
+      });
+    }
+    // Setting up email parameters.
+    var mailOptions = {
+      from: 'NWEN304 Shopping Site <nwen.supermarket@yahoo.com>', // sender address
+      to: `nwen.supermarket@yahoo.com, ${userAccount.email}`, // list of receivers
+      subject: 'Shopping Site Password Reset', // Subject line
+      text: `Click link to reset password:
+      https://nwen304-project.herokuapp.com/password-reset?token=${token} \n\n
+      You have 24 hours to reset your password using the link above`, // plaintext body
+      html: `Click link to reset password:
+      <b><a href="https://nwen304-project.herokuapp.com/password-reset?token=${token}">Link</a></b><br><br>
+      You have 24 hours to reset your password using the link above.` // html body
+    };
+
+    // send mail with defined transport object
+    transporter.sendMail(mailOptions, function(error, response) {
+      if (error) {
+        console.error(error);
+        res.status(400).json({ message: 'Email could not send. Make sure your email is correct.'});
+      } else {
+        res.status(204).end();
+      }
+    });
     client.release();
   } catch (err) {
     // bad request
     console.error(err);
-    res.status(400);
+    res.status(400).end();
   }
 });
 
