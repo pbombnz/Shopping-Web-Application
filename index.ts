@@ -508,6 +508,54 @@ app.put('/auth/forgot-password', authNotAllowed, async (req, res) => {
   }
 });
 
+app.put('/auth/password-reset', authNotAllowed, async (req, res) => {
+  // Body validation
+  if (!req.body.token) {
+    return res.status(400).json({ message: 'Must have both \'token\' and \'password\' in body.' });
+  }
+
+  try {
+    // Firstly, check if token is valid.
+    const client = await pool.connect();
+    const existsResult = await client.query('SELECT user_id, password_reset_token_expiry FROM users WHERE password_reset_token=$1 LIMIT 1',
+     [req.body.token]);
+
+    if (!existsResult) {
+      client.release();
+      return res.status(403).json({ message: 'Invalid token used. Cannot reset password.' });
+    }
+    // Get user from token
+    const { user_id, password_reset_token_expiry } = existsResult.rows[0];
+    console.log('user_id: ', user_id, ' - password_reset_token_expiry: ', password_reset_token_expiry);
+
+    // Check if token is valid via expiry date.
+    let nowDate: moment.Moment = moment();
+    let tokenExpiryDate: moment.Moment = moment(password_reset_token_expiry);
+    if (!nowDate.isBefore(tokenExpiryDate)) {
+      client.release();
+      return res.status(403).json({ message: 'Expired token. You must request a new email from the Forgot Password page.' });
+    }
+
+    // Saving the new password
+    const salt = bcrypt.genSaltSync(10);
+    const encrpytedPassword = bcrypt.hashSync(req.body.password, salt);
+    const updatePasswordResult = await client.query(
+      'UPDATE users SET password=$1, password_reset_token=NULL, password_reset_token_expiry=NULL WHERE user_id=$2',
+      [encrpytedPassword, user_id]
+    );
+    if (!updatePasswordResult) {
+      client.release();
+      return res.status(500).json({ message: 'Could not update password of account.' });
+    }
+    res.status(200).json({ message: 'Successful password reset.' });
+    client.release();
+  } catch (err) {
+    // bad request
+    console.error(err);
+    res.status(400).end();
+  }
+});
+
 // ~~~~~~~~~~GET API~~~~~~~~~~~~~//
 
 // ============ ITEMS ============//

@@ -101,4 +101,10 @@ export class APIService {
       tap((result: any) => console.log(result))
     );
   }
+
+  passwordReset(body: { token: string, password: string}): Observable<Object> {
+    return this.http.put('/auth/password-reset', body).pipe(
+      tap((result: any) => console.log(result))
+    );
+  }
 }
