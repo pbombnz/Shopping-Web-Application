@@ -430,10 +430,12 @@ app.get('/api/users', authRequired, async (req, res) => {
 app.put('/auth/forgot-password', authNotAllowed, async (req, res) => {
   try {
     const client = await pool.connect();
-    const userAccountResult = await client.query('SELECT * FROM users WHERE email=$1 LIMIT 1', [req.body.email]);
+    const userAccountResult = await client.query(
+      'SELECT user_id, email, password_reset_token_expiry FROM users WHERE email=$1 LIMIT 1', [req.body.email]
+    );
 
     // Checks if any user is assoicated with specified email
-    if (!userAccountResult) {
+    if (!userAccountResult || userAccountResult.rows.length === 0) {
       // User not found
       client.release();
       return res.status(400).json({ message: 'User account does not exists with specified email. Please create an account instead.' });
@@ -520,11 +522,12 @@ app.put('/auth/password-reset', authNotAllowed, async (req, res) => {
     const existsResult = await client.query('SELECT user_id, password_reset_token_expiry FROM users WHERE password_reset_token=$1 LIMIT 1',
      [req.body.token]);
 
-    if (!existsResult) {
+    if (!existsResult || existsResult.rows.length === 0) {
       client.release();
       return res.status(403).json({ message: 'Invalid token used. Cannot reset password.' });
     }
     // Get user from token
+    console.log(existsResult.rows);
     const { user_id, password_reset_token_expiry } = existsResult.rows[0];
     console.log('user_id: ', user_id, ' - password_reset_token_expiry: ', password_reset_token_expiry);
 
