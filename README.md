@@ -34,7 +34,7 @@ You can also use this method for development, but it gets annoying to use becaus
 
 Run `ng generate component component-name` to generate a new component. You can also use `ng generate directive|pipe|service|class|guard|interface|enum|module`.
 
-IMPORTANT When creating a new page, use the flag `--no-module`. For example `ng generate component browsing-page --no-module`. 
+IMPORTANT When creating a new page, use the flag `-m  app.module.ts`. For example `ng generate component browsing-page -m app.module.ts`. 
 
 ## Further help
 
