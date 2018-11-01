@@ -9,6 +9,9 @@ import { renderModuleFactory } from '@angular/platform-server';
 import { enableProdMode } from '@angular/core';
 
 import * as express from 'express';
+import * as nodemailer from 'nodemailer';
+import * as moment from 'moment';
+const crypto = require('crypto');
 const queryString = require('query-string');
 const cors = require('cors');
 const logger = require('morgan');
@@ -22,6 +25,16 @@ const bodyParser = require('body-parser');
 const passport = require('passport');
 const LocalStrategy = require('passport-local').Strategy;
 const GoogleStrategy = require('passport-google-oauth').OAuth2Strategy;
+
+var transporter = nodemailer.createTransport({
+  service: 'yahoo', // no need to set host or port etc.
+  auth: {
+    user: 'nwen.supermarket@yahoo.com',
+    pass: 'w5mL0!JtmGsc'
+  },
+  debug: false,
+  logger: true
+});
 
 // * NOTE :: leave this as require() since this file is built Dynamically from webpack
 const { AppServerModuleNgFactory, LAZY_MODULE_MAP } = require('./dist/server/main.js');
@@ -411,6 +424,138 @@ app.get('/api/users', authRequired, async (req, res) => {
     // bad request
     console.error(err);
     res.status(400);
+  }
+});
+
+app.put('/auth/forgot-password', authNotAllowed, async (req, res) => {
+  try {
+    const client = await pool.connect();
+    const userAccountResult = await client.query(
+      'SELECT user_id, email, password_reset_token_expiry FROM users WHERE email=$1 LIMIT 1', [req.body.email]
+    );
+
+    // Checks if any user is assoicated with specified email
+    if (!userAccountResult || userAccountResult.rows.length === 0) {
+      // User not found
+      client.release();
+      return res.status(400).json({ message: 'User account does not exists with specified email. Please create an account instead.' });
+    }
+
+    const userAccount = userAccountResult.rows[0];
+
+    // Checking if the user already has requested for a forgot password before, and whether it is still valid or not.
+    // If either of those cases fail, create a new random token and an expiry date that expires in 24 hours.
+    if (userAccount.password_reset_token) {
+      const nowDate: moment.Moment = moment();
+      const tokenExpiryDate: moment.Moment = moment(userAccount.password_reset_token_expiry);
+
+      if (nowDate.isBefore(tokenExpiryDate)) {
+        client.release();
+        return res.status(400).json({
+          message: 'You have already requested password reset. Look in your spam/junk mail folder to see if the email is there.'
+        });
+      }
+    }
+
+    // Getting here suggests that a new token and expiry need to be created.
+    const token = await new Promise((resolve, reject) => {
+      crypto.randomBytes(64, function(err, buffer) {
+        if (err) {
+          reject('Error generating token');
+        }
+        resolve(buffer.toString('hex'));
+      });
+    });
+    // Create timestamp
+    const expiryDateMoment: moment.Moment = moment().add(1, 'd');
+    let expiryDate: string = expiryDateMoment.format();
+
+    const result = await client.query('UPDATE users SET password_reset_token=$1, password_reset_token_expiry=$2 ' +
+      'WHERE user_id=$3', [token, expiryDate, userAccount.user_id]);
+
+    // If the SQL was successful, send an email to end-user with the reset password link, otherwise return an error.
+    if (!result) {
+      client.release();
+      return res.status(500).json({
+         message: 'Failed to create and save reset token and expiry date into database. Contact administrator for assistance.'
+      });
+    }
+    // Setting up email parameters.
+    var mailOptions = {
+      from: 'NWEN304 Shopping Site <nwen.supermarket@yahoo.com>', // sender address
+      to: `nwen.supermarket@yahoo.com, ${userAccount.email}`, // list of receivers
+      subject: 'Shopping Site Password Reset', // Subject line
+      text: `Click link to reset password:
+      https://nwen304-project.herokuapp.com/password-reset?token=${token} \n\n
+      You have 24 hours to reset your password using the link above`, // plaintext body
+      html: `Click link to reset password:
+      <b><a href="https://nwen304-project.herokuapp.com/password-reset?token=${token}">Link</a></b><br><br>
+      You have 24 hours to reset your password using the link above.` // html body
+    };
+
+    // send mail with defined transport object
+    transporter.sendMail(mailOptions, function(error, response) {
+      if (error) {
+        console.error(error);
+        res.status(400).json({ message: 'Email could not send. Make sure your email is correct.'});
+      } else {
+        res.status(204).end();
+      }
+    });
+    client.release();
+  } catch (err) {
+    // bad request
+    console.error(err);
+    res.status(400).end();
+  }
+});
+
+app.put('/auth/password-reset', authNotAllowed, async (req, res) => {
+  // Body validation
+  if (!req.body.token) {
+    return res.status(400).json({ message: 'Must have both \'token\' and \'password\' in body.' });
+  }
+
+  try {
+    // Firstly, check if token is valid.
+    const client = await pool.connect();
+    const existsResult = await client.query('SELECT user_id, password_reset_token_expiry FROM users WHERE password_reset_token=$1 LIMIT 1',
+     [req.body.token]);
+
+    if (!existsResult || existsResult.rows.length === 0) {
+      client.release();
+      return res.status(403).json({ message: 'Invalid token used. Cannot reset password.' });
+    }
+    // Get user from token
+    console.log(existsResult.rows);
+    const { user_id, password_reset_token_expiry } = existsResult.rows[0];
+    console.log('user_id: ', user_id, ' - password_reset_token_expiry: ', password_reset_token_expiry);
+
+    // Check if token is valid via expiry date.
+    let nowDate: moment.Moment = moment();
+    let tokenExpiryDate: moment.Moment = moment(password_reset_token_expiry);
+    if (!nowDate.isBefore(tokenExpiryDate)) {
+      client.release();
+      return res.status(403).json({ message: 'Expired token. You must request a new email from the Forgot Password page.' });
+    }
+
+    // Saving the new password
+    const salt = bcrypt.genSaltSync(10);
+    const encrpytedPassword = bcrypt.hashSync(req.body.password, salt);
+    const updatePasswordResult = await client.query(
+      'UPDATE users SET password=$1, password_reset_token=NULL, password_reset_token_expiry=NULL WHERE user_id=$2',
+      [encrpytedPassword, user_id]
+    );
+    if (!updatePasswordResult) {
+      client.release();
+      return res.status(500).json({ message: 'Could not update password of account.' });
+    }
+    res.status(200).json({ message: 'Successful password reset.' });
+    client.release();
+  } catch (err) {
+    // bad request
+    console.error(err);
+    res.status(400).end();
   }
 });
 

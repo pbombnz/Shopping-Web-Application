@@ -11,9 +11,13 @@ CREATE TABLE users (
     address_city varchar(100) NOT NULL,
     address_postcode integer NOT NULL,
     phone varchar(30) NOT NULL,
+    password_reset_token text DEFAULT NULL,
+    password_reset_token_expiry timestamptz DEFAULT NULL,
 );
 
 CREATE INDEX users_index_google_id on users(google_id);
+CREATE INDEX users_index_email on users(email);
+CREATE INDEX users_index_password_reset_token on users(password_reset_token);
 
 CREATE TABLE orders (
     order_id serial NOT NULL PRIMARY KEY,
