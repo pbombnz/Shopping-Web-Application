@@ -1,0 +1,100 @@
+<div class="container" *ngIf="!googleAuth">
+  <ngx-loading [show]="loading" [config]="{ fullScreenBackdrop: true, backdropBackgroundColour: 'rgba(0, 0, 0, 0.8)' }"></ngx-loading>
+  <h1>Update Account details</h1>
+  <hr>
+  <form class="my-4" [formGroup]="form" (ngSubmit)="onSubmit()">
+    <h3 class="text-center">General</h3>
+    <div class="row">
+      <div class="col">
+        <div class="form-group">
+          <label for="inputFirstName">First Name</label>
+          <input type="text" class="form-control" id="inputFirstName" formControlName="first_name">
+        </div>
+      </div>
+      <div class="col">
+        <div class="form-group">
+          <label for="inputLastName">Last Name</label>
+          <input type="text" class="form-control" id="inputLastName" formControlName="last_name">
+        </div>
+      </div>
+    </div>
+
+    <!-- Phone Numbers -->
+    <div class="row">
+      <div class="col">
+        <div class="form-group">
+          <label for="phoneNumber">Phone Number (Mobile or Home)</label>
+          <input type="tel" class="form-control" id="phoneNumber" formControlName="phone">
+        </div>
+      </div>
+    </div>
+    <hr>
+    <!-- Login -->
+    <h3 class="text-center">Login</h3>
+    <div class="form-group">
+      <label for="inputEmail">Email</label>
+      <input type="email" class="form-control" id="inputEmail" formControlName="email">
+    </div>
+
+    <div class="form-group">
+      <label for="inputPassword">Password</label>
+      <input type="password" class="form-control" id="inputPassword" formControlName="password">
+      <ng2-password-strength-bar [passwordToCheck]="password.value" [barLabel]="'Password strength:'">
+      </ng2-password-strength-bar>
+    </div>
+    <div class="form-group" [customErrorMessages]="customErrorMessages">
+      <label for="inputPasswordConfirm">Confirm Password</label>
+      <input type="password" class="form-control" id="inputPasswordConfirm" formControlName="password_confirm">
+    </div>
+
+    <hr>
+    <!-- Address -->
+    <h3 class="text-center">Delivery Address</h3>
+    <div class="form-group">
+      <label for="inputAddress_Street1">Street Address #1</label>
+      <input type="text" class="form-control" id="inputAddress_Street1" formControlName="address_line1">
+    </div>
+    <div class="form-group">
+      <label for="inputAddress_Street2">Street Address #2</label>
+      <input type="text" class="form-control" id="inputAddress_Street2" formControlName="address_line2">
+    </div>
+    <div class="row">
+      <div class="col-5">
+        <div class="form-group">
+          <label for="inputAddress_Suburb">Suburb</label>
+          <input type="tel" class="form-control" id="inputAddress_Suburb" formControlName="address_suburb">
+        </div>
+      </div>
+      <div class="col-5">
+        <div class="form-group">
+          <label for="inputAddress_City">City</label>
+          <input type="tel" class="form-control" id="inputAddress_City" formControlName="address_city">
+        </div>
+      </div>
+      <div class="col-2">
+        <div class="form-group" [customErrorMessages]="customErrorMessages">
+          <label for="inputAddress_PostCode">Post Code</label>
+          <input type="text" class="form-control" id="inputAddress_PostCode" formControlName="address_postcode">
+        </div>
+      </div>
+    </div>
+    <hr>
+    <div *ngIf="!form.pristine && !form.valid" class="my-4 alert alert-danger" role="alert">
+      You cannot update your account account until all the required fields are filled correctly.
+    </div>
+    <div *ngIf="error" class="my-4 alert alert-danger" role="alert">
+      {{error.error.message}}
+    </div>
+    <div *ngIf="success" class="my-4 alert alert-success alert-top" role="alert">
+      Updated user account information sucessfully. Redirecting to home page...
+    </div>
+    <div class="row">
+        <div class="col">
+          <button type="button" class="btn btn-outline-secondary" (click)="resetFields()">Reset Fields back to Orginal</button>
+        </div>
+        <div class="col">
+          <button type="submit" class="btn btn-primary float-right">Update Details</button>
+        </div>
+      </div>
+  </form>
+</div>

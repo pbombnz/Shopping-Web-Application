@@ -107,4 +107,20 @@ export class APIService {
       tap((result: any) => console.log(result))
     );
   }
+
+  getUserInformation(id?: number): Observable<Object> {
+    const url = `/api/users${(id ? `/${id}` : '')}`;
+
+    return this.http.get(url).pipe(
+      tap((result: any) => console.log(result))
+    );
+  }
+
+  updateUserInformation(id: number, body: any): Observable<Object> {
+    const url = `/api/users${(id ? `/${id}` : '')}`;
+
+    return this.http.put(url, body).pipe(
+      tap((result: any) => console.log(result))
+    );
+  }
 }

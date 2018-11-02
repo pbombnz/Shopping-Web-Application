@@ -2,3 +2,10 @@
 @import 'https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css';
 @import 'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css';
 @import 'https://lipis.github.io/bootstrap-social/bootstrap-social.css';
+
+alert-top {
+    position: absolute;
+    top: 5px; 
+    left:2%;
+    width: 96%;
+}

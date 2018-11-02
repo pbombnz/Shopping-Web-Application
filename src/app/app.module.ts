@@ -22,6 +22,7 @@ import { SearchBarComponent } from './search-bar/search-bar.component';
 import { APIService } from './services/api.service';
 import { ForgotPasswordComponent } from './forgot-password/forgot-password.component';
 import { PasswordResetComponent } from './password-reset/password-reset.component';
+import { UpdateUserDetailsComponent } from './update-user-details/update-user-details.component';
 
 @NgModule({
   declarations: [
@@ -34,7 +35,8 @@ import { PasswordResetComponent } from './password-reset/password-reset.componen
     BrowseItemsComponent,
     SearchBarComponent,
     ForgotPasswordComponent,
-    PasswordResetComponent
+    PasswordResetComponent,
+    UpdateUserDetailsComponent
   ],
   imports: [
     BrowserModule.withServerTransition({ appId : 'nwen304-group-project'}),
@@ -54,7 +56,8 @@ import { PasswordResetComponent } from './password-reset/password-reset.componen
       { path: 'password-reset', component: PasswordResetComponent },
       { path: 'item-details/:id', component: ItemDetailsComponent },
       { path: 'browse', component: BrowseItemsComponent },
-      { path: 'cart-page', component: CartPageComponent }
+      { path: 'cart-page', component: CartPageComponent },
+      { path: 'update-user-details', component: UpdateUserDetailsComponent }
     ])
   ],
   providers: [ APIService, BrowseItemsService],

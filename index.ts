@@ -404,7 +404,7 @@ app.post('/auth/local', authNotAllowed, passport.authenticate('local'), (req, re
 });
 
 
-app.get('/api/users', authRequired, async (req, res) => {
+/*app.get('/api/users', authRequired, async (req, res) => {
   try {
     const client = await pool.connect();
     var result = await client.query('SELECT * FROM category');
@@ -425,7 +425,7 @@ app.get('/api/users', authRequired, async (req, res) => {
     console.error(err);
     res.status(400);
   }
-});
+});*/
 
 app.put('/auth/forgot-password', authNotAllowed, async (req, res) => {
   try {
@@ -726,31 +726,44 @@ app.get('/api/users/validate', async (req, res) => {
   res.json(200);
 });
 
-app.get('/api/users/:id', async (req, res) => {
-  try {
-    let id = req.params.id;
-    const client = await pool.connect();
-    var result = await client.query('SELECT * FROM users WHERE user_id=' + id);
 
-    if (!result) {
-      // not found
-      return res.json(404, 'No data found');
+// GET /api/user[/id]
+//   Gets the User Account information. if no 'id' param is supplied, it will use the current user's id from session data,
+//   otherwise it will retrieve information of the user based on the 'id' used as the parameter. This 'id' parameter has to
+//   match their their own id associated with the account they currently authenticated with. Only an admininistrator can
+//   access other users' information.
+app.get('/api/users/:id?', authRequired, async (req, res) => {
+  try {
+    const id: number = req.params.id || req.user.user_id;
+    console.log(`id: ${id} - req.user.user_id: ${req.user.user_id}`);
+    if (id !== req.user.user_id /* && is not an admin */) {
+      return res.status(401).json({ message: 'You do not have permission to access other accounts.' });
+    }
+
+    const client = await pool.connect();
+    let result;
+    // if (is an admin) {
+    //    result = await client.query('SELECT * FROM users WHERE user_id=$1', [id]);
+    // } else {
+      result = await client.query(
+        'SELECT first_name, last_name, email, address_line1, address_line2, address_suburb, address_city, address_postcode, ' +
+        'phone FROM users WHERE user_id=$1', [id]
+      );
+    // }
+
+    if (!result || result.rows.length === 0) {
+      res.status(404).json({ message: 'No user found with specified id.' });
     } else {
-      result.rows.forEach(row => {
-        console.log(row);
-      });
-      res.send(result.rows);
+      const userAccInfo = result.rows[0];
+      res.json(userAccInfo);
     }
     client.release();
 
   } catch (err) {
     // bad request
     console.error(err);
-    res.json(400);
+    res.status(400);
   }
-
-  // ok
-  res.json(200);
 });
 
 app.get('/api/users/:id/orders', async (req, res) => {
@@ -929,32 +942,81 @@ app.post('/api/addToCart', async (req, res) => {
 
 
 // ~~~~~~~~~~PUT API~~~~~~~~~~~~~//
-app.put('/api/users/:id', async (req, res) => {
+app.put('/api/users/:id?', async (req, res) => {
   try {
-    let id = req.params.id;
-    const client = await pool.connect();
-    // var result = await client.query('SELECT * FROM users WHERE user_id='+id);
-    let result = { rows : null};
+    const id: number = req.params.id || req.user.user_id;
+    console.log(`id: ${id} - req.user.user_id: ${req.user.user_id}`);
+    if (id !== req.user.user_id /* && is not an admin */) {
+      return res.status(401).json({ message: 'You do not have permission to access other accounts.' });
+    }
 
-    if (!result) {
-      // not found
-      return res.json(404, 'No data found');
+    let body = Object.assign({}, req.body);
+
+    // Deter all atttempts to modify system-set sensitive information of a user (if they are not an admin).
+    // if (is user not an admin) {
+      if (body.user_id) {
+        delete body['user_id'];
+      }
+      if (body.google_id) {
+        delete body['google_id'];
+      }
+      if (body.password_reset_token) {
+        delete body['password_reset_token'];
+      }
+      if (body.password_reset_token_expiry) {
+        delete body['password_reset_token_expiry'];
+      }
+    // }
+
+    if (body.password) {
+      if (body.password.length === 0) {
+        delete body['password'];
+      } else {
+        const salt = bcrypt.genSaltSync(10);
+        body.password = bcrypt.hashSync(body.password, salt);
+      }
+    }
+
+    // TODO: Validation - Remove any non-support data in body.
+    // TODO: Validation - Validate supported data in body.
+
+    let bodyKeys: string[] = Object.keys(body);
+    let bodyVals: any[] = Object.values(body);
+    bodyVals.unshift(id);
+
+    let setStatement = '';
+    bodyKeys.forEach((value, index) => {
+      if (index === (bodyKeys.length - 1)) {
+        setStatement += `${value}=$${index + 2} `;
+      } else {
+        setStatement += `${value}=$${index + 2}, `;
+      }
+    });
+    // console.log(setStatement);
+    // console.log(bodyVals);
+
+
+    const client = await pool.connect();
+    let result = await client.query('UPDATE users SET ' + setStatement + ' WHERE user_id=$1 RETURNING *', bodyVals);
+
+    if (!result || result.rows.length === 0) {
+      res.status(404).json({ message: 'No user found with specified id.' });
     } else {
-      result.rows.forEach(row => {
-        console.log(row);
+      const user = result.rows[0];
+      req.login(user, function(err) {
+        if (err) {
+          res.status(400).json({ message: err });
+        }
+        // Return a success message
+        res.status(204).end();
       });
-      res.send(result.rows);
     }
     client.release();
-
   } catch (err) {
     // bad request
     console.error(err);
-    res.json(400);
+    res.status(400).end();
   }
-
-  // ok
-  res.json(200);
 });
 
 app.put('/api/makeOrder', async (req, res) => {
