@@ -2,21 +2,14 @@
   <div class="rounded border p-3 mt-5">
     <div class="row">
       <div class="col-sm-12 col-md-5 align-self-center justify-content-center">
-        <img class="d-block m-auto" src="assets/misc/logo-placeholder.png" alt="Item Image">
+        <img class="d-block m-auto" [src]="item.item_image" alt="Item Image" width="250px" height="250px">
       </div>
       <div class="col-sm-12 col-md-7">
-        <h2>Item Name here</h2>
+        <h2>{{item.item_name}}</h2>
         <hr>
         <p text-wrap>
           <span style="font-weight: bold">Description:</span>
-          Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore
-          magna aliqua.
-          Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.
-          Duis aute irure
-          dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint
-          occaecat
-          cupidatat non
-          proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
+          {{item.item_description}}
         </p>
       </div>
     </div>

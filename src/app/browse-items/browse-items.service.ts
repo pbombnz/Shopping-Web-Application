@@ -36,6 +36,13 @@ export class BrowseItemsService {
       );
   }
 
+  getItemByID(id): Observable<Item[]>{
+    return this.http.get<Item[]>(this.itemsUrl+'/'+id)
+      .pipe(
+        // catchError(this.handleError('getHeroes', []))
+      );
+  }
+
 //   /* GET heroes whose name contains search term */
 //   searchHeroes(term: string): Observable<Item[]> {
 //     term = term.trim();
