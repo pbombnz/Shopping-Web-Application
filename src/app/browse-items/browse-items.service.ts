@@ -43,6 +43,26 @@ export class BrowseItemsService {
       );
   }
 
+  addItemToCart(id,userid){
+    if (this.userHasActiveCart(userid)){
+      console.log("add to existing cart")
+      // this.http.post()
+      
+    }
+    else{
+      console.log("post new cart")
+      // this.http.post()
+    }
+
+  }
+
+  private userHasActiveCart(userid): boolean{
+    // check if user has cart with order status of active (but no dispatched)
+    return false;
+  }
+
+
+
 //   /* GET heroes whose name contains search term */
 //   searchHeroes(term: string): Observable<Item[]> {
 //     term = term.trim();

@@ -19,6 +19,7 @@ export class ItemDetailsComponent implements OnInit {
 
   itemID;
   item;
+  userInfo;
 
   constructor(private router: Router, private activeRoute: ActivatedRoute, private browseItemsService: BrowseItemsService, private apiService: APIService) { }
 
@@ -44,15 +45,19 @@ export class ItemDetailsComponent implements OnInit {
 
   onSubmitClick(){
     console.log("submit");
-    console.log(this.apiService.isLoggedIn());
 
     // check if user is logged in, else redirect to login page.
-    if( !this.apiService.isLoggedIn() ){
+    if( this.apiService.isAuthenticated() ){
       
       console.log("redirect to login page");
     }
     else{
       console.log("add to cart");
+
+      this.userInfo = this.apiService.getUserInformation();
+      console.log(this.userInfo);
+      // 3 is placeholder user value
+      this.browseItemsService.addItemToCart(this.itemID,3);
     }
 
   }
