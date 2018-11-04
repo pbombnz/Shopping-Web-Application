@@ -47,7 +47,7 @@ export class ItemDetailsComponent implements OnInit {
     console.log("submit");
 
     // check if user is logged in, else redirect to login page.
-    if( this.apiService.isAuthenticated() ){
+    if( !this.apiService.isAuthenticated() ){
       
       console.log("redirect to login page");
     }
