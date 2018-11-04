@@ -29,6 +29,12 @@
                     <span class="glyphicon glyphicon-plus">+</span>
                 </button>
             </span>
+            <input type="number" id="submit" name="submit" class="form-control input-number"  [(ngModel)]="itemQuantity">
+            <span class="input-group-btn">
+                <button type="button" class="btn btn-success btn-number" data-type="submit" data-field="" (click)="onSubmitClick()">
+                    <span> Submit </span>
+                </button>
+            </span>
         </div>
       </div>
     </div>

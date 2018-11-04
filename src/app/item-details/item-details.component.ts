@@ -3,6 +3,7 @@ import { Router, ActivatedRoute, ParamMap } from '@angular/router';
 
 import { Item } from '../browse-items/browse-items';
 import { BrowseItemsService } from '../browse-items/browse-items.service';
+import { APIService } from '../services/api.service';
 
 
 @Component({
@@ -19,16 +20,17 @@ export class ItemDetailsComponent implements OnInit {
   itemID;
   item;
 
-  constructor(private router: Router, private activeRoute: ActivatedRoute, private browseItemsService: BrowseItemsService) { }
+  constructor(private router: Router, private activeRoute: ActivatedRoute, private browseItemsService: BrowseItemsService, private apiService: APIService) { }
 
   ngOnInit() {
-    this.itemID = this.activeRoute.params._value.id;
+
+    // reference: https://stackoverflow.com/questions/41496316/get-active-route-data-inside-router-events
+    this.itemID = this.activeRoute.snapshot.params.id;
 
     // get item by id
     this.browseItemsService.getItemByID(this.itemID)
     .subscribe(item => this.item = item[0]);
-
-    
+ 
   }
 
 
@@ -38,5 +40,20 @@ export class ItemDetailsComponent implements OnInit {
 
   onQuantityPlusClick() {
     this.itemQuantity++;
+  }
+
+  onSubmitClick(){
+    console.log("submit");
+    console.log(this.apiService.isLoggedIn());
+
+    // check if user is logged in, else redirect to login page.
+    if( !this.apiService.isLoggedIn() ){
+      
+      console.log("redirect to login page");
+    }
+    else{
+      console.log("add to cart");
+    }
+
   }
 }
