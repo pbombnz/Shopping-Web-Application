@@ -1,5 +1,43 @@
 <div class="container">
-  <p>
-    cart-page works!
-  </p>
+  <table class="table table-bordered">
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Image</th>
+          <th>Name</th>
+          <th>Price</th>
+          <th>Quatity</th>
+          <th>Action</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let list of cartItems">
+          <td>{{list.item_id}}</td>
+          <td>
+            <img src="{{list.item_image}}" class="img-thumbnail" style="height:100px;" />
+          </td>
+          <td>{{list.item_name}}</td>
+          <td>{{list.item_price}}</td>
+          <td>
+            {{list.item_stock_quantity}}
+            <button class="btn btn-success btn-xs plus" (click)="add(list.item_id)">
+              <i class="glyphicon glyphicon-plus"></i>
+            </button>
+            <button class="btn btn-danger btn-xs minus" (click)="del(list.item_id)">
+              <i class="glyphicon glyphicon-minus"></i>
+            </button>
+          </td>
+          <td>
+            <button class="btn btn-danger btn-sm" (click)="delpopup(list.item_id)">Delete</button>
+          </td>
+        </tr>
+      </tbody>
+      <tfoot>
+        <tr>
+          <td>Total Price</td>
+          <td colspan="6" class="text-right">{{total | currency: 'NZD' }}</td>
+        </tr>
+      </tfoot>
+    </table>
+    
 </div>
