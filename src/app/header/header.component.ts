@@ -20,6 +20,10 @@ export class HeaderComponent implements OnInit {
     this.router.navigate(['/login']);
   }
 
+  onCartButtonClicked(){
+    this.router.navigate(['/cart-page']);
+  }
+
   onUpdateUserDetailsButtonClicked() {}
 
   onMyOrdersButtonClicked() {}

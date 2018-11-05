@@ -44,7 +44,7 @@
           / Register</button>
       </span>
       <span *ngIf="apiService.isAuthenticated()">
-        <button class="btn btn-outline-light btn-sm my-2 mr-2 my-sm-0" type="button">Cart</button>
+        <button class="btn btn-outline-light btn-sm my-2 mr-2 my-sm-0" type="button" (click)="onCartButtonClicked()">Cart</button>
         <div ngbDropdown class="d-inline-block" placement="bottom-right">
           <button class="btn btn-outline-light btn-sm" id="dropdownBasic1" ngbDropdownToggle>{{apiService.getUserFirstName()}} {{apiService.getUserLastName()}}</button>
           <div ngbDropdownMenu aria-labelledby="dropdownBasic1">
