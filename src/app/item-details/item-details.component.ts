@@ -53,7 +53,7 @@ export class ItemDetailsComponent implements OnInit {
     }
     else{
       console.log("add to cart");
-      this.browseItemsService.addItemToCart(this.itemID);
+      this.browseItemsService.addItemToCart(this.itemID).subscribe();
     }
 
   }

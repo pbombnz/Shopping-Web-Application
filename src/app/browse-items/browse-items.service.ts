@@ -16,7 +16,9 @@ const httpOptions = {
   })
 };
 
-@Injectable()
+@Injectable({
+  providedIn: 'root'
+})
 export class BrowseItemsService {
   itemsUrl = 'api/items';  // URL to web api
 //   private handleError: HandleError;
@@ -44,11 +46,11 @@ export class BrowseItemsService {
   }
 
   // this function requires user authentication to be checked beforehand
-  addItemToCart(itemID): Observable<Item[]>{
-    let url = '/api/addToCart'
+  addItemToCart(itemID): Observable<Object>{
+    let url = '/api/addtocart'
     let body = {id: itemID}
     console.log("Called post on %s", url);
-    return this.http.post<Item[]>(url,body).pipe();
+    return this.http.post<Object>(url,body).pipe();
 
 
   }

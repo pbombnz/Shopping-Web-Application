@@ -910,34 +910,28 @@ app.get('/api/users/:id/cart', async (req, res) => {
 // ~~~~~~~~~POST API~~~~~~~~~~~~~//
 
 
-app.post('/api/addToCart', async (req, res) => {
-  // try {
-    console.log("got into post");
-    // let id = req.body.id;
-    // console.log("item id: %d",id);
+app.post('/api/addtocart', async (req, res) => {
+  console.log("add to cart post");
+  try {
+    const client = await pool.connect();
+    var result = await client.query('SELECT * FROM items');
 
-    res.send(false);
-    
-  //   const client = await pool.connect();
-  //   // var result = await client.query('SELECT * FROM users WHERE user_id='+id);
-  //   let result = { rows : null};
+    if (!result) {
+      // not found
+      return res.json(404, 'No data found');
+    } else {
+      result.rows.forEach(row => {
+        console.log(row);
+      });
+      res.send(result.rows);
+    }
+    client.release();
 
-  //   if (!result) {
-  //     // not found
-  //     return res.json(404, 'No data found');
-  //   } else {
-  //     result.rows.forEach(row => {
-  //       console.log(row);
-  //     });
-  //     res.send(result.rows);
-  //   }
-  //   client.release();
-
-  // } catch (err) {
-  //   // bad request
-  //   console.error(err);
-  //   res.json(400);
-  // }
+  } catch (err) {
+    // bad request
+    console.error(err);
+    res.json(400);
+  }
 
   // ok
   res.json(200);
