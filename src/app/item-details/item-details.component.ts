@@ -53,11 +53,7 @@ export class ItemDetailsComponent implements OnInit {
     }
     else{
       console.log("add to cart");
-
-      this.userInfo = this.apiService.getUserInformation();
-      console.log(this.userInfo);
-      // 3 is placeholder user value
-      this.browseItemsService.addItemToCart(this.itemID,3);
+      this.browseItemsService.addItemToCart(this.itemID);
     }
 
   }

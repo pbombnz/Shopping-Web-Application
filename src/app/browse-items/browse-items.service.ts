@@ -43,20 +43,17 @@ export class BrowseItemsService {
       );
   }
 
-  addItemToCart(id,userid){
-    if (this.userHasActiveCart(userid)){
-      console.log("add to existing cart")
-      // this.http.post()
-      
-    }
-    else{
-      console.log("post new cart")
-      // this.http.post()
-    }
+  // this function requires user authentication to be checked beforehand
+  addItemToCart(itemID): Observable<Item[]>{
+    let url = '/api/addToCart'
+    let body = {id: itemID}
+    console.log("Called post on %s", url);
+    return this.http.post<Item[]>(url,body).pipe();
+
 
   }
 
-  private userHasActiveCart(userid): boolean{
+  private userHasActiveCart(): boolean{
     // check if user has cart with order status of active (but no dispatched)
     return false;
   }
