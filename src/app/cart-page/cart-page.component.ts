@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { Item } from '../browse-items/browse-items';
 import { CartItem } from './cart-item';
+import { CartPageService } from './cart-page.service';
 
 @Component({
   selector: 'app-cart-page',
@@ -18,7 +19,7 @@ export class CartPageComponent implements OnInit {
   //selectedProduct: Subject<any> = new Subject;
   total: number = 0;
 
-  constructor() {
+  constructor(private cartPageService: CartPageService) {
     this.cartItems = [
       {
         order_id: 1,
@@ -31,6 +32,11 @@ export class CartPageComponent implements OnInit {
   ngOnInit() {
     this.calculateTotalPrice();
   }
+
+  // getCartItems(): void {
+  //   this.cartPageService.getCartItems()
+  //     .subscribe
+  // }
 
   calculateTotalPrice() {
     this.total = 0;
