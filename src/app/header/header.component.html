@@ -50,6 +50,10 @@
           <div ngbDropdownMenu aria-labelledby="dropdownBasic1">
             <button class="dropdown-item" [routerLink]="['/update-user-details']">Update User Details</button>
             <button class="dropdown-item" (click)="onMyOrdersButtonClicked()">My Orders</button>
+            <span *ngIf="apiService.isUserAdmin()">
+              <div class="dropdown-divider"></div>
+              <button class="dropdown-item" [routerLink]="['/admin']">Admin Panel</button>
+            </span>
             <div class="dropdown-divider"></div>
             <button class="dropdown-item" (click)="onLogoutButtonClicked()">Logout</button>
           </div>

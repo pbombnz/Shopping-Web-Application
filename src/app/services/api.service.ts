@@ -29,6 +29,11 @@ export class APIService {
     return this.user ? this.user.email : null;
   }
 
+  isUserAdmin(): boolean {
+    console.log(this.user);
+    return this.user ? this.user.admin : false;
+  }
+
   isAuthenticated(): boolean {
     return this.user ? true : false;
   }

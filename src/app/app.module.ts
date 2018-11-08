@@ -23,6 +23,7 @@ import { APIService } from './services/api.service';
 import { ForgotPasswordComponent } from './forgot-password/forgot-password.component';
 import { PasswordResetComponent } from './password-reset/password-reset.component';
 import { UpdateUserDetailsComponent } from './update-user-details/update-user-details.component';
+import { AdminModule } from './admin/admin.module';
 
 @NgModule({
   declarations: [
@@ -49,6 +50,7 @@ import { UpdateUserDetailsComponent } from './update-user-details/update-user-de
     NgBootstrapFormValidationModule.forRoot(),
     NgBootstrapFormValidationModule,
     NgxLoadingModule.forRoot({}),
+    AdminModule,
     RouterModule.forRoot([
       { path: 'login', component: LoginComponent },
       { path: 'register', component: RegisterComponent },
