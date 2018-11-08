@@ -888,7 +888,7 @@ app.get('/api/current_user_cart', async (req, res) => {
       // not found
       return res.json(404, 'No data found');
     } else {
-      var items = await client.query('SELECT * FROM order_items WHERE order_id = ' + order_id);
+      var items = await client.query('SELECT order_id, item_id, quantity, item_name, item_price, item_image FROM order_items natural join items WHERE order_id = ' + order_id);
       if (!items) {
         return res.json(404, 'No data found');
       } else {
