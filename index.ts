@@ -120,18 +120,23 @@ passport.use(new GoogleStrategy({
   clientSecret: GOOGLE_CLIENT_SECRET,
   callbackURL: '/auth/google/callback'
 }, async (accessToken, refreshToken, profile, done) => {
-    console.log('Passport:: GoogleStrategy: Callback executed.');
-    console.log('profile: ', profile);
+  console.log('Passport:: GoogleStrategy: Callback executed.');
+  console.log('profile: ', profile);
 
-    // Check if user account has been already created.
-    try {
-      const client = await pool.connect();
-      let query = await client.query('SELECT * FROM users WHERE google_id=$1', [profile.id]);
+  // Check if user account has been already created.
+  try {
+    const client = await pool.connect();
+    let query = await client.query('SELECT * FROM users WHERE google_id=$1', [profile.id]);
+    let user;
 
-      if (!query) {
-        // Failed SQL Call
-        client.release();
-        done('Database Error');
+    if (!query) {
+      // Failed SQL Call
+      client.release();
+      done('Database Error');
+    } else {
+      // Successful SQL Call
+      if (query.rows.length > 0) {
+        // Account Found. User has used Google ID login before.
       } else {
         // Successful SQL Call
         if (query.rows.length > 0) {
@@ -160,16 +165,17 @@ passport.use(new GoogleStrategy({
             );
           }
         }
-        const user = query.rows[0];
-        client.release();
-        done(null, user);
       }
-    } catch (err) {
-      // bad request
-      console.error(err);
-      done(err);
+      user = query.rows[0];
+      client.release();
+      done(null, user);
     }
+  } catch (err) {
+    // bad request
+    console.error(err);
+    done(err);
   }
+}
 ));
 
 
@@ -200,7 +206,7 @@ try {
 
   app.set('view engine', 'html');
   app.set('views', join(DIST_FOLDER, 'browser'));
-} catch (e) {}
+} catch (e) { }
 
 app.use(logger('dev'));
 app.use(bodyParser.urlencoded({ extended: false }));
@@ -226,10 +232,10 @@ app.listen(PORT, () => console.log(`Listening on ${PORT}`));
  */
 function authRequired(req, res, next) {
   if (req.isAuthenticated()/* && req.user*/) {
-      next();
+    next();
   } else {
-      res.status(403).end(); // Forbidden Request
-      // res.redirect('/login');
+    res.status(403).end(); // Forbidden Request
+    // res.redirect('/login');
   }
 }
 
@@ -239,7 +245,7 @@ function authRequired(req, res, next) {
  */
 function authNotAllowed(req, res, next) {
   if (!req.isAuthenticated()) {
-      next();
+    next();
   } else {
     res.status(403).end(); // Forbidden Request
     // res.redirect('/');
@@ -271,7 +277,7 @@ app.get('/auth/google/callback', passport.authenticate('google'), (req, res) => 
   console.log(req.user);
 
   if (req.user.address_line1 === '' || req.user.address_line2 === '' || req.user.address_suburb === ''
-  || req.user.address_city === '' || req.user.address_postcode === -1 || req.user.phone === '') {
+    || req.user.address_city === '' || req.user.address_postcode === -1 || req.user.phone === '') {
     const query = queryString.stringify({
       'googleAuth': true,
     });
@@ -290,9 +296,9 @@ app.put('/auth/google/register', authRequired, async (req, res) => {
     const client = await pool.connect();
 
     let result = await client.query('UPDATE users SET address_line1=$1, address_line2=$2, address_suburb=$3, ' +
-    'address_city=$4, address_postcode=$5, phone=$6 WHERE user_id=$7',
-      [ req.body.address_line1, req.body.address_line2, req.body.address_suburb, req.body.address_city, req.body.address_postcode,
-        req.body.phone, req.user.user_id]);
+      'address_city=$4, address_postcode=$5, phone=$6 WHERE user_id=$7',
+      [req.body.address_line1, req.body.address_line2, req.body.address_suburb, req.body.address_city, req.body.address_postcode,
+      req.body.phone, req.user.user_id]);
 
     if (!result) {
       // cannot update user information, contraint issue failed? user does not exists? other?
@@ -302,14 +308,14 @@ app.put('/auth/google/register', authRequired, async (req, res) => {
       // session of user on Passport by relogging in.
       let user = Object.assign({}, req.user);
       user = Object.assign(user, {
-      address_line1: req.body.address_line2,
-      address_line2: req.body.address_line2,
-      address_suburb: req.body.address_suburb,
-      address_city: req.body.address_city,
-      address_postcode: req.body.address_postcode,
-      phone: req.body.phone
+        address_line1: req.body.address_line2,
+        address_line2: req.body.address_line2,
+        address_suburb: req.body.address_suburb,
+        address_city: req.body.address_city,
+        address_postcode: req.body.address_postcode,
+        phone: req.body.phone
       });
-      req.login(user, function(err) {
+      req.login(user, function (err) {
         if (err) {
           res.status(400).json({ message: err });
         }
@@ -360,7 +366,7 @@ app.get('/auth/loggedin', authIgnore, (req, res) => {
 //   the Strategy used for authentication.
 app.get('/auth/logout', authRequired, (req, res) => {
   req.logout();
-  res.status(200).json({ message: 'Logout successful.'});
+  res.status(200).json({ message: 'Logout successful.' });
 });
 
 // POST /auth/local/register
@@ -382,7 +388,7 @@ app.post('/auth/local/register', authNotAllowed, async (req, res) => {
       'address_line1, address_line2, address_suburb, address_city, address_postcode, phone) ' +
       'VALUES($1, $2, $3, $4, $5, $6, $7, $8, $9, $10) RETURNING user_id',
       [req.body.first_name, req.body.last_name, req.body.email, encrpytedPassword, req.body.address_line1, req.body.address_line2,
-       req.body.address_suburb, req.body.address_city, req.body.address_postcode, req.body.phone]);
+      req.body.address_suburb, req.body.address_city, req.body.address_postcode, req.body.phone]);
 
     if (!result) {
       // cannot create user, contraint issue failed?
@@ -479,7 +485,7 @@ app.put('/auth/forgot-password', authNotAllowed, async (req, res) => {
 
     // Getting here suggests that a new token and expiry need to be created.
     const token = await new Promise((resolve, reject) => {
-      crypto.randomBytes(64, function(err, buffer) {
+      crypto.randomBytes(64, function (err, buffer) {
         if (err) {
           reject('Error generating token');
         }
@@ -497,7 +503,7 @@ app.put('/auth/forgot-password', authNotAllowed, async (req, res) => {
     if (!result) {
       client.release();
       return res.status(500).json({
-         message: 'Failed to create and save reset token and expiry date into database. Contact administrator for assistance.'
+        message: 'Failed to create and save reset token and expiry date into database. Contact administrator for assistance.'
       });
     }
     // Setting up email parameters.
@@ -514,10 +520,10 @@ app.put('/auth/forgot-password', authNotAllowed, async (req, res) => {
     };
 
     // send mail with defined transport object
-    transporter.sendMail(mailOptions, function(error, response) {
+    transporter.sendMail(mailOptions, function (error, response) {
       if (error) {
         console.error(error);
-        res.status(400).json({ message: 'Email could not send. Make sure your email is correct.'});
+        res.status(400).json({ message: 'Email could not send. Make sure your email is correct.' });
       } else {
         res.status(204).end();
       }
@@ -540,7 +546,7 @@ app.put('/auth/password-reset', authNotAllowed, async (req, res) => {
     // Firstly, check if token is valid.
     const client = await pool.connect();
     const existsResult = await client.query('SELECT user_id, password_reset_token_expiry FROM users WHERE password_reset_token=$1 LIMIT 1',
-     [req.body.token]);
+      [req.body.token]);
 
     if (!existsResult || existsResult.rows.length === 0) {
       client.release();
@@ -723,7 +729,7 @@ app.get('/api/users/validate', async (req, res) => {
     let id = req.params.id;
     const client = await pool.connect();
     // var result = await client.query('SELECT * FROM users WHERE user_id='+id);
-    let result = { rows : null};
+    let result = { rows: null };
 
     if (!result) {
       // not found
@@ -765,10 +771,10 @@ app.get('/api/users/:id?', authRequired, async (req, res) => {
     // if (is an admin) {
     //    result = await client.query('SELECT * FROM users WHERE user_id=$1', [id]);
     // } else {
-      result = await client.query(
-        'SELECT first_name, last_name, email, address_line1, address_line2, address_suburb, address_city, address_postcode, ' +
-        'phone FROM users WHERE user_id=$1', [id]
-      );
+    result = await client.query(
+      'SELECT first_name, last_name, email, address_line1, address_line2, address_suburb, address_city, address_postcode, ' +
+      'phone FROM users WHERE user_id=$1', [id]
+    );
     // }
 
     if (!result || result.rows.length === 0) {
@@ -895,20 +901,28 @@ app.get('/api/users/:id/orders/dispatched', async (req, res) => {
   res.json(200);
 });
 
-app.get('/api/users/:id/cart', async (req, res) => {
+app.get('/api/current_user_cart', async (req, res) => {
   try {
-    let id = req.params.id;
+    
+    let id = '7';
+    
     const client = await pool.connect();
-    var result = await client.query('SELECT * FROM orders WHERE user_id=' + id + 'AND order_status=0');
+    let innerQueryResult = await client.query('SELECT order_id FROM orders WHERE user_id = ' + id + ' AND order_status=0');
+    let order_id = innerQueryResult.rows[0].order_id;
 
-    if (!result) {
+    if (!order_id) {
       // not found
       return res.json(404, 'No data found');
     } else {
-      result.rows.forEach(row => {
-        console.log(row);
-      });
-      res.send(result.rows);
+      var items = await client.query('SELECT order_id, item_id, quantity, item_name, item_price, item_image FROM order_items natural join items WHERE order_id = ' + order_id);
+      if (!items) {
+        return res.json(404, 'No data found');
+      } else {
+        items.rows.forEach(row => {
+          console.log(row);
+        });
+        res.send(items.rows);
+      }
     }
     client.release();
 
@@ -973,18 +987,18 @@ app.put('/api/users/:id?', async (req, res) => {
 
     // Deter all atttempts to modify system-set sensitive information of a user (if they are not an admin).
     // if (is user not an admin) {
-      if (body.user_id) {
-        delete body['user_id'];
-      }
-      if (body.google_id) {
-        delete body['google_id'];
-      }
-      if (body.password_reset_token) {
-        delete body['password_reset_token'];
-      }
-      if (body.password_reset_token_expiry) {
-        delete body['password_reset_token_expiry'];
-      }
+    if (body.user_id) {
+      delete body['user_id'];
+    }
+    if (body.google_id) {
+      delete body['google_id'];
+    }
+    if (body.password_reset_token) {
+      delete body['password_reset_token'];
+    }
+    if (body.password_reset_token_expiry) {
+      delete body['password_reset_token_expiry'];
+    }
     // }
 
     if (body.password) {
@@ -1022,7 +1036,7 @@ app.put('/api/users/:id?', async (req, res) => {
       res.status(404).json({ message: 'No user found with specified id.' });
     } else {
       const user = result.rows[0];
-      req.login(user, function(err) {
+      req.login(user, function (err) {
         if (err) {
           res.status(400).json({ message: err });
         }
@@ -1043,7 +1057,7 @@ app.put('/api/makeOrder', async (req, res) => {
     let id = req.params.id;
     const client = await pool.connect();
     // var result = await client.query('SELECT * FROM users WHERE user_id='+id);
-    let result = { rows : null};
+    let result = { rows: null };
 
     if (!result) {
       // not found
@@ -1071,7 +1085,7 @@ app.put('/api/users/:id/cart/:itemid/appendQuantity/:qty', async (req, res) => {
     let id = req.params.id;
     const client = await pool.connect();
     // var result = await client.query('SELECT * FROM users WHERE user_id='+id);
-    let result = { rows : null};
+    let result = { rows: null };
 
     if (!result) {
       // not found
