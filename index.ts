@@ -138,10 +138,27 @@ passport.use(new GoogleStrategy({
           // Account Found. User has used Google ID login before.
         } else {
           // Account not found. Create an account for user.
-          query = await client.query('INSERT INTO users(first_name, last_name, email, google_id, ' +
-          'address_line1, address_line2, address_suburb, address_city, address_postcode, phone) ' +
-          'VALUES($1, $2, $3, $4, $5, $6, $7, $8, $9, $10) RETURNING *',
-          [profile.name.givenName, profile.name.familyName, profile.emails[0].value, profile.id, '', '', '', '', -1, '']);
+          let insertSuccess: boolean;
+          query = undefined;
+          try {
+            query = await client.query('INSERT INTO users(first_name, last_name, email, google_id, ' +
+            'address_line1, address_line2, address_suburb, address_city, address_postcode, phone) ' +
+            'VALUES($1, $2, $3, $4, $5, $6, $7, $8, $9, $10) RETURNING *',
+            [profile.name.givenName, profile.name.familyName, profile.emails[0].value, profile.id, '', '', '', '', -1, '']);
+            insertSuccess = true;
+          } catch (err) {
+            insertSuccess = false;
+          }
+
+          // May fail if the user is already created via local-authentication.
+          if (!query && !insertSuccess) {
+            // If this is the case, simply create another SQL UPDATE statement,
+            // where we only update the google_id field.
+            query = await client.query(
+              'UPDATE users SET first_name=$1, last_name=$2, google_id=$3 WHERE email=$4 RETURNING *',
+              [profile.name.givenName, profile.name.familyName, profile.id, profile.emails[0].value]
+            );
+          }
         }
         const user = query.rows[0];
         client.release();
@@ -329,6 +346,7 @@ app.get('/auth/loggedin', authIgnore, (req, res) => {
       first_name: req.user.first_name,
       last_name: req.user.last_name,
       email: req.user.email,
+      admin: req.user.admin,
       googleAuth: req.user.google_id != null,
     };
     res.json({ authenticated: true, user: userData });
@@ -398,7 +416,9 @@ app.post('/auth/local', authNotAllowed, passport.authenticate('local'), (req, re
   let userData = {
     first_name: req.user.first_name,
     last_name: req.user.last_name,
-    email: req.user.email
+    email: req.user.email,
+    admin: req.user.admin,
+    googleAuth: false,
   };
   res.json(userData);
 });
