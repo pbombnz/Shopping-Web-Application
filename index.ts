@@ -910,8 +910,51 @@ app.get('/api/users/:id/cart', async (req, res) => {
 // ~~~~~~~~~POST API~~~~~~~~~~~~~//
 
 
-app.post('/api/addtocart', async (req, res) => {
+app.post('/api/addtocart', authRequired, async (req, res) => {
   console.log("add to cart post");
+
+  let user_id = req.user.user_id;
+  let quantiy = req.params.quantity;
+  let item_id = req.params.itemID;
+  
+  try {
+    const client = await pool.connect();
+
+    // find the order id for the user where status is in the cart stage
+    let orderQueryResult = client.query('SELECT order_id FROM orders WHERE user_id = $1' , [user_id]);
+    if (!orderQueryResult) {
+      // not found
+      return res.json(404, 'No data found');
+    }
+
+    // get order id from query result
+    let order_id = orderQueryResult.rows[0].order_id;
+
+    // add items to cart
+    let insertStatement = 'INSERT INTO order_items (order_id,item_id,price,quantity) ';
+    let valuesStatement = 'VALUES ($1,$2,$3,$4)';
+    let values =  [order_id,item_id,'$5.70',quantiy];
+    let result = await client.query(insertStatement + valuesStatement, values);
+
+    console.log(result);
+
+    if (!result) {
+      // not found
+      return res.json(404, 'No data found');
+    } else {
+      result.rows.forEach(row => {
+        console.log(row);
+      });
+      res.send(result.rows);
+    }
+    client.release();
+
+  } catch (err) {
+    // bad request
+    console.error(err);
+    res.json(400);
+  }
+
   try {
     const client = await pool.connect();
     var result = await client.query('SELECT * FROM items');
