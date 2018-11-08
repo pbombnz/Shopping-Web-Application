@@ -15,34 +15,31 @@ export class CartPageComponent implements OnInit {
   message = "You cart is empty";
   
   cartItems: CartItem[];
-  upproducts: CartItem[] = [];
   //selectedProduct: Subject<any> = new Subject;
   total: number = 0;
 
   constructor(private cartPageService: CartPageService) {
-    this.cartItems = [
-      {
-        order_id: 1,
-        item_id: 0,
-        quantity: 1
-      }
-    ];
   }
 
   ngOnInit() {
-    this.calculateTotalPrice();
+    this.getCartItems();
   }
 
-  // getCartItems(): void {
-  //   this.cartPageService.getCartItems()
-  //     .subscribe
-  // }
+  getCartItems(): void {
+    this.cartPageService.getCartItems()
+      .subscribe(items => {
+        this.cartItems = items;
+        this.calculateTotalPrice();
+      })
+
+    
+  }
 
   calculateTotalPrice() {
     this.total = 0;
     for (var i = 0; i < this.cartItems.length; i++) {
-      //TODO: fix price
-      //this.total += (this.cartItems[i].item_price * this.cartItems[i].quantity);
+      console.log(this.cartItems[i]);
+      this.total += (this.cartItems[i].item_price * this.cartItems[i].quantity);
     }
   }
 
