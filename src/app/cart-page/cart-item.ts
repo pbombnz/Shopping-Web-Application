@@ -2,6 +2,5 @@
 export interface CartItem {
     order_id: number,
     item_id: number,
-    price: number,
     quantity: number,
 }

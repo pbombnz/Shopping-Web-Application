@@ -31,7 +31,6 @@ CREATE TABLE orders (
 CREATE TABLE order_items (
     order_id serial NOT NULL,
     item_id serial NOT NULL,
-    price money NOT NULL,
     quantity integer NOT NULL,
 
     CONSTRAINT pk PRIMARY KEY (order_id, item_id),

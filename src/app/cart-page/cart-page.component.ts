@@ -1,5 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { Item } from '../browse-items/browse-items';
+import { CartItem } from './cart-item';
 
 @Component({
   selector: 'app-cart-page',
@@ -9,24 +10,20 @@ import { Item } from '../browse-items/browse-items';
 export class CartPageComponent implements OnInit {
   title = 'My Cart';
 
+  //displayed when nothing in cart
   message = "You cart is empty";
   
-  //TODO: use CartItem type?? fix item_stock_quantity
-  cartItems: Item[];
-  upproducts: Item[] = [];
+  cartItems: CartItem[];
+  upproducts: CartItem[] = [];
   //selectedProduct: Subject<any> = new Subject;
   total: number = 0;
 
   constructor() {
     this.cartItems = [
       {
+        order_id: 1,
         item_id: 0,
-        item_name: 'Onion',
-        item_category: 3,
-        item_origin: 'China',
-        item_price: 5.99,
-        item_stock_quantity: 100,
-        item_image: '/src/assets/vegetables/onion.jpg'
+        quantity: 1
       }
     ];
   }
@@ -38,7 +35,8 @@ export class CartPageComponent implements OnInit {
   calculateTotalPrice() {
     this.total = 0;
     for (var i = 0; i < this.cartItems.length; i++) {
-      this.total += (this.cartItems[i].item_price * this.cartItems[i].item_stock_quantity);
+      //TODO: fix price
+      //this.total += (this.cartItems[i].item_price * this.cartItems[i].quantity);
     }
   }
 
@@ -61,7 +59,7 @@ export class CartPageComponent implements OnInit {
     console.log(pid);
     for (var i = 0; i < this.cartItems.length; i++) {
       if (this.cartItems[i].item_id === pid) {
-        this.cartItems[i].item_stock_quantity += 1;
+        this.cartItems[i].quantity += 1;
       }
     }
     this.calculateTotalPrice();
@@ -72,7 +70,7 @@ export class CartPageComponent implements OnInit {
     console.log(pid);
     for (var i = 0; i < this.cartItems.length; i++) {
       if (this.cartItems[i].item_id === pid) {
-        this.cartItems[i].item_stock_quantity -= 1;
+        this.cartItems[i].quantity -= 1;
       }
     }
     this.calculateTotalPrice();
