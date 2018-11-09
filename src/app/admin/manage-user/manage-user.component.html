@@ -1,0 +1,99 @@
+<ngx-loading [show]="loading" [config]="{ fullScreenBackdrop: true, backdropBackgroundColour: 'rgba(0, 0, 0, 0.8)' }"></ngx-loading>
+<div class="container my-5" *ngIf="!loading">
+  <ngb-alert [dismissible]="false" *ngIf="successMessage" type="success" (close)="successMessage = null">{{ successMessage }}</ngb-alert>
+  <ngb-alert [dismissible]="false" *ngIf="dangerMessage" type="danger" (close)="dangerMessage = null">{{ dangerMessage }}</ngb-alert>
+  <h1>Admin: User Management</h1>
+  <hr>
+  <h2>General Information</h2>
+  <hr>
+  <table class="table">
+    <thead>
+      <tr>
+        <th scope="col">Attribute</th>
+        <th scope="col">Value</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <th>User ID</th>
+        <td>{{user?.user_id}}</td>
+      </tr>
+      <tr>
+        <th>Google ID</th>
+        <td>{{user ? user.google_id ? user.google_id : "N/A" : "N/A"}}</td>
+      </tr>
+      <tr>
+        <th>Admin Privileges</th>
+        <td>
+          <div class="row">
+            <div class="col">{{user?.admin ? "Yes" : "No" }}</div>
+            <div class="col">
+                <button [disabled]="apiService.getUserEmail() === user.email" type="button" class="btn btn-outline-secondary btn-sm float-right" (click)="toggleAdminPrivileges()" >{{user?.admin ? "Remove" : "Add"}}  Admin Privileges</button>
+            </div>
+          </div>
+        </td>
+      </tr>
+      <tr>
+        <th>First Name</th>
+        <td>{{user?.first_name}}</td>
+      </tr>
+
+      <tr>
+        <th>Last Name</th>
+        <td>{{user?.last_name}}</td>
+      </tr>
+
+      <tr>
+        <th>Email</th>
+        <td><a href="mailto:{{user?.email}}">{{user?.email}}</a></td>
+      </tr>
+
+      <tr>
+        <th>Phone Number</th>
+        <td>{{user?.phone}}</td>
+      </tr>
+
+      <tr>
+        <th>Address</th>
+        <td>
+          {{user?.address_line1}}<br>
+          {{user?.address_line2}}<br>
+          {{user?.suburb}}<br>
+          {{user?.city}} {{user?.postcode}}
+        </td>
+      </tr>
+    </tbody>  
+  </table>
+  <h2>Order History</h2>
+  <hr>
+  <table class="table table-bordered table-hover" *ngIf="user?.orderHistory?.delivered?.length > 0 || user?.orderHistory?.dispatched?.length > 0">
+    <thead>
+        <tr>
+          <th scope="col">Order ID</th>
+          <th scope="col">Date</th>
+          <th scope="col">Order Status</th>
+          <th scope="col">Order Archived</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let order of user?.orderHistory?.dispatched">
+          <th (click)="viewOrder(order)">{{order.order_id}}</th>
+          <td (click)="viewOrder(order)">{{order.date | date}}</td>
+          <td (click)="viewOrder(order)">{{apiService.getOrderStatusString(order.order_status)}}</td>
+          <td><input type="checkbox" aria-label="Order is Archived or not" [checked]="order.archive" (change)="toggleOrderArchive(order)"></td>
+        </tr>
+        <tr *ngFor="let order of user?.orderHistory?.delivered">
+            <th (click)="viewOrder(order)">{{order.order_id}}</th>
+            <td (click)="viewOrder(order)">{{order.date | date}}</td>
+            <td (click)="viewOrder(order)">{{apiService.getOrderStatusString(order.order_status)}}</td>
+            <td><input type="checkbox" aria-label="Order is Archived or not" [checked]="order.archive" (change)="toggleOrderArchive(order)"></td>
+          </tr>
+      </tbody>
+  </table>
+  <div class="row" *ngIf="user?.orderHistory?.delivered?.length === 0 && user?.orderHistory?.dispatched?.length === 0">
+    <div class="col">
+        <h5 style="text-align: center;">No Orders available</h5>
+    </div>
+  </div>
+
+</div>

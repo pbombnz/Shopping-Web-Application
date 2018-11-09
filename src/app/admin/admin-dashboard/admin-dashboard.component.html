@@ -1,0 +1,25 @@
+<ngx-loading [show]="loading" [config]="{ fullScreenBackdrop: true, backdropBackgroundColour: 'rgba(0, 0, 0, 0.8)' }"></ngx-loading>
+<div class="container my-5">
+  <h1>Admin: User Management</h1>
+  <hr>
+  <table class="table table-bordered table-hover">
+    <thead>
+      <tr>
+        <th scope="col">User ID</th>
+        <th scope="col">First Name</th>
+        <th scope="col">Last Name</th>
+        <th scope="col">Email</th>
+        <th scope="col">Admin Privileges</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let user of users" [routerLink]="['./manage-user/' + user.user_id]">
+        <th scope="row">{{user.user_id}}</th>
+        <td>{{user.first_name}}</td>
+        <td>{{user.last_name}}</td>
+        <td><a href="mailto:{{user.email}}">{{user.email}}</a></td>
+        <td>{{user.admin ? "Yes" : ""}}</td>
+      </tr>
+    </tbody>
+  </table>
+</div>

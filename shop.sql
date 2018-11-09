@@ -13,6 +13,7 @@ CREATE TABLE users (
     phone varchar(30) NOT NULL,
     password_reset_token text DEFAULT NULL,
     password_reset_token_expiry timestamptz DEFAULT NULL,
+    admin boolean NOT NULL DEFAULT false
 );
 
 CREATE INDEX users_index_google_id on users(google_id);
@@ -23,6 +24,7 @@ CREATE TABLE orders (
     order_id serial NOT NULL PRIMARY KEY,
     user_id serial NOT NULL REFERENCES users,
     date date NOT NULL,
+    archive boolean NOT NULL DEFAULT false,
     order_status integer NOT NULL,
 
     CONSTRAINT status CHECK (order_status >= 0 AND order_status <= 2)
