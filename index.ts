@@ -394,14 +394,36 @@ app.post('/auth/local/register', authNotAllowed, async (req, res) => {
   try {
     const client = await pool.connect();
 
+    let result = await client.query('SELECT COUNT(*) FROM users');
+    if (!result) {
+      return res.status(400).json({ message: 'Could not create new user. Unknown error occured.' });
+    }
+    const userCount: number = result.rows[0].count;
+
     const salt = bcrypt.genSaltSync(10);
     const encrpytedPassword = bcrypt.hashSync(req.body.password, salt);
 
-    let result = await client.query('INSERT INTO users(first_name, last_name, email, password, ' +
+    let sqlQuery;
+    let sqlParams;
+
+    if (userCount === 0) {
+      sqlQuery = 'INSERT INTO users(first_name, last_name, email, password, ' +
+        'address_line1, address_line2, address_suburb, address_city, address_postcode, phone, admin) ' +
+        'VALUES($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11) RETURNING user_id';
+      sqlParams = [req.body.first_name, req.body.last_name, req.body.email, encrpytedPassword,
+        req.body.address_line1, req.body.address_line2, req.body.address_suburb, req.body.address_city,
+        req.body.address_postcode, req.body.phone, true];
+    } else {
+      sqlQuery = 'INSERT INTO users(first_name, last_name, email, password, ' +
       'address_line1, address_line2, address_suburb, address_city, address_postcode, phone) ' +
-      'VALUES($1, $2, $3, $4, $5, $6, $7, $8, $9, $10) RETURNING user_id',
-      [req.body.first_name, req.body.last_name, req.body.email, encrpytedPassword, req.body.address_line1, req.body.address_line2,
-      req.body.address_suburb, req.body.address_city, req.body.address_postcode, req.body.phone]);
+      'VALUES($1, $2, $3, $4, $5, $6, $7, $8, $9, $10) RETURNING user_id';
+      sqlParams = [req.body.first_name, req.body.last_name, req.body.email, encrpytedPassword,
+        req.body.address_line1, req.body.address_line2, req.body.address_suburb, req.body.address_city,
+        req.body.address_postcode, req.body.phone];
+    }
+
+
+    result = await client.query(sqlQuery, sqlParams);
 
     if (!result) {
       // cannot create user, contraint issue failed?
