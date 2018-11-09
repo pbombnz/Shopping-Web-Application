@@ -20,6 +20,7 @@ const cookieParser = require('cookie-parser');
 const bcrypt = require('bcryptjs');
 import { join } from 'path';
 import { readFileSync } from 'fs';
+import { async } from 'rxjs/internal/scheduler/async';
 const { Pool } = require('pg');
 const bodyParser = require('body-parser');
 const passport = require('passport');
@@ -240,6 +241,18 @@ function authRequired(req, res, next) {
 }
 
 /**
+ * Only authenticated user is allowed on these routes that uses this middleware function.
+ */
+function authAndAdminRequired(req, res, next) {
+  if (req.isAuthenticated() && req.user.admin) {
+    next();
+  } else {
+    res.status(403).end(); // Forbidden Request
+    // res.redirect('/login');
+  }
+}
+
+/**
  * No authenticated user is allowed on these routes that uses this middleware function.
  * Ususally used on /api/login route when they are already logged in.
  */
@@ -430,28 +443,23 @@ app.post('/auth/local', authNotAllowed, passport.authenticate('local'), (req, re
 });
 
 
-/*app.get('/api/users', authRequired, async (req, res) => {
+app.get('/api/users', authAndAdminRequired, async (req, res) => {
   try {
     const client = await pool.connect();
-    var result = await client.query('SELECT * FROM category');
+    var result = await client.query('SELECT user_id, email, first_name, last_name, admin FROM users');
 
     if (!result) {
-      // not found
-      return res.status(404).json({ 'message': 'No data found' });
-    } else {
-      // result.rows.forEach(row => {
-      //   console.log(row);
-      // });
-      res.send(result.rows);
+      throw new Error();
     }
-    client.release();
 
+    res.send(result.rows);
+    client.release();
   } catch (err) {
     // bad request
     console.error(err);
-    res.status(400);
+    res.status(400).json({ 'message': 'No users found' });
   }
-});*/
+});
 
 app.put('/auth/forgot-password', authNotAllowed, async (req, res) => {
   try {
@@ -724,7 +732,7 @@ app.get('/api/items/:id', async (req, res) => {
 // ============ USERS ============//
 
 // Stub Endpoint
-app.get('/api/users/validate', async (req, res) => {
+/*app.get('/api/users/validate', async (req, res) => {
   try {
     let id = req.params.id;
     const client = await pool.connect();
@@ -750,7 +758,7 @@ app.get('/api/users/validate', async (req, res) => {
 
   // ok
   res.json(200);
-});
+});*/
 
 
 // GET /api/user[/id]
@@ -761,21 +769,22 @@ app.get('/api/users/validate', async (req, res) => {
 app.get('/api/users/:id?', authRequired, async (req, res) => {
   try {
     const id: number = req.params.id || req.user.user_id;
+    const isAdmin: boolean = req.user.admin || false;
     console.log(`id: ${id} - req.user.user_id: ${req.user.user_id}`);
-    if (id !== req.user.user_id /* && is not an admin */) {
+    if (id !== req.user.user_id && !isAdmin) {
       return res.status(401).json({ message: 'You do not have permission to access other accounts.' });
     }
 
     const client = await pool.connect();
     let result;
-    // if (is an admin) {
-    //    result = await client.query('SELECT * FROM users WHERE user_id=$1', [id]);
-    // } else {
-    result = await client.query(
-      'SELECT first_name, last_name, email, address_line1, address_line2, address_suburb, address_city, address_postcode, ' +
-      'phone FROM users WHERE user_id=$1', [id]
-    );
-    // }
+    if (isAdmin) {
+        result = await client.query('SELECT * FROM users WHERE user_id=$1', [id]);
+    } else {
+      result = await client.query(
+        'SELECT first_name, last_name, email, address_line1, address_line2, address_suburb, address_city, address_postcode, ' +
+        'phone FROM users WHERE user_id=$1', [id]
+      );
+    }
 
     if (!result || result.rows.length === 0) {
       res.status(404).json({ message: 'No user found with specified id.' });
@@ -819,86 +828,79 @@ app.get('/api/users/:id/orders', async (req, res) => {
   res.json(200);
 });
 
-app.get('/api/users/:id/orders/:orderid', async (req, res) => {
-  try {
-    let id = req.params.id;
-    let orderId = req.params.orderid;
-    const client = await pool.connect();
-    var result = await client.query('SELECT * FROM orders WHERE user_id=' + id + ' AND order_id=' + orderId);
-
-    if (!result) {
-      // not found
-      return res.json(404, 'No data found');
-    } else {
-      result.rows.forEach(row => {
-        console.log(row);
-      });
-      res.send(result.rows);
-    }
-    client.release();
-
-  } catch (err) {
-    // bad request
-    console.error(err);
-    res.json(400);
-  }
-
-  // ok
-  res.json(200);
-});
-
 app.get('/api/users/:id/orders/delivered', async (req, res) => {
   try {
     let id = req.params.id;
     const client = await pool.connect();
-    var result = await client.query('SELECT * FROM orders WHERE user_id=' + id + 'AND order_status=2');
+    var result = await client.query('SELECT * FROM orders WHERE user_id=$1 AND order_status=2', [id]);
 
     if (!result) {
       // not found
-      return res.json(404, 'No data found');
+      return res.status(404).json({ message: 'No data found' });
     } else {
-      result.rows.forEach(row => {
-        console.log(row);
-      });
-      res.send(result.rows);
+      res.send(result.rows).end();
     }
     client.release();
 
   } catch (err) {
     // bad request
     console.error(err);
-    res.json(400);
+    return res.status(400).json({ message: 'Bad Request' });
   }
-
-  // ok
-  res.json(200);
 });
 
 app.get('/api/users/:id/orders/dispatched', async (req, res) => {
   try {
-    let id = req.params.id;
+    const id = req.params.id;
     const client = await pool.connect();
-    var result = await client.query('SELECT * FROM orders WHERE user_id=' + id + 'AND order_status=1');
+    var result = await client.query('SELECT * FROM orders WHERE user_id=$1 AND order_status=1', [id]);
 
     if (!result) {
       // not found
-      return res.json(404, 'No data found');
+      return res.status(404).json({ message: 'No data found' });
     } else {
-      result.rows.forEach(row => {
-        console.log(row);
-      });
-      res.send(result.rows);
+      res.send(result.rows).end();
     }
     client.release();
 
   } catch (err) {
     // bad request
     console.error(err);
-    res.json(400);
+    return res.status(400).json({ message: 'Bad Request' });
   }
+});
 
-  // ok
-  res.json(200);
+app.get('/api/users/:id/orders/:orderid', async (req, res) => {
+  try {
+    const id = req.params.id;
+    const orderId = req.params.orderid;
+    const isAdmin = req.user.admin || false;
+
+    if (id !== req.user.user_id && !isAdmin) {
+      return res.status(403).json({ message: 'You do not have permission to retrieve this sort of information.'});
+    }
+
+    const client = await pool.connect();
+    var result = await client.query(
+      'SELECT quantity, item_id, item_name, item_price, item_image FROM orders NATURAL JOIN order_items NATURAL JOIN items ' +
+      'WHERE user_id=$1 AND order_id=$2;', [id, orderId]);
+
+    if (!result) {
+      // not found
+      return res.status(404).json({ message: 'No Order items found'});
+    } else {
+      result.rows.forEach(row => {
+        console.log(row);
+      });
+      res.send(result.rows).end();
+    }
+    client.release();
+
+  } catch (err) {
+    // bad request
+    console.error(err);
+    res.status(400).json({ message: 'Bad request'});
+  }
 });
 
 app.get('/api/current_user_cart', async (req, res) => {
@@ -978,28 +980,29 @@ app.post('/api/addtocart', async (req, res) => {
 app.put('/api/users/:id?', async (req, res) => {
   try {
     const id: number = req.params.id || req.user.user_id;
+    const isAdmin: boolean = req.user.admin || false;
     console.log(`id: ${id} - req.user.user_id: ${req.user.user_id}`);
-    if (id !== req.user.user_id /* && is not an admin */) {
+    if (id !== req.user.user_id && !isAdmin) {
       return res.status(401).json({ message: 'You do not have permission to access other accounts.' });
     }
 
     let body = Object.assign({}, req.body);
 
     // Deter all atttempts to modify system-set sensitive information of a user (if they are not an admin).
-    // if (is user not an admin) {
-    if (body.user_id) {
-      delete body['user_id'];
+    if (!isAdmin) {
+      if (body.user_id) {
+        delete body['user_id'];
+      }
+      if (body.google_id) {
+        delete body['google_id'];
+      }
+      if (body.password_reset_token) {
+        delete body['password_reset_token'];
+      }
+      if (body.password_reset_token_expiry) {
+        delete body['password_reset_token_expiry'];
+      }
     }
-    if (body.google_id) {
-      delete body['google_id'];
-    }
-    if (body.password_reset_token) {
-      delete body['password_reset_token'];
-    }
-    if (body.password_reset_token_expiry) {
-      delete body['password_reset_token_expiry'];
-    }
-    // }
 
     if (body.password) {
       if (body.password.length === 0) {
@@ -1043,6 +1046,45 @@ app.put('/api/users/:id?', async (req, res) => {
         // Return a success message
         res.status(204).end();
       });
+    }
+    client.release();
+  } catch (err) {
+    // bad request
+    console.error(err);
+    res.status(400).end();
+  }
+});
+
+app.put('/api/users/:userId/orders/:orderId', authAndAdminRequired, async (req, res) => {
+  try {
+    const id: number = req.params.id || req.user.user_id;
+    let body: any = Object.assign({}, req.body);
+
+
+    let bodyKeys: string[] = Object.keys(body);
+    let bodyVals: any[] = Object.values(body);
+    bodyVals.unshift(req.params.orderId); // has to be 2nd element
+    bodyVals.unshift(req.params.userId); // has to be 1nd element
+
+    let setStatement = '';
+    const offset = bodyVals.length;
+    bodyKeys.forEach((value, index) => {
+      if (index === (bodyKeys.length - 1)) {
+        setStatement += `${value}=$${index + offset} `;
+      } else {
+        setStatement += `${value}=$${index + offset}, `;
+      }
+    });
+    console.log(setStatement); console.log(bodyVals);
+
+    const client = await pool.connect();
+    let result = await client.query('UPDATE orders SET ' + setStatement + ' WHERE user_id=$1 AND order_id=$2 RETURNING *', bodyVals);
+    if (!result || result.rows.length === 0) {
+      res.status(404).json({ message: 'No order found with specified user and order ID combination.' });
+    } else {
+      console.log( result.rows[0]);
+      // Return a success message
+      res.status(204).end();
     }
     client.release();
   } catch (err) {

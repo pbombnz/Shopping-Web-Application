@@ -46,7 +46,7 @@ import { AdminModule } from './admin/admin.module';
     FormsModule,
     ReactiveFormsModule,
     PasswordStrengthBarModule,
-    NgbModule.forRoot(),
+    NgbModule,
     NgBootstrapFormValidationModule.forRoot(),
     NgBootstrapFormValidationModule,
     NgxLoadingModule.forRoot({}),

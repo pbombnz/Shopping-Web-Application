@@ -1,7 +1,8 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable } from 'rxjs';
-import { tap, map } from 'rxjs/operators';
+import { Observable, of, forkJoin } from 'rxjs';
+import { tap, map, mergeMap } from 'rxjs/operators';
+import { number } from 'ngx-custom-validators/src/app/number/validator';
 
 @Injectable({
   providedIn: 'root'
@@ -30,7 +31,6 @@ export class APIService {
   }
 
   isUserAdmin(): boolean {
-    console.log(this.user);
     return this.user ? this.user.admin : false;
   }
 
@@ -95,6 +95,11 @@ export class APIService {
   }
 
   isLoggedIn(): Observable<boolean> {
+    // TODO: Check expiry
+    if (this.user) {
+      return of(true);
+    }
+
     return this.http.get('/auth/loggedin').pipe(
       tap((result: any) => this.user = result.authenticated ? result.user : undefined),
       map((result: any) => result.authenticated),
@@ -127,5 +132,48 @@ export class APIService {
     return this.http.put(url, body).pipe(
       tap((result: any) => console.log(result))
     );
+  }
+
+  /* Order Routes */
+  getUserOrderHistory(id: number): Observable<Object> {
+    return forkJoin([
+      this.http.get(`/api/users/${id}/orders/delivered`),
+      this.http.get(`/api/users/${id}/orders/dispatched`)
+    ]).pipe(
+      map((result: any[]) => ({delivered: result[0], dispatched: result[1], })),
+    );
+  }
+
+  getOrderStatusString(num: number): string {
+    switch (num) {
+      case 0:
+        return 'Shopping Cart';
+      case 1:
+        return 'Dispatched';
+      case 2:
+        return 'Delivered';
+      default:
+        return num.toString();
+    }
+  }
+
+  getUserOrderItems(userId: number, orderId: number): Observable<Object> {
+    return this.http.get(`/api/users/${userId}/orders/${orderId}`).pipe(
+      map((value: any[]) => {
+        return value.map((item: any, index: number) => {
+          item.item_price = +((item.item_price as string).substr(1));
+          return item;
+        });
+      })
+    );
+  }
+
+  /* Strictly Admin Routes */
+  getAllUsersInformation(): Observable<Object> {
+    return this.http.get(`/api/users`);
+  }
+
+  setUserOrderArchive(userId: number, orderId: number, archive: boolean): Observable<Object> {
+    return this.http.put(`/api/users/${userId}/orders/${orderId}`, { archive });
   }
 }
