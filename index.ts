@@ -804,16 +804,15 @@ app.get('/api/users/:id?', authRequired, async (req, res) => {
 app.get('/api/users/:id/orders', async (req, res) => {
   try {
     let id = req.params.id;
+    const isAdmin = req.user.admin || false;
+    const hideArchive = !isAdmin ? ' AND archive<>\'t\'' : '';
     const client = await pool.connect();
-    var result = await client.query('SELECT * FROM orders WHERE user_id=' + id);
+    var result = await client.query('SELECT * FROM orders WHERE user_id=$1' + hideArchive, [id]);
 
     if (!result) {
       // not found
-      return res.json(404, 'No data found');
+      return res.status(404).json({ message: 'No orders found.' });
     } else {
-      result.rows.forEach(row => {
-        console.log(row);
-      });
       res.send(result.rows);
     }
     client.release();
@@ -821,18 +820,18 @@ app.get('/api/users/:id/orders', async (req, res) => {
   } catch (err) {
     // bad request
     console.error(err);
-    res.json(400);
+    res.status(400).json({ message: 'Bad request' });
   }
-
-  // ok
-  res.json(200);
 });
 
 app.get('/api/users/:id/orders/delivered', async (req, res) => {
   try {
     let id = req.params.id;
+    const isAdmin = req.user.admin || false;
+    const hideArchive = !isAdmin ? ' AND archive<>\'t\'' : '';
+
     const client = await pool.connect();
-    var result = await client.query('SELECT * FROM orders WHERE user_id=$1 AND order_status=2', [id]);
+    var result = await client.query('SELECT * FROM orders WHERE user_id=$1 AND order_status=2' + hideArchive, [id]);
 
     if (!result) {
       // not found
@@ -852,8 +851,11 @@ app.get('/api/users/:id/orders/delivered', async (req, res) => {
 app.get('/api/users/:id/orders/dispatched', async (req, res) => {
   try {
     const id = req.params.id;
+    const isAdmin = req.user.admin || false;
+    const hideArchive = !isAdmin ? ' AND archive<>\'t\'' : '';
+
     const client = await pool.connect();
-    var result = await client.query('SELECT * FROM orders WHERE user_id=$1 AND order_status=1', [id]);
+    var result = await client.query('SELECT * FROM orders WHERE user_id=$1 AND order_status=1' + hideArchive, [id]);
 
     if (!result) {
       // not found
@@ -883,7 +885,7 @@ app.get('/api/users/:id/orders/:orderid', async (req, res) => {
     const client = await pool.connect();
     var result = await client.query(
       'SELECT quantity, item_id, item_name, item_price, item_image FROM orders NATURAL JOIN order_items NATURAL JOIN items ' +
-      'WHERE user_id=$1 AND order_id=$2;', [id, orderId]);
+      'WHERE user_id=$1 AND order_id=$2', [id, orderId]);
 
     if (!result) {
       // not found
