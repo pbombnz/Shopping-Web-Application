@@ -45,11 +45,20 @@ export class ItemDetailsComponent implements OnInit {
 
   onSubmitClick(){
     console.log("submit");
+    
+    // check if quantity is of valid size
+    if(this.itemQuantity <= 0){
+      console.log("cannot submit item to cart of size " + this.itemQuantity);
+      return;
+    }
+    
+
 
     // check if user is logged in, else redirect to login page.
     if( !this.apiService.isAuthenticated() ){
       
       console.log("redirect to login page");
+      this.router.navigate(['/login']);
     }
     else{
       console.log("add to cart");

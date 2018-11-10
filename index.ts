@@ -566,13 +566,14 @@ app.get('/api/items', async (req, res) => {
   try {
     const client = await pool.connect();
     var result = await client.query('SELECT * FROM items');
+    console.log(result);
 
     if (!result) {
       // not found
       return res.json(404, 'No data found');
     } else {
       result.rows.forEach(row => {
-        console.log(row);
+        // console.log(row);
       });
       res.send(result.rows);
     }
@@ -914,60 +915,31 @@ app.post('/api/addtocart', authRequired, async (req, res) => {
   console.log("add to cart post");
 
   let user_id = req.user.user_id;
-  let quantiy = req.params.quantity;
-  let item_id = req.params.itemID;
-  
+  let quantiy = req.body.quantity;
+  let item_id = req.body.id;
+
+  console.log('user: $1 \n quantity: $2 \n item_id: $3 ', [user_id,quantiy,item_id]);
   try {
     const client = await pool.connect();
+    let orderidQuery = await client.query('SELECT order_id FROM orders WHERE user_id=$1 ', [user_id]);
 
-    // find the order id for the user where status is in the cart stage
-    let orderQueryResult = client.query('SELECT order_id FROM orders WHERE user_id = $1' , [user_id]);
-    if (!orderQueryResult) {
-      // not found
-      return res.json(404, 'No data found');
-    }
+    console.log(orderidQuery);
 
-    // get order id from query result
-    let order_id = orderQueryResult.rows[0].order_id;
+    if (orderidQuery.rowCount == 0) {
+      // make new cart for user using psql CURRENT_DATE: https://www.postgresql.org/docs/8.2/functions-datetime.html#FUNCTIONS-DATETIME-CURRENT
+      await client.query('INSERT INTO orders (user_id,date,order_status) VALUES ($1, CURRENT_DATE ,0) ',[user_id]);
+      orderidQuery = await client.query('SELECT order_id FROM orders WHERE user_id=$1 ', [user_id]);
+    } 
+
+    let order_id = orderidQuery.rows[0].order_id;
+    
 
     // add items to cart
-    let insertStatement = 'INSERT INTO order_items (order_id,item_id,price,quantity) ';
-    let valuesStatement = 'VALUES ($1,$2,$3,$4)';
-    let values =  [order_id,item_id,'$5.70',quantiy];
+    let insertStatement = 'INSERT INTO order_items (order_id,item_id,quantity) ';
+    let valuesStatement = 'VALUES ($1,$2,$3)';
+    let values =  [order_id,item_id,quantiy];
     let result = await client.query(insertStatement + valuesStatement, values);
 
-    console.log(result);
-
-    if (!result) {
-      // not found
-      return res.json(404, 'No data found');
-    } else {
-      result.rows.forEach(row => {
-        console.log(row);
-      });
-      res.send(result.rows);
-    }
-    client.release();
-
-  } catch (err) {
-    // bad request
-    console.error(err);
-    res.json(400);
-  }
-
-  try {
-    const client = await pool.connect();
-    var result = await client.query('SELECT * FROM items');
-
-    if (!result) {
-      // not found
-      return res.json(404, 'No data found');
-    } else {
-      result.rows.forEach(row => {
-        console.log(row);
-      });
-      res.send(result.rows);
-    }
     client.release();
 
   } catch (err) {
@@ -978,6 +950,9 @@ app.post('/api/addtocart', authRequired, async (req, res) => {
 
   // ok
   res.json(200);
+
+
+  
 });
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~//
 
