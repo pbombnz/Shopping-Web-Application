@@ -622,13 +622,14 @@ app.get('/api/items', async (req, res) => {
   try {
     const client = await pool.connect();
     var result = await client.query('SELECT * FROM items');
+    console.log(result);
 
     if (!result) {
       // not found
       return res.json(404, 'No data found');
     } else {
       result.rows.forEach(row => {
-        console.log(row);
+        // console.log(row);
       });
       res.send(result.rows);
     }
@@ -970,21 +971,35 @@ app.get('/api/current_user_cart', async (req, res) => {
 // ~~~~~~~~~POST API~~~~~~~~~~~~~//
 
 
-app.post('/api/addtocart', async (req, res) => {
+app.post('/api/addtocart', authRequired, async (req, res) => {
   console.log("add to cart post");
+
+  let user_id = req.user.user_id;
+  let quantiy = req.body.quantity;
+  let item_id = req.body.id;
+
+  console.log('user: $1 \n quantity: $2 \n item_id: $3 ', [user_id,quantiy,item_id]);
   try {
     const client = await pool.connect();
-    var result = await client.query('SELECT * FROM items');
+    let orderidQuery = await client.query('SELECT order_id FROM orders WHERE user_id=$1 ', [user_id]);
 
-    if (!result) {
-      // not found
-      return res.json(404, 'No data found');
-    } else {
-      result.rows.forEach(row => {
-        console.log(row);
-      });
-      res.send(result.rows);
-    }
+    console.log(orderidQuery);
+
+    if (orderidQuery.rowCount == 0) {
+      // make new cart for user using psql CURRENT_DATE: https://www.postgresql.org/docs/8.2/functions-datetime.html#FUNCTIONS-DATETIME-CURRENT
+      await client.query('INSERT INTO orders (user_id,date,order_status) VALUES ($1, CURRENT_DATE ,0) ',[user_id]);
+      orderidQuery = await client.query('SELECT order_id FROM orders WHERE user_id=$1 ', [user_id]);
+    } 
+
+    let order_id = orderidQuery.rows[0].order_id;
+    
+
+    // add items to cart
+    let insertStatement = 'INSERT INTO order_items (order_id,item_id,quantity) ';
+    let valuesStatement = 'VALUES ($1,$2,$3)';
+    let values =  [order_id,item_id,quantiy];
+    let result = await client.query(insertStatement + valuesStatement, values);
+
     client.release();
 
   } catch (err) {
@@ -995,6 +1010,9 @@ app.post('/api/addtocart', async (req, res) => {
 
   // ok
   res.json(200);
+
+
+  
 });
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~//
 
