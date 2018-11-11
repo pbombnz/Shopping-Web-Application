@@ -54,13 +54,13 @@ const pool = new Pool({
 });
 
 passport.serializeUser((user, done) => {
-  console.log('Passport:: Serializing user....');
-  console.log('user:', user);
+  // console.log('Passport:: Serializing user....');
+  // console.log('user:', user);
   done(null, user.user_id);
 });
 
 passport.deserializeUser(async (id, done) => {
-  console.log('Passport:: Deserializing user....');
+  // console.log('Passport:: Deserializing user....');
   try {
     const client = await pool.connect();
     var result = await client.query('SELECT * FROM users WHERE user_id=$1 LIMIT 1', [parseInt(id, 10)]);
@@ -122,7 +122,7 @@ passport.use(new GoogleStrategy({
   callbackURL: '/auth/google/callback'
 }, async (accessToken, refreshToken, profile, done) => {
   console.log('Passport:: GoogleStrategy: Callback executed.');
-  console.log('profile: ', profile);
+  // console.log('profile: ', profile);
 
   // Check if user account has been already created.
   try {
@@ -219,7 +219,7 @@ app.use(session({
   saveUninitialized: false,
   resave: false,
   rolling: true,
-  cookie: { maxAge: 10000/* 60 * 60 * 24, /* 24 hours */ }
+  cookie: { maxAge: 1000 * 60 * 60 * 24, /* 24 hours */ }
 }));
 app.use(passport.initialize());
 app.use(passport.session());
@@ -237,7 +237,7 @@ function authRequired(req, res, next) {
   if (req.isAuthenticated()/* && req.user*/) {
     next();
   } else {
-    res.status(403).end(); // Forbidden Request
+    res.status(401).end(); // Unauthorised Request
     // res.redirect('/login');
   }
 }
@@ -246,12 +246,15 @@ function authRequired(req, res, next) {
  * Only authenticated user is allowed on these routes that uses this middleware function.
  */
 function authAndAdminRequired(req, res, next) {
-  if (req.isAuthenticated() && req.user.admin) {
-    next();
-  } else {
-    res.status(403).end(); // Forbidden Request
-    // res.redirect('/login');
+  if (!req.isAuthenticated()) {
+    res.status(401).end(); // Unauthorised Request
   }
+
+  if (!req.user.admin) {
+    res.status(403).end(); // Forbidden Request
+  }
+
+  next();
 }
 
 /**
@@ -263,7 +266,6 @@ function authNotAllowed(req, res, next) {
     next();
   } else {
     res.status(403).end(); // Forbidden Request
-    // res.redirect('/');
   }
 }
 
@@ -289,8 +291,6 @@ app.get('/auth/google', authNotAllowed, passport.authenticate('google', {
 //   login page.  Otherwise, the primary route function function will be called,
 //   which, in this example, will redirect the user to the home page.
 app.get('/auth/google/callback', passport.authenticate('google'), (req, res) => {
-  console.log(req.user);
-
   if (req.user.address_line1 === '' || req.user.address_line2 === '' || req.user.address_suburb === ''
     || req.user.address_city === '' || req.user.address_postcode === -1 || req.user.phone === '') {
     const query = queryString.stringify({
@@ -370,12 +370,10 @@ app.get('/auth/loggedin', authIgnore, (req, res) => {
       admin: req.user.admin,
       googleAuth: req.user.google_id != null,
     };
-    console.log(req.session.id);
-    console.log(req.session.cookie);
     res.json({
       authenticated: true,
       user: userData,
-      _expires: moment(req.session.cookie._expires).utc().format()
+      _expires: moment.utc(req.session.cookie._expires).format()
     });
   } else {
     res.json({ authenticated: false, user: null, _expires: null });
@@ -469,7 +467,7 @@ app.post('/auth/local', authNotAllowed, passport.authenticate('local'), (req, re
     admin: req.user.admin,
     googleAuth: false,
   };
-  res.json({authenticated: true, user: userData, _expires: moment(req.session.cookie._expires).utc().format()});
+  res.json({authenticated: true, user: userData, _expires: moment.utc(req.session.cookie._expires).format()});
 });
 
 

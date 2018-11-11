@@ -2,7 +2,7 @@ import { BrowserModule } from '@angular/platform-browser';
 import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
 import { HttpModule } from '@angular/http';
-import { HttpClientModule } from '@angular/common/http';
+import { HttpClientModule, HTTP_INTERCEPTORS } from '@angular/common/http';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import {NgbModule} from '@ng-bootstrap/ng-bootstrap';
 import { NgBootstrapFormValidationModule } from 'ng-bootstrap-form-validation';
@@ -24,6 +24,7 @@ import { ForgotPasswordComponent } from './forgot-password/forgot-password.compo
 import { PasswordResetComponent } from './password-reset/password-reset.component';
 import { UpdateUserDetailsComponent } from './update-user-details/update-user-details.component';
 import { AdminModule } from './admin/admin.module';
+import { SessionExpireInterceptor } from './interceptors/session-expire-interceptor';
 
 @NgModule({
   declarations: [
@@ -62,7 +63,7 @@ import { AdminModule } from './admin/admin.module';
       { path: 'update-user-details', component: UpdateUserDetailsComponent }
     ])
   ],
-  providers: [ APIService, BrowseItemsService],
+  providers: [ APIService, BrowseItemsService, { provide: HTTP_INTERCEPTORS, useClass: SessionExpireInterceptor, multi: true }],
   bootstrap: [AppComponent]
 })
 export class AppModule { }

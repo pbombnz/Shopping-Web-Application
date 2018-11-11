@@ -1,4 +1,4 @@
-<div class="container">
+<div class="container my-5">
   <ngx-loading [show]="loading" [config]="{ fullScreenBackdrop: true, backdropBackgroundColour: 'rgba(0, 0, 0, 0.8)' }"></ngx-loading>
   <h1>Login / Register</h1>
   <hr>
@@ -30,8 +30,11 @@
       <div class="col alert alert-danger" role="alert" *ngIf="fail_login">
         Cannot login! Please make sure you have the correct credentials to login.
       </div>
-      <div class="col alert alert-danger" role="alert" *ngIf="fail_error">
-        Cannot login due to network issues. Please try again later.
+      <div class="col alert alert-warning" role="alert" *ngIf="warningMessage">
+        {{ warningMessage }}
+      </div>
+      <div class="col alert alert-danger" role="alert" *ngIf="dangerMessage">
+        {{ dangerMessage }}
       </div>
     </div>
     <div class="row">
@@ -45,6 +48,15 @@
     </div>
   </form>
   <hr>
+  <div>
+    <p>Alternatively, you can login via the online services below:</p>
+    <p class="font-italic">
+      The inability to see 'Sign In with...' buttons below is a likely indicator that you may have some sort of content-filtering
+      extension (like Ad-blockers) that block these types of buttons. Please add this website to your Ad-blocker whitelist and/or disable
+       your ad-blocker completely to log in using these services.
+    </p>
+    <br>
+  </div>
   <div class="d-flex justify-content-center align-items-center">
     <a class="btn btn-social btn-google" style="color: white" href="/auth/google">
       <i class="fa fa-google"></i> Sign in with Google

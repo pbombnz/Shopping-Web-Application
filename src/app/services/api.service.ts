@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable, of, forkJoin } from 'rxjs';
-import { tap, map } from 'rxjs/operators';
+import { tap, map, catchError } from 'rxjs/operators';
 import * as moment from 'moment';
 
 @Injectable({
@@ -16,7 +16,7 @@ export class APIService {
     // this will be false, but if the user was previously logged in and had an
     // active session, this gets the basic information for angular to know that we
     // are still logged in.
-    this.isLoggedIn().subscribe();
+    // this.isLoggedIn().subscribe();
   }
 
   getUserFirstName(): string {
@@ -91,30 +91,40 @@ export class APIService {
     return this.http.post('/auth/local', body).pipe(
       tap((result: any) => {
         this.user = result.user;
-        this.sessionExpires = moment().utc(result._expires).local();
+        this.sessionExpires = moment.utc(result._expires).local();
 
-        console.log(result._expires);
-        console.log(this.sessionExpires.format());
+        // console.log(result._expires);
+        // console.log(this.sessionExpires.format());
       })
     );
   }
 
-  logout(): Observable<Object> {
+  logout(force: boolean = false): Observable<Object> {
+    if (force) {
+      this.user = undefined;
+      this.sessionExpires = null;
+    }
+
     return this.http.get('/auth/logout').pipe(
-      tap(result => this.user = undefined)
+      tap(() => {
+        this.user = undefined;
+        this.sessionExpires = null;
+      }),
+      catchError(() => of({ message: 'Logout successful.' }))
     );
   }
 
   isLoggedIn(): Observable<boolean> {
-    // TODO: Check expiry
-    if (this.user) {
-      return of(true);
+    if (this.sessionExpires && this.user) {
+      if (moment().isBefore(this.sessionExpires)) {
+        return of(true);
+      }
     }
 
     return this.http.get('/auth/loggedin').pipe(
       tap((result: any) => {
         this.user = result.authenticated ? result.user : undefined;
-        this.sessionExpires = result._expires ? moment().utc(result._expires).local() : undefined;
+        this.sessionExpires = result._expires ? moment.utc(result._expires).local() : null;
 
         console.log(result._expires);
         console.log(this.sessionExpires ? this.sessionExpires.format() : null);
@@ -187,7 +197,9 @@ export class APIService {
 
   /* Strictly Admin Routes */
   getAllUsersInformation(): Observable<Object> {
-    return this.http.get(`/api/users`);
+    return this.http.get(`/api/users`).pipe(
+      catchError(() => of([]))
+    );
   }
 
   setUserOrderArchive(userId: number, orderId: number, archive: boolean): Observable<Object> {
