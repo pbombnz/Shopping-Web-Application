@@ -2,7 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { Router, ActivatedRoute, ParamMap } from '@angular/router';
 import { APIService } from '../services/api.service';
 import { WeatherService } from '../services/weather.service';
-import { ConsoleReporter } from 'jasmine';
+//import { ConsoleReporter } from 'jasmine';
 
 @Component({
   selector: 'app-header',
