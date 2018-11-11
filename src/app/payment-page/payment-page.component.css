@@ -6,9 +6,9 @@
     margin: 0 -16px;
   }
   
-  .col-25 {
-    -ms-flex: 25%; 
-    flex: 25%;
+  .col-30 {
+    -ms-flex: 30%; 
+    flex: 30%;
   }
   
   .col-50 {
@@ -16,14 +16,14 @@
     flex: 50%;
   }
   
-  .col-75 {
-    -ms-flex: 75%; 
-    flex: 75%;
+  .col-70 {
+    -ms-flex: 70%; 
+    flex: 70%;
   }
   
-  .col-25,
+  .col-30,
   .col-50,
-  .col-75 {
+  .col-70 {
     padding: 0 16px;
   }
   
@@ -61,7 +61,7 @@
     .row {
       flex-direction: column-reverse;
     }
-    .col-25 {
+    .col-30 {
       margin-bottom: 20px;
     }
   }
