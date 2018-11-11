@@ -50,30 +50,41 @@ export class WeatherService {
 
     }
 
-    // Do a get request to the weather API
-    public getWeather() {
-        this.http.get(this.externalURL).subscribe(res =>{
-            console.log(res);
-            this.weatherData = res;
-            this.assessWeatherCondition();
-        })
+    // promise the weather condition
+    public getWeatherCondition(){
+        return this.requestWeatherData().then( (result) =>{
+            return this.assessWeatherCondition(result);
+        });
+    }
+
+    // get data from external service: openweathermap
+    private requestWeatherData = function(){
+        return new Promise((resolve, reject) =>{
+            this.http.get(this.externalURL).subscribe(res =>{
+                this.weatherData = res;
+                resolve(res)
+            });           
+        });
     }
 
     // Weather Condition Codes: https://openweathermap.org/weather-conditions
-    private assessWeatherCondition(){
-        let weatherID = this.weatherData.weather[0].id
+    private assessWeatherCondition = function(weatherData){ 
+        return new Promise((resolve,reject) =>{
+            let weatherID = weatherData.weather[0].id
         
-        // if not a valid weather from the API docs (Which shouldn't happen)
-        if (weatherID < 200 || weatherID >= 900){ this.weatherCondition = Weather.DEFAULT; }
+            // if not a valid weather from the API docs (Which shouldn't happen)
+            if (weatherID < 200 || weatherID >= 900){ this.weatherCondition = Weather.DEFAULT; }
 
-        if (weatherID >= 200 && weatherID < 300){ this.weatherCondition = Weather.THUNDER; }
-        if (weatherID >= 300 && weatherID < 400){ this.weatherCondition = Weather.DRIZZLE; }
-        if (weatherID >= 500 && weatherID < 600){ this.weatherCondition = Weather.RAIN; }
-        if (weatherID >= 600 && weatherID < 700){ this.weatherCondition = Weather.SNOW; }
-        if (weatherID >= 700 && weatherID < 800){ this.weatherCondition = Weather.AMBIENCE; }
-        if (weatherID == 800){ this.weatherCondition = Weather.CLEAR; }
-        if (weatherID > 800 && weatherID < 900){ this.weatherCondition = Weather.CLOUD; }
+            if (weatherID >= 200 && weatherID < 300){ this.weatherCondition = Weather.THUNDER; }
+            if (weatherID >= 300 && weatherID < 400){ this.weatherCondition = Weather.DRIZZLE; }
+            if (weatherID >= 500 && weatherID < 600){ this.weatherCondition = Weather.RAIN; }
+            if (weatherID >= 600 && weatherID < 700){ this.weatherCondition = Weather.SNOW; }
+            if (weatherID >= 700 && weatherID < 800){ this.weatherCondition = Weather.AMBIENCE; }
+            if (weatherID == 800){ this.weatherCondition = Weather.CLEAR; }
+            if (weatherID > 800 && weatherID < 900){ this.weatherCondition = Weather.CLOUD; }
+
+            resolve(this.weatherCondition);
+        });
     }
-
 
 }

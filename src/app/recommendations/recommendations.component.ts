@@ -1,5 +1,8 @@
 import { Component, OnInit } from '@angular/core';
 import { WeatherService } from '../services/weather.service';
+import { Dictionary } from 'typescript-collections';
+import { resolve } from 'dns';
+
 
 @Component({
   selector: 'app-recommendations',
@@ -10,28 +13,27 @@ export class RecommendationsComponent implements OnInit {
 
   constructor(private WeatherService: WeatherService) { }
 
-  recommendationsStrings = {
-    Thunderstorm: "Have some grapes while watching the light show",
-    Snow: "Have some beef for stew on this cold day",
-    Drizzle: "Have some ... for this drizzling day",
-    Rain: "Have some beetroot and chicken, it's raining",
-    Atmosphere: "Grab some avocado for this atmospheric day",
-    Cloud: "Have some oranges for this cloudy day, it's good to have vitamen D",
-    Clear: "It's sunny! Buy meat and veges for a BBQ!",
-    Unknown: "We cannot recommend anything, we have no weather data"
-  };
+  recommendationsStrings = new Dictionary<String, String>();
 
-  recommendation = 'placeholder';
+  recommendation: String;
 
   ngOnInit() {
-    this.WeatherService.getWeather();
-    
-    //while(typeof this.WeatherService.weatherCondition === "undefined"){}
-    //console.log(this.WeatherService.weatherCondition);
+    // Initialise recommendations
+    this.recommendationsStrings.setValue("Thunderstorm", "Have some grapes while watching the light show");
+    this.recommendationsStrings.setValue("Snow","Have some beef for stew on this cold day");
+    this.recommendationsStrings.setValue("Rain", "Have some beetroot and chicken, it's raining");
+    this.recommendationsStrings.setValue("Atmosphere", "Grab some avocado for this atmospheric day");
+    this.recommendationsStrings.setValue("Clouds", "Have some oranges for this cloudy day, it's good to have vitamen D");
+    this.recommendationsStrings.setValue("Clear", "It's sunny! Buy meat and veges for a BBQ!");
+    this.recommendationsStrings.setValue("Unknown", "We cannot recommend anything, we have no weather data");
+    this.recommendationsStrings.setValue("Drizzle", "Have some ... for this drizzling day");
 
-    this.recommendation = "ready";
+    // update recommendation once promise for weather data han been resolved
+    this.WeatherService.getWeatherCondition().then((result) =>{
+      let key = <string> result;
 
-    //this.recommendation =  this.recommendationsStrings[this.WeatherService.weatherCondition];
+      this.recommendation = this.recommendationsStrings.getValue(key);
+    });
 
   }
 

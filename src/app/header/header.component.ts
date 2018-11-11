@@ -16,10 +16,6 @@ export class HeaderComponent implements OnInit {
   constructor(private router: Router, public apiService: APIService, public weatherService: WeatherService) { }
 
   ngOnInit() {
-    // === TEST can be removed === //
-    console.log("get weather api");
-    this.weatherService.getWeather();
-    // ========================== //
   }
 
   onLoginButtonClicked() {
@@ -27,12 +23,7 @@ export class HeaderComponent implements OnInit {
   }
 
   onCartButtonClicked(){
-    // === TEST can be removed === //
-    console.log(this.weatherService.weatherCondition);
-    // ========================== //
-
-    this.router.navigate(['/cart-page']);
-    
+    this.router.navigate(['/cart-page']); 
   }
 
   onUpdateUserDetailsButtonClicked() {}
