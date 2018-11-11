@@ -1,7 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { WeatherService } from '../services/weather.service';
 import { Dictionary } from 'typescript-collections';
-import { resolve } from 'dns';
 
 
 @Component({
