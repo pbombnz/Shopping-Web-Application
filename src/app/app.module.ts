@@ -25,6 +25,8 @@ import { PasswordResetComponent } from './password-reset/password-reset.componen
 import { UpdateUserDetailsComponent } from './update-user-details/update-user-details.component';
 import { AdminModule } from './admin/admin.module';
 import { SessionExpireInterceptor } from './interceptors/session-expire-interceptor';
+import { NoAuthGuard } from './guards/no-auth.guard';
+import { AuthRequiredGuard } from './guards/auth-required.guard';
 
 @NgModule({
   declarations: [
@@ -53,14 +55,14 @@ import { SessionExpireInterceptor } from './interceptors/session-expire-intercep
     NgxLoadingModule.forRoot({}),
     AdminModule,
     RouterModule.forRoot([
-      { path: 'login', component: LoginComponent },
-      { path: 'register', component: RegisterComponent },
-      { path: 'forgot-password', component: ForgotPasswordComponent },
-      { path: 'password-reset', component: PasswordResetComponent },
+      { path: 'login', component: LoginComponent, canActivate: [NoAuthGuard] },
+      { path: 'register', component: RegisterComponent, canActivate: [NoAuthGuard] },
+      { path: 'forgot-password', component: ForgotPasswordComponent, canActivate: [NoAuthGuard] },
+      { path: 'password-reset', component: PasswordResetComponent, canActivate: [NoAuthGuard] },
       { path: 'item-details/:id', component: ItemDetailsComponent },
       { path: 'browse', component: BrowseItemsComponent },
       { path: 'cart-page', component: CartPageComponent },
-      { path: 'update-user-details', component: UpdateUserDetailsComponent }
+      { path: 'update-user-details', component: UpdateUserDetailsComponent, canActivate: [AuthRequiredGuard] },
     ])
   ],
   providers: [ APIService, BrowseItemsService, { provide: HTTP_INTERCEPTORS, useClass: SessionExpireInterceptor, multi: true }],
