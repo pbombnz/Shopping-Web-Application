@@ -217,7 +217,9 @@ app.use(cookieParser());
 app.use(session({
   secret: 'thesecret',
   saveUninitialized: false,
-  resave: false
+  resave: false,
+  rolling: true,
+  cookie: { maxAge: 10000/* 60 * 60 * 24, /* 24 hours */ }
 }));
 app.use(passport.initialize());
 app.use(passport.session());
@@ -361,16 +363,22 @@ app.put('/auth/google/register', authRequired, async (req, res) => {
 //   to retreive back their valid sessionId if the user closes the browser.
 app.get('/auth/loggedin', authIgnore, (req, res) => {
   if (req.isAuthenticated()) {
-    let userData = {
+    const userData: any = {
       first_name: req.user.first_name,
       last_name: req.user.last_name,
       email: req.user.email,
       admin: req.user.admin,
       googleAuth: req.user.google_id != null,
     };
-    res.json({ authenticated: true, user: userData });
+    console.log(req.session.id);
+    console.log(req.session.cookie);
+    res.json({
+      authenticated: true,
+      user: userData,
+      _expires: moment(req.session.cookie._expires).utc().format()
+    });
   } else {
-    res.json({ authenticated: false });
+    res.json({ authenticated: false, user: null, _expires: null });
   }
 });
 
@@ -454,14 +462,14 @@ app.post('/auth/local/register', authNotAllowed, async (req, res) => {
 // POST /auth/local
 //   Logs the user in via Local Strategy (via email/password).
 app.post('/auth/local', authNotAllowed, passport.authenticate('local'), (req, res) => {
-  let userData = {
+  const userData = {
     first_name: req.user.first_name,
     last_name: req.user.last_name,
     email: req.user.email,
     admin: req.user.admin,
     googleAuth: false,
   };
-  res.json(userData);
+  res.json({authenticated: true, user: userData, _expires: moment(req.session.cookie._expires).utc().format()});
 });
 
 
