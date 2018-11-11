@@ -27,6 +27,7 @@ import { AdminModule } from './admin/admin.module';
 import { SessionExpireInterceptor } from './interceptors/session-expire-interceptor';
 import { NoAuthGuard } from './guards/no-auth.guard';
 import { AuthRequiredGuard } from './guards/auth-required.guard';
+import { PageNotFoundComponent } from './page-not-found/page-not-found.component';
 
 @NgModule({
   declarations: [
@@ -40,7 +41,8 @@ import { AuthRequiredGuard } from './guards/auth-required.guard';
     SearchBarComponent,
     ForgotPasswordComponent,
     PasswordResetComponent,
-    UpdateUserDetailsComponent
+    UpdateUserDetailsComponent,
+    PageNotFoundComponent
   ],
   imports: [
     BrowserModule.withServerTransition({ appId : 'nwen304-group-project'}),
@@ -63,6 +65,8 @@ import { AuthRequiredGuard } from './guards/auth-required.guard';
       { path: 'browse', component: BrowseItemsComponent },
       { path: 'cart-page', component: CartPageComponent },
       { path: 'update-user-details', component: UpdateUserDetailsComponent, canActivate: [AuthRequiredGuard] },
+      // Other routes...
+      { path: '**',  component: PageNotFoundComponent },
     ])
   ],
   providers: [ APIService, BrowseItemsService, { provide: HTTP_INTERCEPTORS, useClass: SessionExpireInterceptor, multi: true }],
