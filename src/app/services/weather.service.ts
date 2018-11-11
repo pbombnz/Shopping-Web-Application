@@ -2,12 +2,23 @@ import { Component, OnInit } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { map } from 'rxjs/operators';
 import { Injectable } from '@angular/core';
+import { THIS_EXPR } from '@angular/compiler/src/output/output_ast';
+
+enum Weather{
+    THUNDER = 'Thunderstorm',
+    DRIZZLE = 'Drizzle',
+    RAIN =  'Rain',
+    SNOW = 'Snow',
+    AMBIENCE = 'Atmosphere',
+    CLEAR = 'Clear',
+    CLOUD = 'Clouds',
+    DEFAULT = 'Unknown'
+}
 
 /**
  * This classes utilises OpenWeatherMap's Weather API to get weather data
  * as part of the external service requirement for recommendations.
  */
-
 @Injectable({
     providedIn: 'root'
   })
@@ -23,8 +34,10 @@ export class WeatherService {
     private units : string;
     private externalURL: string;
 
+    // weather data
     public weatherData: any;
     public weatherCondition: string;
+
 
     public constructor(private http: HttpClient) {
         // APP Key from my account
@@ -49,15 +62,18 @@ export class WeatherService {
     // Weather Condition Codes: https://openweathermap.org/weather-conditions
     private assessWeatherCondition(){
         let weatherID = this.weatherData.weather[0].id
-
-        if(weatherID >= 200 && weatherID < 300){ this.weatherCondition = "Thunderstorm"; }
-        if(weatherID >= 300 && weatherID < 400){ this.weatherCondition = "Drizzle"; }
-        if(weatherID >= 500 && weatherID < 600){ this.weatherCondition = "Rain"; }
-        if(weatherID >= 600 && weatherID < 700){ this.weatherCondition = "Snow"; }
-        if(weatherID >= 700 && weatherID < 800){ this.weatherCondition = "Atmosphere"; }
-        if(weatherID == 800){ this.weatherCondition = "Clear"; }
-        if(weatherID > 800 && weatherID < 900){ this.weatherCondition = "Clouds"; }
         
+        // if not a valid weather from the API docs (Which shouldn't happen)
+        if (weatherID < 200 || weatherID >= 900){ this.weatherCondition = Weather.DEFAULT; }
+
+        if (weatherID >= 200 && weatherID < 300){ this.weatherCondition = Weather.THUNDER; }
+        if (weatherID >= 300 && weatherID < 400){ this.weatherCondition = Weather.DRIZZLE; }
+        if (weatherID >= 500 && weatherID < 600){ this.weatherCondition = Weather.RAIN; }
+        if (weatherID >= 600 && weatherID < 700){ this.weatherCondition = Weather.SNOW; }
+        if (weatherID >= 700 && weatherID < 800){ this.weatherCondition = Weather.AMBIENCE; }
+        if (weatherID == 800){ this.weatherCondition = Weather.CLEAR; }
+        if (weatherID > 800 && weatherID < 900){ this.weatherCondition = Weather.CLOUD; }
     }
+
 
 }
