@@ -25,6 +25,7 @@ import { PasswordResetComponent } from './password-reset/password-reset.componen
 import { UpdateUserDetailsComponent } from './update-user-details/update-user-details.component';
 import { AdminModule } from './admin/admin.module';
 import { PaymentPageComponent } from './payment-page/payment-page.component';
+import { RecommendationsComponent } from './recommendations/recommendations.component';
 
 @NgModule({
   declarations: [
@@ -39,7 +40,8 @@ import { PaymentPageComponent } from './payment-page/payment-page.component';
     ForgotPasswordComponent,
     PasswordResetComponent,
     UpdateUserDetailsComponent,
-    PaymentPageComponent
+    PaymentPageComponent,
+    RecommendationsComponent
   ],
   imports: [
     BrowserModule.withServerTransition({ appId : 'nwen304-group-project'}),
@@ -62,7 +64,8 @@ import { PaymentPageComponent } from './payment-page/payment-page.component';
       { path: 'browse', component: BrowseItemsComponent },
       { path: 'cart-page', component: CartPageComponent },
       { path: 'update-user-details', component: UpdateUserDetailsComponent },
-      { path: 'payment-page', component: PaymentPageComponent }
+      { path: 'payment-page', component: PaymentPageComponent },
+      { path: '', component: RecommendationsComponent }
     ])
   ],
   providers: [ APIService, BrowseItemsService],
