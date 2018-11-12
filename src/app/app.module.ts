@@ -30,6 +30,10 @@ import { AuthRequiredGuard } from './guards/auth-required.guard';
 import { PageNotFoundComponent } from './page-not-found/page-not-found.component';
 import { PaymentPageComponent } from './payment-page/payment-page.component';
 import { RecommendationsComponent } from './recommendations/recommendations.component';
+import { OrderCompletePageComponent } from './order-complete-page/order-complete-page.component';
+import { CartPageService } from './cart-page/cart-page.service';
+import { PaymentService } from './payment-page/payment.service';
+import { OrdersPageComponent } from './orders-page/orders-page.component';
 
 @NgModule({
   declarations: [
@@ -46,7 +50,9 @@ import { RecommendationsComponent } from './recommendations/recommendations.comp
     UpdateUserDetailsComponent,
     PageNotFoundComponent,
     PaymentPageComponent,
-    RecommendationsComponent
+    RecommendationsComponent,
+    OrderCompletePageComponent,
+    OrdersPageComponent
   ],
   imports: [
     BrowserModule.withServerTransition({ appId : 'nwen304-group-project'}),
@@ -68,12 +74,16 @@ import { RecommendationsComponent } from './recommendations/recommendations.comp
       { path: 'item-details/:id', component: ItemDetailsComponent },
       { path: 'browse', component: BrowseItemsComponent },
       { path: 'cart-page', component: CartPageComponent },
-      // Other routes...
       { path: 'update-user-details', component: UpdateUserDetailsComponent },
+      { path: 'payment-page', component: PaymentPageComponent },
+      { path: 'orders-page', component: OrdersPageComponent },
+      { path: 'order-complete-page', component: OrderCompletePageComponent },
       { path: '', component: RecommendationsComponent },
+      // other routes
       { path: '**',  component: PageNotFoundComponent },
     ])
   ],
+  providers: [ APIService, BrowseItemsService, CartPageService, PaymentService],
   bootstrap: [AppComponent]
 })
 export class AppModule { }

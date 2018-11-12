@@ -197,9 +197,7 @@ export class APIService {
 
   /* Strictly Admin Routes */
   getAllUsersInformation(): Observable<Object> {
-    return this.http.get(`/api/users`).pipe(
-      catchError(() => of([]))
-    );
+    return this.http.get(`/api/users/all`);
   }
 
   setUserOrderArchive(userId: number, orderId: number, archive: boolean): Observable<Object> {
