@@ -61,9 +61,18 @@ export class CartPageComponent implements OnInit {
     console.log(this.cartItems);
   }
 
+  delpopup(pid){
+    console.log(pid);
+    for(var i=0;i<this.cartItems.length;i++){
+      if(this.cartItems[i].item_id === pid)
+      {  
+        this.cartItems.splice(i,1);
+      }           
+    }
+    this.calculateTotalPrice();
+  }
+
   checkout(){
-    // this.cartPageService.updateCartItems(this.cartItems).subscribe(()=>{
       this.router.navigate(['/payment-page']);
-    // })
   }
 }

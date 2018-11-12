@@ -45,7 +45,7 @@ export class PaymentPageComponent implements OnInit {
     address_suburb: new FormControl('', Validators.required),
     address_city: new FormControl('', Validators.required),
     address_postcode: new FormControl('', [Validators.required, CustomValidators.digits, CustomValidators.rangeLength([4, 4])]),
-    card_number: new FormControl('378282246310005', [Validators.required, CustomValidators.creditCard]),
+    card_number: new FormControl('', [Validators.required, CustomValidators.creditCard]),
     card_name: new FormControl('', [Validators.required, Validators.pattern('^[a-zA-Z ]+$')]),
     card_cvv: new FormControl('', [Validators.required, CustomValidators.digits, CustomValidators.rangeLength([3, 3])])
   });
@@ -58,7 +58,7 @@ export class PaymentPageComponent implements OnInit {
     this.getCartItems();
     this.apiService.getUserInformation().subscribe((result) => {
       this.loading = false;
-      this.userAccountInformation = Object.assign({card_number: '', card_name: '', card_cvv: ''}, result);
+      this.userAccountInformation = Object.assign({card_number: '378282246310005', card_name: '', card_cvv: ''}, result);
       delete this.userAccountInformation['email'];
       // Need to convert the Address Postcode to string to make Form validation happy.
       this.userAccountInformation.address_postcode = this.userAccountInformation.address_postcode.toString();
