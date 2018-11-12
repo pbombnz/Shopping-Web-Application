@@ -836,7 +836,8 @@ app.get('/api/users/:id?', authRequired, async (req, res) => {
 
 app.get('/api/users/:id/orders', async (req, res) => {
   try {
-    let id = req.params.id;
+    //let id = req.params.id;
+    const id = req.params.id === 'undefined' ? req.user.user_id : req.params.id;
     const isAdmin = req.user.admin || false;
     const hideArchive = !isAdmin ? ' AND archive<>\'t\'' : '';
     const client = await pool.connect();
@@ -859,13 +860,15 @@ app.get('/api/users/:id/orders', async (req, res) => {
 
 app.get('/api/users/:id/orders/delivered', async (req, res) => {
   try {
-    let id = req.params.id;
+    const id = req.params.id === 'undefined' ? req.user.user_id : req.params.id;
+    console.log(id);
     const isAdmin = req.user.admin || false;
     const hideArchive = !isAdmin ? ' AND archive<>\'t\'' : '';
 
     const client = await pool.connect();
     var result = await client.query('SELECT * FROM orders WHERE user_id=$1 AND order_status=2' + hideArchive, [id]);
 
+    console.log('pbomb');
     if (!result) {
       // not found
       return res.status(404).json({ message: 'No data found' });
@@ -883,7 +886,7 @@ app.get('/api/users/:id/orders/delivered', async (req, res) => {
 
 app.get('/api/users/:id/orders/dispatched', async (req, res) => {
   try {
-    const id = req.params.id;
+    const id = req.params.id === 'undefined' ? req.user.user_id : req.params.id;
     const isAdmin = req.user.admin || false;
     const hideArchive = !isAdmin ? ' AND archive<>\'t\'' : '';
 
@@ -907,7 +910,7 @@ app.get('/api/users/:id/orders/dispatched', async (req, res) => {
 
 app.get('/api/users/:id/orders/:orderid', async (req, res) => {
   try {
-    const id = req.params.id;
+    const id = req.params.id === 'undefined' ? req.user.user_id : req.params.id;
     const orderId = req.params.orderid;
     const isAdmin = req.user.admin || false;
 
