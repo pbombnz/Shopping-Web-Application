@@ -43,8 +43,8 @@ export class WeatherService {
         // APP Key from my account
         this.appId = "d5fe3061eb1bc6a1d724d33ae9417b92";
         this.weatherData = [];
-        this.city = "Harlem";
-        this.country = "us";
+        this.city = "Wellington";
+        this.country = "nz";
         this.units = "&units=metric"
         this.externalURL = "http://api.openweathermap.org/data/2.5/weather?q=" + this.city + ',' + this.country + this.units + '&APPID=' + this.appId;
 
