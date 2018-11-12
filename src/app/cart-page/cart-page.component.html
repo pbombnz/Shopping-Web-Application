@@ -1,5 +1,6 @@
 <div class="container">
-  <table class="table table-bordered">
+  <h2>My cart</h2>
+  <table class="table table-bordered"  *ngIf="cartItems?.length > 0">
       <thead>
         <tr>
           <th>ID</th>
@@ -38,7 +39,14 @@
           <td colspan="6" class="text-right">{{total | currency: 'NZD' }}</td>
         </tr>
       </tfoot>
+
+      <button class="btn btn-primary active" (click)="checkout()">Proceed to checkout</button>
     </table>
-    
-    <button class="btn btn-primary active" (click)="checkout()">Proceed to checkout</button>
+
+    <div class="row" *ngIf="!cartItems || cartItems?.length == 0">
+        <div class="col">
+            <h5 style="text-align: center;">Your cart is empty</h5>
+        </div>
+    </div>
+
 </div>
