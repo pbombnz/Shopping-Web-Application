@@ -946,6 +946,7 @@ app.get('/api/current_user_cart', async (req, res) => {
     
     //FIXME: fix this hard coded thing
     let id = req.user.user_id;
+    console.log("show me cart for user" + id);
     
     const client = await pool.connect();
     let innerQueryResult = await client.query('SELECT order_id FROM orders WHERE user_id = ' + id + ' AND order_status=0');
@@ -992,7 +993,7 @@ app.post('/api/addtocart', authRequired, async (req, res) => {
   console.log('user: $1 \n quantity: $2 \n item_id: $3 ', [user_id,quantiy,item_id]);
   try {
     const client = await pool.connect();
-    let orderidQuery = await client.query('SELECT order_id FROM orders WHERE user_id=$1 ', [user_id]);
+    let orderidQuery = await client.query('SELECT order_id FROM orders WHERE user_id=$1 AND order_status=0', [user_id]);
 
     console.log(orderidQuery);
 
