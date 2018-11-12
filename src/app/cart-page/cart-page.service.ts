@@ -24,4 +24,12 @@ export class CartPageService {
        
       );
   }
+
+  /**
+   * If the user had modified the quantities in the cart page, apply these changes to their cart
+   * record in the DB
+   */
+  // updateCartItems(cartItems: CartItem[]): Observable<Object> {
+  //     return this.http.patch
+  // }
 }

@@ -11,7 +11,7 @@ import { Router } from '@angular/router';
 export class CartPageComponent implements OnInit {
   title = 'My Cart';
 
-  //displayed when nothing in cart
+  //displayed when nothing in cartx
   message = "You cart is empty";
   
   cartItems: CartItem[];
@@ -54,7 +54,7 @@ export class CartPageComponent implements OnInit {
   del(pid) {
     console.log(pid);
     for (var i = 0; i < this.cartItems.length; i++) {
-      if (this.cartItems[i].item_id === pid) {
+      if (this.cartItems[i].item_id === pid && this.cartItems[i].quantity-1 != 0) {
         this.cartItems[i].quantity -= 1;
       }
     }
@@ -63,6 +63,8 @@ export class CartPageComponent implements OnInit {
   }
 
   checkout(){
-    this.router.navigate(['/payment-page']);
+    // this.cartPageService.updateCartItems(this.cartItems).subscribe(()=>{
+      this.router.navigate(['/payment-page']);
+    // })
   }
 }
