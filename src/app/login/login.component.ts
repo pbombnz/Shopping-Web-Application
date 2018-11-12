@@ -13,8 +13,11 @@ import { APIService } from '../services/api.service';
 })
 export class LoginComponent implements OnInit {
   loading = false;
-  fail_error = false;
+  warningMessage: string;
+  dangerMessage: string;
   fail_login = false;
+
+  redirectUrl: string;
 
   form: FormGroup = new FormGroup({
     email: new FormControl('', [Validators.required, Validators.email]),
@@ -24,7 +27,13 @@ export class LoginComponent implements OnInit {
 
   constructor(private apiService: APIService, private router: Router, private activeRoute: ActivatedRoute) { }
 
-  ngOnInit() { }
+  ngOnInit() {
+    this.activeRoute.queryParams.subscribe(queryParams => {
+      if (queryParams.redirect) {
+        this.redirectUrl = queryParams.redirect;
+      }
+    });
+  }
 
   onSubmit() {
     // Debug
@@ -34,7 +43,7 @@ export class LoginComponent implements OnInit {
 
     // Reset Page Status
     this.loading = false;
-    this.fail_error = false;
+    this.dangerMessage = undefined;
     this.fail_login = false;
 
     // Do not continue if the form is not valid.
@@ -46,7 +55,10 @@ export class LoginComponent implements OnInit {
     this.loading = true; // display Loader Screen
     this.apiService.login(this.form.value).subscribe((result) => {
       console.log(result);
-      this.router.navigate(['/']);
+      this.router.navigate([this.redirectUrl || '/']).catch((reason: any) => {
+        // Cannot navigate because redirect url is NOT relative.
+        this.router.navigate(['/']);
+      });
       this.loading = false;
     }, (error) => {
       this.loading = false;
@@ -55,9 +67,9 @@ export class LoginComponent implements OnInit {
         // Hide error after 10 seconds.
         setTimeout(() => { this.fail_login = false; } , 10000);
       } else {
-        this.fail_error = true;
+        this.dangerMessage = 'Cannot login due to network issues. Please try again later.';
         // Hide error after 5 seconds.
-        setTimeout(() => { this.fail_error = false; } , 5000);
+        setTimeout(() => { this.dangerMessage = undefined; } , 8000);
       }
     });
   }

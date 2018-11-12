@@ -1,21 +1,22 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable, of, forkJoin } from 'rxjs';
-import { tap, map, mergeMap } from 'rxjs/operators';
-import { number } from 'ngx-custom-validators/src/app/number/validator';
+import { tap, map, catchError } from 'rxjs/operators';
+import * as moment from 'moment';
 
 @Injectable({
   providedIn: 'root'
 })
 export class APIService {
   private user: any = undefined;
+  private sessionExpires: moment.Moment = null;
 
   constructor(private http: HttpClient) {
     // Determines if we are still logged in or not. On first load of the website,
     // this will be false, but if the user was previously logged in and had an
     // active session, this gets the basic information for angular to know that we
     // are still logged in.
-    this.isLoggedIn().subscribe();
+    // this.isLoggedIn().subscribe();
   }
 
   getUserFirstName(): string {
@@ -28,6 +29,10 @@ export class APIService {
 
   getUserEmail(): string {
     return this.user ? this.user.email : null;
+  }
+
+  getSessionExpires(): moment.Moment {
+    return this.user ? this.sessionExpires : null;
   }
 
   isUserAdmin(): boolean {
@@ -84,24 +89,46 @@ export class APIService {
 
   login(body: { email: string, password: string}): Observable<Object> {
     return this.http.post('/auth/local', body).pipe(
-      tap(result => this.user = result)
+      tap((result: any) => {
+        this.user = result.user;
+        this.sessionExpires = moment.utc(result._expires).local();
+
+        // console.log(result._expires);
+        // console.log(this.sessionExpires.format());
+      })
     );
   }
 
-  logout(): Observable<Object> {
+  logout(force: boolean = false): Observable<Object> {
+    if (force) {
+      this.user = undefined;
+      this.sessionExpires = null;
+    }
+
     return this.http.get('/auth/logout').pipe(
-      tap(result => this.user = undefined)
+      tap(() => {
+        this.user = undefined;
+        this.sessionExpires = null;
+      }),
+      catchError(() => of({ message: 'Logout successful.' }))
     );
   }
 
   isLoggedIn(): Observable<boolean> {
-    // TODO: Check expiry
-    if (this.user) {
-      return of(true);
+    if (this.sessionExpires && this.user) {
+      if (moment().isBefore(this.sessionExpires)) {
+        return of(true);
+      }
     }
 
     return this.http.get('/auth/loggedin').pipe(
-      tap((result: any) => this.user = result.authenticated ? result.user : undefined),
+      tap((result: any) => {
+        this.user = result.authenticated ? result.user : undefined;
+        this.sessionExpires = result._expires ? moment.utc(result._expires).local() : null;
+
+        console.log(result._expires);
+        console.log(this.sessionExpires ? this.sessionExpires.format() : null);
+      }),
       map((result: any) => result.authenticated),
     );
   }

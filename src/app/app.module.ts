@@ -2,7 +2,7 @@ import { BrowserModule } from '@angular/platform-browser';
 import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
 import { HttpModule } from '@angular/http';
-import { HttpClientModule } from '@angular/common/http';
+import { HttpClientModule, HTTP_INTERCEPTORS } from '@angular/common/http';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import {NgbModule} from '@ng-bootstrap/ng-bootstrap';
 import { NgBootstrapFormValidationModule } from 'ng-bootstrap-form-validation';
@@ -24,6 +24,10 @@ import { ForgotPasswordComponent } from './forgot-password/forgot-password.compo
 import { PasswordResetComponent } from './password-reset/password-reset.component';
 import { UpdateUserDetailsComponent } from './update-user-details/update-user-details.component';
 import { AdminModule } from './admin/admin.module';
+import { SessionExpireInterceptor } from './interceptors/session-expire-interceptor';
+import { NoAuthGuard } from './guards/no-auth.guard';
+import { AuthRequiredGuard } from './guards/auth-required.guard';
+import { PageNotFoundComponent } from './page-not-found/page-not-found.component';
 import { PaymentPageComponent } from './payment-page/payment-page.component';
 import { RecommendationsComponent } from './recommendations/recommendations.component';
 import { OrderCompletePageComponent } from './order-complete-page/order-complete-page.component';
@@ -44,6 +48,7 @@ import { OrdersPageComponent } from './orders-page/orders-page.component';
     ForgotPasswordComponent,
     PasswordResetComponent,
     UpdateUserDetailsComponent,
+    PageNotFoundComponent,
     PaymentPageComponent,
     RecommendationsComponent,
     OrderCompletePageComponent,
@@ -62,10 +67,10 @@ import { OrdersPageComponent } from './orders-page/orders-page.component';
     NgxLoadingModule.forRoot({}),
     AdminModule,
     RouterModule.forRoot([
-      { path: 'login', component: LoginComponent },
-      { path: 'register', component: RegisterComponent },
-      { path: 'forgot-password', component: ForgotPasswordComponent },
-      { path: 'password-reset', component: PasswordResetComponent },
+      { path: 'login', component: LoginComponent, canActivate: [NoAuthGuard] },
+      { path: 'register', component: RegisterComponent, canActivate: [NoAuthGuard] },
+      { path: 'forgot-password', component: ForgotPasswordComponent, canActivate: [NoAuthGuard] },
+      { path: 'password-reset', component: PasswordResetComponent, canActivate: [NoAuthGuard] },
       { path: 'item-details/:id', component: ItemDetailsComponent },
       { path: 'browse', component: BrowseItemsComponent },
       { path: 'cart-page', component: CartPageComponent },
@@ -73,7 +78,9 @@ import { OrdersPageComponent } from './orders-page/orders-page.component';
       { path: 'payment-page', component: PaymentPageComponent },
       { path: 'orders-page', component: OrdersPageComponent },
       { path: 'order-complete-page', component: OrderCompletePageComponent },
-      { path: '', component: RecommendationsComponent }
+      { path: '', component: RecommendationsComponent },
+      // other routes
+      { path: '**',  component: PageNotFoundComponent },
     ])
   ],
   providers: [ APIService, BrowseItemsService, CartPageService, PaymentService],
