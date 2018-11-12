@@ -11,6 +11,7 @@ import { enableProdMode } from '@angular/core';
 import * as express from 'express';
 import * as nodemailer from 'nodemailer';
 import * as moment from 'moment';
+import * as apicache from 'apicache';
 const crypto = require('crypto');
 const queryString = require('query-string');
 const cors = require('cors');
@@ -26,6 +27,20 @@ const bodyParser = require('body-parser');
 const passport = require('passport');
 const LocalStrategy = require('passport-local').Strategy;
 const GoogleStrategy = require('passport-google-oauth').OAuth2Strategy;
+
+
+let doNotCache = apicache.options({
+  headers: {
+    'cache-control': 'no-store'
+  }
+}).middleware;
+let validationCache = apicache.options({
+  headers: {
+    'cache-control': 'no-cache'
+  }
+}).middleware;
+
+
 
 var transporter = nodemailer.createTransport({
   service: 'yahoo', // no need to set host or port etc.
@@ -281,7 +296,7 @@ function authIgnore(req, res, next) {
 //   request.  The first step in Google authentication will involve
 //   redirecting the user to google.com.  After authorization, Google
 //   will redirect the user back to this application at /auth/google/callback
-app.get('/auth/google', authNotAllowed, passport.authenticate('google', {
+app.get('/auth/google', doNotCache(), authNotAllowed, passport.authenticate('google', {
   scope: ['profile', 'email']
 }));
 
@@ -290,7 +305,7 @@ app.get('/auth/google', authNotAllowed, passport.authenticate('google', {
 //   request.  If authentication fails, the user will be redirected back to the
 //   login page.  Otherwise, the primary route function function will be called,
 //   which, in this example, will redirect the user to the home page.
-app.get('/auth/google/callback', passport.authenticate('google'), (req, res) => {
+app.get('/auth/google/callback', doNotCache(), passport.authenticate('google'), (req, res) => {
   if (req.user.address_line1 === '' || req.user.address_line2 === '' || req.user.address_suburb === ''
     || req.user.address_city === '' || req.user.address_postcode === -1 || req.user.phone === '') {
     const query = queryString.stringify({
@@ -361,7 +376,7 @@ app.put('/auth/google/register', authRequired, async (req, res) => {
 //   Called when the Angular Application is loaded. Allows us to check if the client session id
 //   is still valid to use based on the response the server gives back. This also is helpful for
 //   to retreive back their valid sessionId if the user closes the browser.
-app.get('/auth/loggedin', authIgnore, (req, res) => {
+app.get('/auth/loggedin', doNotCache(), authIgnore, (req, res) => {
   if (req.isAuthenticated()) {
     const userData: any = {
       first_name: req.user.first_name,
@@ -383,7 +398,7 @@ app.get('/auth/loggedin', authIgnore, (req, res) => {
 // POST /auth/logout
 //   Logs the user out. This route is suitable to use for logging a user out regardless of
 //   the Strategy used for authentication.
-app.get('/auth/logout', authRequired, (req, res) => {
+app.get('/auth/logout', doNotCache(), authRequired, (req, res) => {
   req.logout();
   res.status(200).json({ message: 'Logout successful.' });
 });
@@ -624,7 +639,7 @@ app.put('/auth/password-reset', authNotAllowed, async (req, res) => {
 // ~~~~~~~~~~GET API~~~~~~~~~~~~~//
 
 // ============ ITEMS ============//
-app.get('/api/items', async (req, res) => {
+app.get('/api/items', validationCache(), async (req, res) => {
   try {
     const client = await pool.connect();
     var result = await client.query('SELECT * FROM items');
@@ -651,7 +666,7 @@ app.get('/api/items', async (req, res) => {
   res.json(200);
 });
 
-app.get('/api/items/fruits', async (req, res) => {
+app.get('/api/items/fruits', validationCache(), async (req, res) => {
   try {
     const client = await pool.connect();
     var result = await client.query('SELECT * FROM items WHERE item_category=2 ');
@@ -677,7 +692,7 @@ app.get('/api/items/fruits', async (req, res) => {
   res.json(200);
 });
 
-app.get('/api/items/meats', async (req, res) => {
+app.get('/api/items/meats', validationCache(), async (req, res) => {
   try {
     const client = await pool.connect();
     var result = await client.query('SELECT * FROM items WHERE item_category=1 ');
@@ -703,7 +718,7 @@ app.get('/api/items/meats', async (req, res) => {
   res.json(200);
 });
 
-app.get('/api/items/veges', async (req, res) => {
+app.get('/api/items/veges', validationCache(), async (req, res) => {
   try {
     const client = await pool.connect();
     var result = await client.query('SELECT * FROM items WHERE item_category=3 ');
@@ -729,7 +744,7 @@ app.get('/api/items/veges', async (req, res) => {
   res.json(200);
 });
 
-app.get('/api/items/:id', async (req, res) => {
+app.get('/api/items/:id', validationCache(), async (req, res) => {
   try {
     let id = req.params.id;
     const client = await pool.connect();
@@ -795,7 +810,7 @@ app.get('/api/items/:id', async (req, res) => {
 //   otherwise it will retrieve information of the user based on the 'id' used as the parameter. This 'id' parameter has to
 //   match their their own id associated with the account they currently authenticated with. Only an admininistrator can
 //   access other users' information.
-app.get('/api/users/:id?', authRequired, async (req, res) => {
+app.get('/api/users/:id?', doNotCache(),authRequired, async (req, res) => {
   try {
     const requestedAllUser: boolean = req.params.id === 'all';
     const id: number = req.params.id || req.user.user_id;
@@ -834,7 +849,7 @@ app.get('/api/users/:id?', authRequired, async (req, res) => {
   }
 });
 
-app.get('/api/users/:id/orders', async (req, res) => {
+app.get('/api/users/:id/orders', validationCache(), async (req, res) => {
   try {
     //let id = req.params.id;
     const id = req.params.id === 'undefined' ? req.user.user_id : req.params.id;
@@ -858,7 +873,7 @@ app.get('/api/users/:id/orders', async (req, res) => {
   }
 });
 
-app.get('/api/users/:id/orders/delivered', async (req, res) => {
+app.get('/api/users/:id/orders/delivered', validationCache(), async (req, res) => {
   try {
     const id = req.params.id === 'undefined' ? req.user.user_id : req.params.id;
     console.log(id);
@@ -884,7 +899,7 @@ app.get('/api/users/:id/orders/delivered', async (req, res) => {
   }
 });
 
-app.get('/api/users/:id/orders/dispatched', async (req, res) => {
+app.get('/api/users/:id/orders/dispatched', validationCache(), async (req, res) => {
   try {
     const id = req.params.id === 'undefined' ? req.user.user_id : req.params.id;
     const isAdmin = req.user.admin || false;
@@ -908,7 +923,7 @@ app.get('/api/users/:id/orders/dispatched', async (req, res) => {
   }
 });
 
-app.get('/api/users/:id/orders/:orderid', async (req, res) => {
+app.get('/api/users/:id/orders/:orderid', validationCache(), async (req, res) => {
   try {
     const id = req.params.id === 'undefined' ? req.user.user_id : req.params.id;
     const orderId = req.params.orderid;
@@ -941,7 +956,7 @@ app.get('/api/users/:id/orders/:orderid', async (req, res) => {
   }
 });
 
-app.get('/api/current_user_cart', async (req, res) => {
+app.get('/api/current_user_cart', validationCache(), async (req, res) => {
   try {
     
     //FIXME: fix this hard coded thing

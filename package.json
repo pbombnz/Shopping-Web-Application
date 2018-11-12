@@ -29,6 +29,7 @@
     "@angular/router": "^6.1.0",
     "@ng-bootstrap/ng-bootstrap": "^3.2.2",
     "@nguniversal/module-map-ngfactory-loader": "^7.0.2",
+    "apicache": "^1.2.3",
     "bcryptjs": "^2.4.3",
     "body-parser": "^1.18.3",
     "buckets-js": "^1.98.2",
