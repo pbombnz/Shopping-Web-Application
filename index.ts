@@ -465,23 +465,23 @@ app.post('/auth/local', authNotAllowed, passport.authenticate('local'), (req, re
 });
 
 
-app.get('/api/users', authAndAdminRequired, async (req, res) => {
-  try {
-    const client = await pool.connect();
-    var result = await client.query('SELECT user_id, email, first_name, last_name, admin FROM users');
+// app.get('/api/users', authAndAdminRequired, async (req, res) => {
+//   try {
+//     const client = await pool.connect();
+//     var result = await client.query('SELECT user_id, email, first_name, last_name, admin FROM users');
 
-    if (!result) {
-      throw new Error();
-    }
+//     if (!result) {
+//       throw new Error();
+//     }
 
-    res.send(result.rows);
-    client.release();
-  } catch (err) {
-    // bad request
-    console.error(err);
-    res.status(400).json({ 'message': 'No users found' });
-  }
-});
+//     res.send(result.rows);
+//     client.release();
+//   } catch (err) {
+//     // bad request
+//     console.error(err);
+//     res.status(400).json({ 'message': 'No users found' });
+//   }
+// });
 
 app.put('/auth/forgot-password', authNotAllowed, async (req, res) => {
   try {
@@ -931,6 +931,7 @@ app.get('/api/users/:id/orders/:orderid', async (req, res) => {
 app.get('/api/current_user_cart', async (req, res) => {
   try {
     
+    //FIXME: fix this hard coded thing
     let id = '7';
     
     const client = await pool.connect();
@@ -1136,12 +1137,16 @@ app.put('/api/users/:userId/orders/:orderId', authAndAdminRequired, async (req, 
   }
 });
 
+/**
+ * Place an order by changing the order_status in the order table from 0 (in cart) to 1 (being processed).
+ */
 app.put('/api/makeOrder', async (req, res) => {
   try {
-    let id = req.params.id;
+    //FIXME
+    let id = 7;
+
     const client = await pool.connect();
-    // var result = await client.query('SELECT * FROM users WHERE user_id='+id);
-    let result = { rows: null };
+    var result = await client.query("UPDATE orders SET order_status = 1 WHERE order_status = 0 AND user_id = " + id);
 
     if (!result) {
       // not found

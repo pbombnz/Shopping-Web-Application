@@ -4,6 +4,7 @@ import { CartPageService } from '../cart-page/cart-page.service';
 import { CartItem } from '../cart-page/cart-item';
 import { FormGroup, FormControl, Validators } from '@angular/forms';
 import { CustomValidators } from 'ngx-custom-validators';
+import { APIService } from '../services/api.service';
 
 @Component({
   selector: 'app-payment-page',
@@ -14,6 +15,8 @@ export class PaymentPageComponent implements OnInit {
   cartItems: CartItem[];
   total: number = 0;
   numItems: number = 0;
+  error: any;
+  userAccountInformation: any;
 
   form: FormGroup = new FormGroup({
     first_name: new FormControl('', Validators.required),
@@ -30,10 +33,17 @@ export class PaymentPageComponent implements OnInit {
     card_expiry: new FormControl('',  [Validators.required,  Validators.pattern('^[0-9]{2}\/[0-9]{4}$')]),
   });
   
-  constructor(private router: Router, private cartPageService: CartPageService) { }
+  constructor(private router: Router, private cartPageService: CartPageService, private apiService: APIService) { }
 
   ngOnInit() {
     this.getCartItems();
+    this.apiService.getUserInformation().subscribe((result) => {
+      this.userAccountInformation = Object.assign({ password: '', password_confirm: ''}, result);
+      // Need to convert the Address Postcode to string to make Form validation happy.
+      this.userAccountInformation.address_postcode = this.userAccountInformation.address_postcode.toString();
+      this.form.setValue(this.userAccountInformation);
+    }, (error) => {
+    });
   }
 
   getCartItems(): void {
@@ -55,5 +65,9 @@ export class PaymentPageComponent implements OnInit {
 
   backToCart(){
     this.router.navigate(['/cart-page']);
+  }
+
+  onSubmit(){
+
   }
 }

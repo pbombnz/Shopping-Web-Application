@@ -13,13 +13,13 @@ import { APIService } from '../services/api.service';
 export class UpdateUserDetailsComponent implements OnInit {
   loading = false;
   success = false;
-  error: any;
 
-  userAccountInformation: any;
 
   /**
    * Custom error messages as CustomValidators does not have default messages.
-   */
+   */  error: any;
+
+  userAccountInformation: any;
   customErrorMessages: ErrorMessage[] = [
     {
       error: 'equalTo',
@@ -67,6 +67,7 @@ export class UpdateUserDetailsComponent implements OnInit {
       this.userAccountInformation.address_postcode = this.userAccountInformation.address_postcode.toString();
       this.form.setValue(this.userAccountInformation);
     }, (error) => {
+      console.error();
       this.loading = false;
       this.router.navigate(['/']);
     });
