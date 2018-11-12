@@ -949,12 +949,12 @@ app.get('/api/current_user_cart', async (req, res) => {
     
     const client = await pool.connect();
     let innerQueryResult = await client.query('SELECT order_id FROM orders WHERE user_id = ' + id + ' AND order_status=0');
-    let order_id = innerQueryResult.rows[0].order_id;
 
-    if (!order_id) {
+    if (!innerQueryResult || innerQueryResult.rows.length == 0) {
       // not found
-      return res.json(404, 'No data found');
+      return res.status(404).json({ message: 'No data found' });
     } else {
+      let order_id = innerQueryResult.rows[0].order_id;
       var items = await client.query('SELECT order_id, item_id, quantity, item_name, item_price, item_image FROM order_items natural join items WHERE order_id = ' + order_id);
       if (!items) {
         return res.json(404, 'No data found');
@@ -970,11 +970,8 @@ app.get('/api/current_user_cart', async (req, res) => {
   } catch (err) {
     // bad request
     console.error(err);
-    res.json(400);
+    res.status(400).end();
   }
-
-  // ok
-  res.json(200);
 });
 // ===============================//
 

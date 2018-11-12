@@ -9,9 +9,7 @@ import { Router } from '@angular/router';
   styleUrls: ['./cart-page.component.css']
 })
 export class CartPageComponent implements OnInit {
-  title = 'My Cart';
-
-  //displayed when nothing in cartx
+  //displayed when nothing in cart
   message = "You cart is empty";
   
   cartItems: CartItem[];
@@ -28,6 +26,7 @@ export class CartPageComponent implements OnInit {
     this.cartPageService.getCartItems()
       .subscribe(items => {
         this.cartItems = items;
+        console.log(this.cartItems)
         this.calculateTotalPrice();
       })
   }
