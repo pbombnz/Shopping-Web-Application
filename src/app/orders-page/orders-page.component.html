@@ -1,3 +1,31 @@
-<p>
-  orders-page works!
-</p>
+<h2>Order History</h2>
+  <hr>
+  <table class="table table-bordered table-hover" *ngIf="user?.orderHistory?.delivered?.length > 0 || user?.orderHistory?.dispatched?.length > 0">
+    <thead>
+        <tr>
+          <th scope="col">Order ID</th>
+          <th scope="col">Date</th>
+          <th scope="col">Order Status</th>
+          <th scope="col">Order Archived</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let order of user?.orderHistory?.dispatched">
+          <th (click)="viewOrder(order)">{{order.order_id}}</th>
+          <td (click)="viewOrder(order)">{{order.date | date}}</td>
+          <td (click)="viewOrder(order)">{{apiService.getOrderStatusString(order.order_status)}}</td>
+          <td><input type="checkbox" aria-label="Order is Archived or not" [checked]="order.archive" (change)="toggleOrderArchive(order)"></td>
+        </tr>
+        <tr *ngFor="let order of user?.orderHistory?.delivered">
+            <th (click)="viewOrder(order)">{{order.order_id}}</th>
+            <td (click)="viewOrder(order)">{{order.date | date}}</td>
+            <td (click)="viewOrder(order)">{{apiService.getOrderStatusString(order.order_status)}}</td>
+            <td><input type="checkbox" aria-label="Order is Archived or not" [checked]="order.archive" (change)="toggleOrderArchive(order)"></td>
+          </tr>
+      </tbody>
+  </table>
+  <div class="row" *ngIf="user?.orderHistory?.delivered?.length === 0 && user?.orderHistory?.dispatched?.length === 0">
+    <div class="col">
+        <h5 style="text-align: center;">No Orders available</h5>
+    </div>
+  </div>

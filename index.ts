@@ -791,6 +791,7 @@ app.get('/api/items/:id', async (req, res) => {
 //   access other users' information.
 app.get('/api/users/:id?', authRequired, async (req, res) => {
   try {
+    console.log('ggg:', req.params.id)
     const id: number = req.params.id || req.user.user_id;
     const isAdmin: boolean = req.user.admin || false;
     console.log(`id: ${id} - req.user.user_id: ${req.user.user_id}`);
@@ -801,7 +802,12 @@ app.get('/api/users/:id?', authRequired, async (req, res) => {
     const client = await pool.connect();
     let result;
     if (isAdmin) {
+      if(req.params.id === 'all') {
+        console.log("a");
+        result = await client.query('SELECT * FROM users');
+      } else {
         result = await client.query('SELECT * FROM users WHERE user_id=$1', [id]);
+      }
     } else {
       result = await client.query(
         'SELECT first_name, last_name, email, address_line1, address_line2, address_suburb, address_city, address_postcode, ' +
