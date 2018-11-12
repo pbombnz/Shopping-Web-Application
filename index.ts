@@ -938,7 +938,7 @@ app.get('/api/current_user_cart', async (req, res) => {
   try {
     
     //FIXME: fix this hard coded thing
-    let id = '7';
+    let id = req.user.user_id;
     
     const client = await pool.connect();
     let innerQueryResult = await client.query('SELECT order_id FROM orders WHERE user_id = ' + id + ' AND order_status=0');
@@ -1149,7 +1149,7 @@ app.put('/api/users/:userId/orders/:orderId', authAndAdminRequired, async (req, 
 app.put('/api/place_order', async (req, res) => {
   try {
     //FIXME
-    let id = 7;
+    let id = req.user.user_id;
 
     const client = await pool.connect();
     var result = await client.query("UPDATE orders SET order_status = 1 WHERE order_status = 0 AND user_id = " + id);
