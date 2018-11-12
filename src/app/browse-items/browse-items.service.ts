@@ -38,8 +38,8 @@ export class BrowseItemsService {
       );
   }
 
-  getItemByID(id): Observable<Item[]>{
-    return this.http.get<Item[]>(this.itemsUrl+'/'+id)
+  getItemByID(id): Observable<Item>{
+    return this.http.get<Item>(this.itemsUrl+'/'+id)
       .pipe(
         // catchError(this.handleError('getHeroes', []))
       );
