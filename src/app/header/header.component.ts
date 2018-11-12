@@ -1,6 +1,8 @@
 import { Component, OnInit } from '@angular/core';
 import { Router, ActivatedRoute, ParamMap } from '@angular/router';
 import { APIService } from '../services/api.service';
+import { WeatherService } from '../services/weather.service';
+//import { ConsoleReporter } from 'jasmine';
 
 @Component({
   selector: 'app-header',
@@ -11,7 +13,7 @@ export class HeaderComponent implements OnInit {
   title = 'Supermarket Shopping Site';
   isCollapsed = true;
 
-  constructor(private router: Router, public apiService: APIService) { }
+  constructor(private router: Router, public apiService: APIService, public weatherService: WeatherService) { }
 
   ngOnInit() {
   }
@@ -21,7 +23,7 @@ export class HeaderComponent implements OnInit {
   }
 
   onCartButtonClicked(){
-    this.router.navigate(['/cart-page']);
+    this.router.navigate(['/cart-page']); 
   }
 
   onUpdateUserDetailsButtonClicked() {}

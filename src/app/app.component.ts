@@ -1,6 +1,7 @@
 import { Component } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { APIService } from './services/api.service';
+import { WeatherService } from './services/weather.service';
 
 @Component({
   selector: 'app-root',

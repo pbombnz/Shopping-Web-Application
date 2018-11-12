@@ -38,17 +38,17 @@ export class BrowseItemsService {
       );
   }
 
-  getItemByID(id): Observable<Item[]>{
-    return this.http.get<Item[]>(this.itemsUrl+'/'+id)
+  getItemByID(id): Observable<Item>{
+    return this.http.get<Item>(this.itemsUrl+'/'+id)
       .pipe(
         // catchError(this.handleError('getHeroes', []))
       );
   }
 
   // this function requires user authentication to be checked beforehand
-  addItemToCart(itemID): Observable<Object>{
+  addItemToCart(itemID,quantity): Observable<Object>{
     let url = '/api/addtocart'
-    let body = {id: itemID}
+    let body = {id: itemID, quantity: quantity}
     console.log("Called post on %s", url);
     return this.http.post<Object>(url,body).pipe();
 

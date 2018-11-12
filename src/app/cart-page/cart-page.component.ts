@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
-import { Item } from '../browse-items/browse-items';
 import { CartItem } from './cart-item';
 import { CartPageService } from './cart-page.service';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-cart-page',
@@ -15,10 +15,9 @@ export class CartPageComponent implements OnInit {
   message = "You cart is empty";
   
   cartItems: CartItem[];
-  //selectedProduct: Subject<any> = new Subject;
   total: number = 0;
 
-  constructor(private cartPageService: CartPageService) {
+  constructor(private cartPageService: CartPageService, private router: Router) {
   }
 
   ngOnInit() {
@@ -31,8 +30,6 @@ export class CartPageComponent implements OnInit {
         this.cartItems = items;
         this.calculateTotalPrice();
       })
-
-    
   }
 
   calculateTotalPrice() {
@@ -41,21 +38,6 @@ export class CartPageComponent implements OnInit {
       console.log(this.cartItems[i]);
       this.total += (this.cartItems[i].item_price * this.cartItems[i].quantity);
     }
-  }
-
-  // getpopup(det) {
-  //   this.selectedProduct.next(det);
-  // }
-
-  delpopup(pid) {
-    console.log(pid);
-    for (var i = 0; i < this.cartItems.length; i++) {
-      if (this.cartItems[i].item_id === pid) {
-        this.cartItems.splice(i, 1);
-      }
-    }
-    this.calculateTotalPrice();
-    console.log(this.cartItems);
   }
 
   add(pid) {
@@ -78,5 +60,9 @@ export class CartPageComponent implements OnInit {
     }
     this.calculateTotalPrice();
     console.log(this.cartItems);
+  }
+
+  checkout(){
+    this.router.navigate(['/payment-page']);
   }
 }

@@ -17,14 +17,14 @@
             <img src="{{list.item_image}}" class="img-thumbnail" style="height:100px;" />
           </td>
           <td>{{list.item_name}}</td>
-          <td>{{list.item_price}}</td>
+          <td>${{list.item_price}}</td>
           <td>
             {{list.quantity}}
-            <button class="btn btn-success btn-xs plus" (click)="add(list.item_id)">
-              <i class="glyphicon glyphicon-plus"></i>
+            <button class="btn btn-success btn-xs plus " (click)="add(list.item_id)">
+              <i class="glyphicon glyphicon-plus">+</i>
             </button>
             <button class="btn btn-danger btn-xs minus" (click)="del(list.item_id)">
-              <i class="glyphicon glyphicon-minus"></i>
+              <i class="glyphicon glyphicon-minus">-</i>
             </button>
           </td>
           <td>
@@ -40,4 +40,5 @@
       </tfoot>
     </table>
     
+    <button class="btn btn-primary active" (click)="checkout()">Proceed to checkout</button>
 </div>

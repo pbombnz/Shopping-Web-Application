@@ -1,0 +1,22 @@
+<app-search-bar></app-search-bar>
+<div class="container">
+  <p>
+    {{recommendation}}
+  </p>
+  <hr>
+  <div class="row mb-5">
+    <div class="col-sm-3 mx-4 my-2 border" *ngFor="let item of itemRecommendations" (click)="onItemClicked(item)">
+      <div class="p-3">
+        <img [src]="item.item_image" width="100%">
+      </div>
+      <h6 class="text-center">{{item.item_name}}</h6>
+      <p class="text-center font-italic">Made in {{item.item_origin}}</p>
+      <br>
+      <div>
+        <p class="text-center">{{item.item_price}} each</p>
+        <p class="text-center font-weight-light bg-warning rounded" *ngIf="item.item_stock_quantity > 0 && item.item_stock_quantity <= 10 ">Stock availability is limited.</p>
+        <p class="text-center font-weight-light bg-danger text-light rounded" *ngIf="item.item_stock_quantity == 0">No stock available.</p>
+      </div>
+    </div>
+  </div>
+</div>

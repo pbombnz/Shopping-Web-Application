@@ -28,6 +28,8 @@ import { SessionExpireInterceptor } from './interceptors/session-expire-intercep
 import { NoAuthGuard } from './guards/no-auth.guard';
 import { AuthRequiredGuard } from './guards/auth-required.guard';
 import { PageNotFoundComponent } from './page-not-found/page-not-found.component';
+import { PaymentPageComponent } from './payment-page/payment-page.component';
+import { RecommendationsComponent } from './recommendations/recommendations.component';
 
 @NgModule({
   declarations: [
@@ -42,7 +44,9 @@ import { PageNotFoundComponent } from './page-not-found/page-not-found.component
     ForgotPasswordComponent,
     PasswordResetComponent,
     UpdateUserDetailsComponent,
-    PageNotFoundComponent
+    PageNotFoundComponent,
+    PaymentPageComponent,
+    RecommendationsComponent
   ],
   imports: [
     BrowserModule.withServerTransition({ appId : 'nwen304-group-project'}),
@@ -64,12 +68,12 @@ import { PageNotFoundComponent } from './page-not-found/page-not-found.component
       { path: 'item-details/:id', component: ItemDetailsComponent },
       { path: 'browse', component: BrowseItemsComponent },
       { path: 'cart-page', component: CartPageComponent },
-      { path: 'update-user-details', component: UpdateUserDetailsComponent, canActivate: [AuthRequiredGuard] },
       // Other routes...
+      { path: 'update-user-details', component: UpdateUserDetailsComponent },
+      { path: '', component: RecommendationsComponent },
       { path: '**',  component: PageNotFoundComponent },
     ])
   ],
-  providers: [ APIService, BrowseItemsService, { provide: HTTP_INTERCEPTORS, useClass: SessionExpireInterceptor, multi: true }],
   bootstrap: [AppComponent]
 })
 export class AppModule { }
