@@ -1,8 +1,8 @@
 <app-search-bar></app-search-bar>
 <div class="container">
-  <p>
+  <h2 class="text-center font-italic" style="margin-top: 10px;">
     {{recommendation}}
-  </p>
+  </h2>
   <hr>
   <div class="row mb-5">
     <div class="col-sm-3 mx-4 my-2 border" *ngFor="let item of itemRecommendations" (click)="onItemClicked(item)">
