@@ -797,7 +797,7 @@ app.get('/api/items/:id', async (req, res) => {
 //   access other users' information.
 app.get('/api/users/:id?', authRequired, async (req, res) => {
   try {
-    console.log('ggg:', req.params.id)
+    const requestedAllUser: boolean = req.params.id === 'all';
     const id: number = req.params.id || req.user.user_id;
     const isAdmin: boolean = req.user.admin || false;
     console.log(`id: ${id} - req.user.user_id: ${req.user.user_id}`);
@@ -808,8 +808,7 @@ app.get('/api/users/:id?', authRequired, async (req, res) => {
     const client = await pool.connect();
     let result;
     if (isAdmin) {
-      if(req.params.id === 'all') {
-        console.log("a");
+      if (requestedAllUser) {
         result = await client.query('SELECT * FROM users');
       } else {
         result = await client.query('SELECT * FROM users WHERE user_id=$1', [id]);
@@ -824,8 +823,7 @@ app.get('/api/users/:id?', authRequired, async (req, res) => {
     if (!result || result.rows.length === 0) {
       res.status(404).json({ message: 'No user found with specified id.' });
     } else {
-      const userAccInfo = result.rows[0];
-      res.json(userAccInfo);
+      res.json(requestedAllUser ? result.rows : result.rows[0]);
     }
     client.release();
 

@@ -16,9 +16,7 @@ export class AdminDashboardComponent implements OnInit {
 
   ngOnInit() {
     this.loading = true;
-    console.log('kkkkk')
     this.apiService.getAllUsersInformation().pipe(
-      tap(result => console.log(result)),
       map((result: any[]) => result.sort((a, b) => a.user_id - b.user_id))
     ).subscribe((result: any[]) => {
       this.users = result;
