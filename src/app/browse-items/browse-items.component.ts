@@ -3,6 +3,8 @@ import { Router, ActivatedRoute, ParamMap } from '@angular/router';
 
 import { Item } from './browse-items';
 import { BrowseItemsService } from './browse-items.service';
+import { tap } from 'rxjs/operators';
+import { Observable } from 'rxjs';
 
 
 @Component({
@@ -44,34 +46,36 @@ export class BrowseItemsComponent implements OnInit {
 
   ngOnInit() {
     // Get Items from our Database
-    this.getItems();
+    this.getItems().subscribe(() => {
     
 
-    // Display items of a specifc catagory based on the query param. If no query param
-    // is provided, display all items.
-    this.activeRoute.queryParams.subscribe((queryParams) => {
-      console.log(queryParams);
-      if (queryParams.hasOwnProperty('category')) {
-        this.queryParam_category = Number.parseInt(queryParams.category, 10);
-        this.items = this._items.filter((item) => item.item_category === this.queryParam_category);
-      } else {
-        this.queryParam_category = -1;
-        this.items = this._items;
-      }
-      this.items = this.items.sort((a, b) => a.item_name.localeCompare(b.item_name));
+      // Display items of a specifc catagory based on the query param. If no query param
+      // is provided, display all items.
+      this.activeRoute.queryParams.subscribe((queryParams) => {
+        console.log(queryParams);
+        if (queryParams.hasOwnProperty('category')) {
+          this.queryParam_category = Number.parseInt(queryParams.category, 10);
+          this.items = this._items.filter((item) => item.item_category === this.queryParam_category);
+        } else {
+          this.queryParam_category = -1;
+          this.items = this._items;
+        }
+        this.items = this.items.sort((a, b) => a.item_name.localeCompare(b.item_name));
+      });
     });
   }
 
   /**
    * Requests `Item` data from the browse-items service
    */
-  getItems(): void {
-    this.browseItemsService.getItems()
-      .subscribe(items => {
+  getItems(): Observable<Object> {
+    return this.browseItemsService.getItems()
+      .pipe(
+        tap((items: any[]) => {
         this._items = items;
         this.items = items;
         console.log(this._items);
-      });
+      }));
   }
 
   /**
