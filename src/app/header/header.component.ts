@@ -28,7 +28,9 @@ export class HeaderComponent implements OnInit {
 
   onUpdateUserDetailsButtonClicked() {}
 
-  onMyOrdersButtonClicked() {}
+  onMyOrdersButtonClicked() {
+    this.router.navigate(['/orders-page']);
+  }
 
   onLogoutButtonClicked() {
     this.apiService.logout().subscribe((result) => {

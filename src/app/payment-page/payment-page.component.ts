@@ -6,6 +6,7 @@ import { FormGroup, FormControl, Validators } from '@angular/forms';
 import { CustomValidators } from 'ngx-custom-validators';
 import { APIService } from '../services/api.service';
 import { ErrorMessage } from 'ng-bootstrap-form-validation';
+import { PaymentService } from './payment.service';
 
 @Component({
   selector: 'app-payment-page',
@@ -49,7 +50,8 @@ export class PaymentPageComponent implements OnInit {
     card_cvv: new FormControl('', [Validators.required, CustomValidators.digits, CustomValidators.rangeLength([3, 3])])
   });
   
-  constructor(private router: Router, private cartPageService: CartPageService, private apiService: APIService) { }
+  constructor(private router: Router, private cartPageService: CartPageService, 
+    private apiService: APIService, private paymentService: PaymentService) { }
 
   ngOnInit() {
     this.loading = true;
@@ -67,7 +69,6 @@ export class PaymentPageComponent implements OnInit {
       this.form.controls['card_cvv'].enable();
     }, (error) => {
       this.loading = false;
-      this.router.navigate(['/']);
     });
   }
 
@@ -93,6 +94,18 @@ export class PaymentPageComponent implements OnInit {
   }
 
   onSubmit(){
+    this.error = undefined;
+    this.loading = true;
 
+    this.paymentService.placeOrder(undefined).subscribe(
+      (result) => {
+        this.loading = false;
+        setTimeout(() => this.router.navigate(['/order-complete-page']), 7000);
+      },
+      (error) => {
+        this.loading = false;
+        this.error = error;
+      }
+    )
   }
 }

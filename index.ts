@@ -1140,7 +1140,7 @@ app.put('/api/users/:userId/orders/:orderId', authAndAdminRequired, async (req, 
 /**
  * Place an order by changing the order_status in the order table from 0 (in cart) to 1 (being processed).
  */
-app.put('/api/makeOrder', async (req, res) => {
+app.put('/api/place_order', async (req, res) => {
   try {
     //FIXME
     let id = 7;
