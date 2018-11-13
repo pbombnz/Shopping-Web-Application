@@ -69,13 +69,10 @@ const pool = new Pool({
 });
 
 passport.serializeUser((user, done) => {
-  // console.log('Passport:: Serializing user....');
-  // console.log('user:', user);
   done(null, user.user_id);
 });
 
 passport.deserializeUser(async (id, done) => {
-  // console.log('Passport:: Deserializing user....');
   try {
     const client = await pool.connect();
     var result = await client.query('SELECT * FROM users WHERE user_id=$1 LIMIT 1', [parseInt(id, 10)]);
@@ -485,25 +482,10 @@ app.post('/auth/local', authNotAllowed, passport.authenticate('local'), (req, re
   res.json({authenticated: true, user: userData, _expires: moment.utc(req.session.cookie._expires).format()});
 });
 
-
-// app.get('/api/users', authAndAdminRequired, async (req, res) => {
-//   try {
-//     const client = await pool.connect();
-//     var result = await client.query('SELECT user_id, email, first_name, last_name, admin FROM users');
-
-//     if (!result) {
-//       throw new Error();
-//     }
-
-//     res.send(result.rows);
-//     client.release();
-//   } catch (err) {
-//     // bad request
-//     console.error(err);
-//     res.status(400).json({ 'message': 'No users found' });
-//   }
-// });
-
+// PUT /auth/forgot-password
+//  Signals to the server that a specific user has forgotten their password. This will create
+//  a reset token and asssoicated expiry date, and will also send a link to their email address
+//  to the user so they can reset their password.
 app.put('/auth/forgot-password', authNotAllowed, async (req, res) => {
   try {
     const client = await pool.connect();
@@ -583,10 +565,15 @@ app.put('/auth/forgot-password', authNotAllowed, async (req, res) => {
   } catch (err) {
     // bad request
     console.error(err);
-    res.status(400).end();
+    res.status(400).json({ message: 'Bad request'});
   }
 });
 
+// PUT /auth/password-reset
+//  Called when the user is going to reset their password. The route must have a 'password' and 'token'
+//  field in the request body. If successful, it will remove the password reset token and token expiry,
+//  and set the new password for the user. This route will fail if the token is invalid (already been used
+//  or expired.
 app.put('/auth/password-reset', authNotAllowed, async (req, res) => {
   // Body validation
   if (!req.body.token) {
@@ -632,13 +619,12 @@ app.put('/auth/password-reset', authNotAllowed, async (req, res) => {
   } catch (err) {
     // bad request
     console.error(err);
-    res.status(400).end();
+    res.status(400).json({ message: 'Bad request'});
   }
 });
 
-// ~~~~~~~~~~GET API~~~~~~~~~~~~~//
-
-// ============ ITEMS ============//
+// GET /api/items
+//  Retrieves all grocery items.
 app.get('/api/items', validationCache(), async (req, res) => {
   try {
     const client = await pool.connect();
@@ -659,13 +645,12 @@ app.get('/api/items', validationCache(), async (req, res) => {
   } catch (err) {
     // bad request
     console.error(err);
-    res.json(400);
+    res.status(400).json({ message: 'Bad Request' });
   }
-
-  // ok
-  res.json(200);
 });
 
+// GET /api/items/fruits
+//  Retrieves all fruit-related grocery items.
 app.get('/api/items/fruits', validationCache(), async (req, res) => {
   try {
     const client = await pool.connect();
@@ -685,13 +670,12 @@ app.get('/api/items/fruits', validationCache(), async (req, res) => {
   } catch (err) {
     // bad request
     console.error(err);
-    res.json(400);
+    res.status(400).json({ message: 'Bad Request' });
   }
-
-  // ok
-  res.json(200);
 });
 
+// GET /api/items/meats
+//  Retrieves all meat-related grocery items.
 app.get('/api/items/meats', validationCache(), async (req, res) => {
   try {
     const client = await pool.connect();
@@ -711,13 +695,12 @@ app.get('/api/items/meats', validationCache(), async (req, res) => {
   } catch (err) {
     // bad request
     console.error(err);
-    res.json(400);
+    res.status(400).json({ message: 'Bad Request' });
   }
-
-  // ok
-  res.json(200);
 });
 
+// GET /api/items/veges
+//  Retrieves all vege-related grocery items.
 app.get('/api/items/veges', validationCache(), async (req, res) => {
   try {
     const client = await pool.connect();
@@ -737,13 +720,15 @@ app.get('/api/items/veges', validationCache(), async (req, res) => {
   } catch (err) {
     // bad request
     console.error(err);
-    res.json(400);
+    res.status(400).json({ message: 'Bad Request' });
   }
 
   // ok
   res.json(200);
 });
 
+// GET /api/items/(id)
+//  Retrieves a item specified by ID.
 app.get('/api/items/:id', validationCache(), async (req, res) => {
   try {
     let id = req.params.id;
@@ -752,7 +737,7 @@ app.get('/api/items/:id', validationCache(), async (req, res) => {
 
     if (!result) {
       // not found
-      return res.json(404, 'No data found');
+      return res.status(404).json({ message: 'No data found'});
     } else {
       result.rows.forEach(row => {
         console.log(row);
@@ -764,45 +749,11 @@ app.get('/api/items/:id', validationCache(), async (req, res) => {
   } catch (err) {
     // bad request
     console.error(err);
-    res.json(400);
+    res.status(400).json({ message: 'Bad Request' });
   }
 
-  // ok
-  res.json(200);
 });
 // ===============================//
-
-
-// ============ USERS ============//
-
-// Stub Endpoint
-/*app.get('/api/users/validate', async (req, res) => {
-  try {
-    let id = req.params.id;
-    const client = await pool.connect();
-    // var result = await client.query('SELECT * FROM users WHERE user_id='+id);
-    let result = { rows: null };
-
-    if (!result) {
-      // not found
-      return res.json(404, 'No data found');
-    } else {
-      result.rows.forEach(row => {
-        console.log(row);
-      });
-      res.send(result.rows);
-    }
-    client.release();
-
-  } catch (err) {
-    // bad request
-    console.error(err);
-    res.json(400);
-  }
-
-  // ok
-  res.json(200);
-});*/
 
 
 // GET /api/user[/id]
@@ -810,7 +761,7 @@ app.get('/api/items/:id', validationCache(), async (req, res) => {
 //   otherwise it will retrieve information of the user based on the 'id' used as the parameter. This 'id' parameter has to
 //   match their their own id associated with the account they currently authenticated with. Only an admininistrator can
 //   access other users' information.
-app.get('/api/users/:id?', doNotCache(),authRequired, async (req, res) => {
+app.get('/api/users/:id?', doNotCache(), authRequired, async (req, res) => {
   try {
     const requestedAllUser: boolean = req.params.id === 'all';
     const id: number = req.params.id || req.user.user_id;
@@ -849,12 +800,23 @@ app.get('/api/users/:id?', doNotCache(),authRequired, async (req, res) => {
   }
 });
 
-app.get('/api/users/:id/orders', validationCache(), async (req, res) => {
+// GET /api/users/(id)/orders
+//  Retrieves all the orders of a specific user.
+//  The 'id' parameter can be set to 'undefined' which allows us to retrieve all orders of the authenticated user
+//  calling the route, otherwise, if the user can supply their own user id if its known to them. If the user is not an admin
+//  changing the 'id' to another user's id will not be allowed, only users who are admin user can do as such.
+app.get('/api/users/:id/orders', validationCache(), authRequired, async (req, res) => {
   try {
-    //let id = req.params.id;
+    // let id = req.params.id;
     const id = req.params.id === 'undefined' ? req.user.user_id : req.params.id;
     const isAdmin = req.user.admin || false;
     const hideArchive = !isAdmin ? ' AND archive<>\'t\'' : '';
+
+    // Only admins can access other user's orders.
+    if (id !== req.user.user_id && !isAdmin) {
+      return res.status(403).json({ message: 'Cannot access other users\' order information.' });
+    }
+
     const client = await pool.connect();
     var result = await client.query('SELECT * FROM orders WHERE user_id=$1' + hideArchive, [id]);
 
@@ -873,12 +835,22 @@ app.get('/api/users/:id/orders', validationCache(), async (req, res) => {
   }
 });
 
-app.get('/api/users/:id/orders/delivered', validationCache(), async (req, res) => {
+// GET /api/users/(id)/orders/delivered
+//  Retrieves all the delivered orders of a specific user.
+//  The 'id' parameter can be set to 'undefined' which allows us to retrieve all orders of the authenticated user
+//  calling the route, otherwise, if the user can supply their own user id if its known to them. If the user is not an admin
+//  changing the 'id' to another user's id will not be allowed, only users who are admin user can do as such.
+app.get('/api/users/:id/orders/delivered', validationCache(), authRequired, async (req, res) => {
   try {
     const id = req.params.id === 'undefined' ? req.user.user_id : req.params.id;
     console.log(id);
     const isAdmin = req.user.admin || false;
     const hideArchive = !isAdmin ? ' AND archive<>\'t\'' : '';
+
+    // Only admins can access other user's orders.
+    if (id !== req.user.user_id && !isAdmin) {
+      return res.status(403).json({ message: 'Cannot access other users\' order information.' });
+    }
 
     const client = await pool.connect();
     var result = await client.query('SELECT * FROM orders WHERE user_id=$1 AND order_status=2' + hideArchive, [id]);
@@ -899,11 +871,21 @@ app.get('/api/users/:id/orders/delivered', validationCache(), async (req, res) =
   }
 });
 
-app.get('/api/users/:id/orders/dispatched', validationCache(), async (req, res) => {
+// GET /api/users/(id)/orders/dispatched
+//  Retrieves all the dispatched orders of a specific user.
+//  The 'id' parameter can be set to 'undefined' which allows us to retrieve all orders of the authenticated user
+//  calling the route, otherwise, if the user can supply their own user id if its known to them. If the user is not an admin
+//  changing the 'id' to another user's id will not be allowed, only users who are admin user can do as such.
+app.get('/api/users/:id/orders/dispatched', validationCache(), authRequired, async (req, res) => {
   try {
     const id = req.params.id === 'undefined' ? req.user.user_id : req.params.id;
     const isAdmin = req.user.admin || false;
     const hideArchive = !isAdmin ? ' AND archive<>\'t\'' : '';
+
+    // Only admins can access other user's orders.
+    if (id !== req.user.user_id && !isAdmin) {
+      return res.status(403).json({ message: 'Cannot access other users\' order information.' });
+    }
 
     const client = await pool.connect();
     var result = await client.query('SELECT * FROM orders WHERE user_id=$1 AND order_status=1' + hideArchive, [id]);
@@ -923,7 +905,12 @@ app.get('/api/users/:id/orders/dispatched', validationCache(), async (req, res) 
   }
 });
 
-app.get('/api/users/:id/orders/:orderid', validationCache(), async (req, res) => {
+// GET /api/users/(id)/orders/(orderid)
+//  Retrieves a specific order of a specific user.
+//  The 'id' parameter can be set to 'undefined' which allows us to retrieve all orders of the authenticated user
+//  calling the route, otherwise, if the user can supply their own user id if its known to them. If the user is not an admin
+//  changing the 'id' to another user's id will not be allowed, only users who are admin user can do as such.
+app.get('/api/users/:id/orders/:orderid', validationCache(), authRequired, async (req, res) => {
   try {
     const id = req.params.id === 'undefined' ? req.user.user_id : req.params.id;
     const orderId = req.params.orderid;
@@ -956,22 +943,25 @@ app.get('/api/users/:id/orders/:orderid', validationCache(), async (req, res) =>
   }
 });
 
+// GET /api/current_user_cart
+//  Retrieves a specific users current shopping cart.
 app.get('/api/current_user_cart', validationCache(), async (req, res) => {
   try {
-    
-    //FIXME: fix this hard coded thing
+    // FIXME: fix this hard coded thing
     let id = req.user.user_id;
-    console.log("show me cart for user" + id);
-    
-    const client = await pool.connect();
-    let innerQueryResult = await client.query('SELECT order_id FROM orders WHERE user_id = ' + id + ' AND order_status=0');
+    console.log('show me cart for user' + id);
 
-    if (!innerQueryResult || innerQueryResult.rows.length == 0) {
+    const client = await pool.connect();
+    let innerQueryResult = await client.query('SELECT order_id FROM orders WHERE user_id=$1 AND order_status=0', [id]);
+
+    if (!innerQueryResult || innerQueryResult.rows.length === 0) {
       // not found
       return res.status(404).json({ message: 'No data found' });
     } else {
       let order_id = innerQueryResult.rows[0].order_id;
-      var items = await client.query('SELECT order_id, item_id, quantity, item_name, item_price, item_image FROM order_items natural join items WHERE order_id = ' + order_id);
+      var items = await client.query(
+        'SELECT order_id, item_id, quantity, item_name, item_price, item_image' +
+        ' FROM order_items natural join items WHERE order_id=$1', [order_id]);
       if (!items) {
         return res.json(404, 'No data found');
       } else {
@@ -986,7 +976,7 @@ app.get('/api/current_user_cart', validationCache(), async (req, res) => {
   } catch (err) {
     // bad request
     console.error(err);
-    res.status(400).end();
+    res.status(400).json({ message: 'Bad request'});
   }
 });
 // ===============================//
@@ -998,55 +988,66 @@ app.get('/api/current_user_cart', validationCache(), async (req, res) => {
 // ~~~~~~~~~POST API~~~~~~~~~~~~~//
 
 
+// POST /api/addtocart
+//  Adds item to cart. The request body must contain a valid item id, and a valid quantity of the item.
+//  Failure to provide valid inputs will result in an error in response.
 app.post('/api/addtocart', authRequired, async (req, res) => {
-  console.log("add to cart post");
+  console.log('add to cart post');
 
   let user_id = req.user.user_id;
   let quantiy = req.body.quantity;
   let item_id = req.body.id;
 
-  console.log('user: $1 \n quantity: $2 \n item_id: $3 ', [user_id,quantiy,item_id]);
+  console.log('user: $1 \n quantity: $2 \n item_id: $3 ', [user_id, quantiy, item_id]);
   try {
     const client = await pool.connect();
     let orderidQuery = await client.query('SELECT order_id FROM orders WHERE user_id=$1 AND order_status=0', [user_id]);
 
     console.log(orderidQuery);
 
-    if (orderidQuery.rowCount == 0) {
-      // make new cart for user using psql CURRENT_DATE: https://www.postgresql.org/docs/8.2/functions-datetime.html#FUNCTIONS-DATETIME-CURRENT
-      await client.query('INSERT INTO orders (user_id,date,order_status) VALUES ($1, CURRENT_DATE ,0) ',[user_id]);
+    if (orderidQuery.rowCount === 0) {
+      // make new cart for user using psql CURRENT_DATE:
+      // https://www.postgresql.org/docs/8.2/functions-datetime.html#FUNCTIONS-DATETIME-CURRENT
+      await client.query('INSERT INTO orders (user_id,date,order_status) VALUES ($1, CURRENT_DATE ,0) ', [user_id]);
       orderidQuery = await client.query('SELECT order_id FROM orders WHERE user_id=$1 ', [user_id]);
-    } 
+    }
 
     let order_id = orderidQuery.rows[0].order_id;
-    
 
     // add items to cart
     let insertStatement = 'INSERT INTO order_items (order_id,item_id,quantity) ';
     let valuesStatement = 'VALUES ($1,$2,$3)';
-    let values =  [order_id,item_id,quantiy];
+    let values =  [order_id, item_id, quantiy];
     let result = await client.query(insertStatement + valuesStatement, values);
 
+    res.status(204).end();
     client.release();
 
   } catch (err) {
     // bad request
     console.error(err);
-    res.json(400);
+    res.status(400).json({ message: 'Bad Request' });
   }
-
-  // ok
-  res.json(200);
-
-
-  
 });
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~//
 
 
 
 // ~~~~~~~~~~PUT API~~~~~~~~~~~~~//
-app.put('/api/users/:id?', async (req, res) => {
+
+// PUT /api/users[/id]
+//  Updates the User's Account information. if no 'id' param is supplied, it will use the current user's id from session data,
+//  otherwise it will retrieve information of the user based on the 'id' used as the parameter. This 'id' parameter has to
+//  match their their own id associated with the account they currently authenticated with. Only an admininistrator can
+//  access other users' information by specifying a different id.
+//
+// Request body can accept any of the user fields:
+//   first_name, last_name, password, email, address_line1, address_line2, address_suburb, address_city, address_postcode, phone
+//
+// Only admins can modify the following fields. If non-admin users tries to modify these, they are simply ignored:
+//   user_id, google_id, password_reset_token, password_reset_token_expiry, admin
+
+app.put('/api/users/:id?', authRequired, async (req, res) => {
   try {
     const id: number = req.params.id || req.user.user_id;
     const isAdmin: boolean = req.user.admin || false;
@@ -1070,6 +1071,9 @@ app.put('/api/users/:id?', async (req, res) => {
       }
       if (body.password_reset_token_expiry) {
         delete body['password_reset_token_expiry'];
+      }
+      if (body.admin) {
+        delete body['admin'];
       }
     }
 
@@ -1120,10 +1124,13 @@ app.put('/api/users/:id?', async (req, res) => {
   } catch (err) {
     // bad request
     console.error(err);
-    res.status(400).end();
+    res.status(400).json({ message: 'Bad request'});
   }
 });
 
+// PUT /api/users/(userId)/orders/(orderId)
+//  Allows an admin to update specific order information of a specific user. Usually used to toggle the archive status of an order
+//  although it can be used to update any field within order. Supplying unknown body parameters will lead to a Bad request response.
 app.put('/api/users/:userId/orders/:orderId', authAndAdminRequired, async (req, res) => {
   try {
     const id: number = req.params.id || req.user.user_id;
@@ -1144,14 +1151,14 @@ app.put('/api/users/:userId/orders/:orderId', authAndAdminRequired, async (req, 
         setStatement += `${value}=$${index + offset}, `;
       }
     });
-    console.log(setStatement); console.log(bodyVals);
+    // console.log(setStatement); console.log(bodyVals);
 
     const client = await pool.connect();
     let result = await client.query('UPDATE orders SET ' + setStatement + ' WHERE user_id=$1 AND order_id=$2 RETURNING *', bodyVals);
     if (!result || result.rows.length === 0) {
       res.status(404).json({ message: 'No order found with specified user and order ID combination.' });
     } else {
-      console.log( result.rows[0]);
+      // console.log( result.rows[0]);
       // Return a success message
       res.status(204).end();
     }
@@ -1159,20 +1166,19 @@ app.put('/api/users/:userId/orders/:orderId', authAndAdminRequired, async (req, 
   } catch (err) {
     // bad request
     console.error(err);
-    res.status(400).end();
+    res.status(400).json({ message: 'Bad request'});
   }
 });
 
-/**
- * Place an order by changing the order_status in the order table from 0 (in cart) to 1 (being processed).
- */
-app.put('/api/place_order', async (req, res) => {
+// PUT /api/place_order
+// Place an order for an auntethicated user by changing the order_status in the order table from 0 (in cart) to 1 (being processed).
+app.put('/api/place_order', authRequired, async (req, res) => {
   try {
-    //FIXME
+    // FIXME
     let id = req.user.user_id;
 
     const client = await pool.connect();
-    var result = await client.query("UPDATE orders SET order_status = 1 WHERE order_status = 0 AND user_id = " + id);
+    var result = await client.query('UPDATE orders SET order_status=1 WHERE order_status=0 AND user_id=$1', [id]);
 
     if (!result) {
       // not found
@@ -1188,41 +1194,45 @@ app.put('/api/place_order', async (req, res) => {
   } catch (err) {
     // bad request
     console.error(err);
-    res.json(400);
+    res.status(400).json({ message: 'Bad Request' });
   }
-
-  // ok
-  res.json(200);
 });
 
-app.put('/api/users/:id/cart/:itemid/appendQuantity/:qty', async (req, res) => {
-  try {
-    let id = req.params.id;
-    const client = await pool.connect();
-    // var result = await client.query('SELECT * FROM users WHERE user_id='+id);
-    let result = { rows: null };
+// app.put('/api/users/:id/cart/:itemid/appendQuantity/:qty', async (req, res) => {
+//   try {
+//     let id = req.params.id;
+//     const client = await pool.connect();
+//     // var result = await client.query('SELECT * FROM users WHERE user_id='+id);
+//     let result = { rows: null };
 
-    if (!result) {
-      // not found
-      return res.json(404, 'No data found');
-    } else {
-      result.rows.forEach(row => {
-        console.log(row);
-      });
-      res.send(result.rows);
-    }
-    client.release();
+//     if (!result) {
+//       // not found
+//       return res.json(404, 'No data found');
+//     } else {
+//       result.rows.forEach(row => {
+//         console.log(row);
+//       });
+//       res.send(result.rows);
+//     }
+//     client.release();
 
-  } catch (err) {
-    // bad request
-    console.error(err);
-    res.json(400);
-  }
+//   } catch (err) {
+//     // bad request
+//     console.error(err);
+//     res.status(400).json({ message: 'Bad Request' });
+//   }
+// });
 
-  // ok
-  res.json(200);
+
+// All non-implemented API routes that a user may request for will be immediately responded with a 501 Not Implemented response.
+app.all('/api/*', (req, res) => {
+  res.status(501).end();
 });
 
+// All non-implemented Auth routes that a user may request immediately responded with a 501 Not Implemented response.
+app.all('/auth/*', (req, res) => {
+  res.status(501).end();
+});
 
 // Server static files from /browser
 app.get('*.*', express.static(join(DIST_FOLDER, 'browser')));
@@ -1232,5 +1242,3 @@ app.get('*', (req, res) => {
   res.render(join(DIST_FOLDER, 'browser', 'index.html'), { req });
 });
 
-
-// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~//
