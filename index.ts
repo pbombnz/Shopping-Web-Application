@@ -592,9 +592,9 @@ app.put('/auth/password-reset', authNotAllowed, async (req, res) => {
       return res.status(403).json({ message: 'Invalid token used. Cannot reset password.' });
     }
     // Get user from token
-    console.log(existsResult.rows);
+    // console.log(existsResult.rows);
     const { user_id, password_reset_token_expiry } = existsResult.rows[0];
-    console.log('user_id: ', user_id, ' - password_reset_token_expiry: ', password_reset_token_expiry);
+    // console.log('user_id: ', user_id, ' - password_reset_token_expiry: ', password_reset_token_expiry);
 
     // Check if token is valid via expiry date.
     let nowDate: moment.Moment = moment();
@@ -632,7 +632,7 @@ app.get('/api/items', async (req, res) => {
   try {
     const client = await pool.connect();
     var result = await client.query('SELECT * FROM items');
-    console.log(result);
+    // console.log(result);
 
     if (!result) {
       // not found
@@ -663,9 +663,9 @@ app.get('/api/items/fruits', async (req, res) => {
       // not found
       return res.json(404, 'No data found');
     } else {
-      result.rows.forEach(row => {
-        console.log(row);
-      });
+      // result.rows.forEach(row => {
+      //   console.log(row);
+      // });
       res.send(result.rows);
     }
     client.release();
@@ -688,9 +688,9 @@ app.get('/api/items/meats', async (req, res) => {
       // not found
       return res.json(404, 'No data found');
     } else {
-      result.rows.forEach(row => {
-        console.log(row);
-      });
+      // result.rows.forEach(row => {
+      //   console.log(row);
+      // });
       res.send(result.rows);
     }
     client.release();
@@ -713,9 +713,9 @@ app.get('/api/items/veges', async (req, res) => {
       // not found
       return res.json(404, 'No data found');
     } else {
-      result.rows.forEach(row => {
-        console.log(row);
-      });
+      // result.rows.forEach(row => {
+      //   console.log(row);
+      // });
       res.send(result.rows);
     }
     client.release();
@@ -742,9 +742,9 @@ app.get('/api/items/:id', async (req, res) => {
       // not found
       return res.status(404).json({ message: 'No data found'});
     } else {
-      result.rows.forEach(row => {
-        console.log(row);
-      });
+      // result.rows.forEach(row => {
+      //   console.log(row);
+      // });
       res.send(result.rows);
     }
     client.release();
@@ -769,7 +769,7 @@ app.get('/api/users/:id?', authRequired, async (req, res) => {
     const requestedAllUser: boolean = req.params.id === 'all';
     const id: number = req.params.id || req.user.user_id;
     const isAdmin: boolean = req.user.admin || false;
-    console.log(`id: ${id} - req.user.user_id: ${req.user.user_id}`);
+    // console.log(`id: ${id} - req.user.user_id: ${req.user.user_id}`);
     if (id !== req.user.user_id && !isAdmin) {
       return res.status(401).json({ message: 'You do not have permission to access other accounts.' });
     }
@@ -846,7 +846,6 @@ app.get('/api/users/:id/orders', authRequired, async (req, res) => {
 app.get('/api/users/:id/orders/delivered', authRequired, async (req, res) => {
   try {
     const id = req.params.id === 'undefined' ? req.user.user_id : req.params.id;
-    console.log(id);
     const isAdmin = req.user.admin || false;
     const hideArchive = !isAdmin ? ' AND archive<>\'t\'' : '';
 
@@ -858,7 +857,6 @@ app.get('/api/users/:id/orders/delivered', authRequired, async (req, res) => {
     const client = await pool.connect();
     var result = await client.query('SELECT * FROM orders WHERE user_id=$1 AND order_status=2' + hideArchive, [id]);
 
-    console.log('pbomb');
     if (!result) {
       // not found
       return res.status(404).json({ message: 'No data found' });
@@ -932,9 +930,9 @@ app.get('/api/users/:id/orders/:orderid', authRequired, async (req, res) => {
       // not found
       return res.status(404).json({ message: 'No Order items found'});
     } else {
-      result.rows.forEach(row => {
-        console.log(row);
-      });
+      // result.rows.forEach(row => {
+      //   console.log(row);
+      // });
       res.send(result.rows).end();
     }
     client.release();
@@ -1054,7 +1052,7 @@ app.put('/api/users/:id?', authRequired, async (req, res) => {
   try {
     const id: number = req.params.id || req.user.user_id;
     const isAdmin: boolean = req.user.admin || false;
-    console.log(`id: ${id} - req.user.user_id: ${req.user.user_id}`);
+    // console.log(`id: ${id} - req.user.user_id: ${req.user.user_id}`);
     if (id !== req.user.user_id && !isAdmin) {
       return res.status(401).json({ message: 'You do not have permission to access other accounts.' });
     }
