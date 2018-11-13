@@ -736,16 +736,13 @@ app.get('/api/items/:id', async (req, res) => {
   try {
     let id = req.params.id;
     const client = await pool.connect();
-    var result = await client.query('SELECT * FROM items WHERE item_id=' + id);
+    var result = await client.query('SELECT * FROM items WHERE item_id=$1', [id]);
 
-    if (!result) {
+    if (!result || result.rows.length === 0) {
       // not found
       return res.status(404).json({ message: 'No data found'});
     } else {
-      // result.rows.forEach(row => {
-      //   console.log(row);
-      // });
-      res.send(result.rows);
+      res.send(result.rows[0]);
     }
     client.release();
 
