@@ -60,9 +60,20 @@ export class UpdateUserDetailsComponent implements OnInit {
 
   ngOnInit() {
     this.loading = true;
-    this.apiService.getUserInformation().subscribe((result) => {
+    this.apiService.getUserInformation().subscribe((result: any) => {
       this.loading = false;
+
+      if (this.apiService.isUserAdmin()) {
+        delete result['user_id'];
+        delete result['password'];
+        delete result['google_id'];
+        delete result['password_reset_token'];
+        delete result['password_reset_token_expiry'];
+        delete result['admin'];
+      }
+
       this.userAccountInformation = Object.assign({ password: '', password_confirm: ''}, result);
+
       // Need to convert the Address Postcode to string to make Form validation happy.
       this.userAccountInformation.address_postcode = this.userAccountInformation.address_postcode.toString();
       this.form.setValue(this.userAccountInformation);
@@ -95,6 +106,10 @@ export class UpdateUserDetailsComponent implements OnInit {
     this.error = undefined;
     this.success = false;
     this.loading = false;
+
+    if (!this.form.valid) {
+      return;
+    }
 
     const body = this.convertFormToBodyObject();
 

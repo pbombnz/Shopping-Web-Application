@@ -9,7 +9,6 @@ import { renderModuleFactory } from '@angular/platform-server';
 import { enableProdMode } from '@angular/core';
 
 import * as express from 'express';
-const expressCurl = require('express-curl');
 import * as nodemailer from 'nodemailer';
 import * as moment from 'moment';
 import * as apicache from 'apicache';
@@ -223,7 +222,6 @@ try {
   app.set('views', join(DIST_FOLDER, 'browser'));
 } catch (e) { }
 
-app.use(expressCurl);
 app.use(logger('dev'));
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
@@ -915,6 +913,7 @@ app.get('/api/users/:id/orders/:orderid', authRequired, async (req, res) => {
     const id = req.params.id === 'undefined' ? req.user.user_id : req.params.id;
     const orderId = req.params.orderid;
     const isAdmin = req.user.admin || false;
+    const hideArchive = !isAdmin ? ' AND archive<>\'t\'' : '';
 
     if (id !== req.user.user_id && !isAdmin) {
       return res.status(403).json({ message: 'You do not have permission to retrieve this sort of information.'});
@@ -923,7 +922,7 @@ app.get('/api/users/:id/orders/:orderid', authRequired, async (req, res) => {
     const client = await pool.connect();
     var result = await client.query(
       'SELECT quantity, item_id, item_name, item_price, item_image FROM orders NATURAL JOIN order_items NATURAL JOIN items ' +
-      'WHERE user_id=$1 AND order_id=$2', [id, orderId]);
+      'WHERE user_id=$1 AND order_id=$2' + hideArchive, [id, orderId]);
 
     if (!result) {
       // not found
