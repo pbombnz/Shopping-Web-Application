@@ -1242,17 +1242,15 @@ app.patch('/api/updateCart', async(req, res) => {
       if (!result) {
         // not found
         client.release();
-        return res.json(404, 'No data found');
+        return res.status(404).json({ message: 'No data found' });
       }
     }
-    res.json(200).end();
-
+    res.json(204).end();
     client.release();
-
   } catch (err) {
     // bad request
     console.error(err);
-    res.json(400).end();
+    res.status(400).json({ message: 'Bad Request' });
   }
 });
 
