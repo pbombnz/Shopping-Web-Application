@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, Input } from '@angular/core';
 import { Router, ActivatedRoute, ParamMap } from '@angular/router';
 
 import { Item } from '../browse-items/browse-items';
@@ -12,10 +12,10 @@ import { APIService } from '../services/api.service';
   styleUrls: ['./item-details.component.css']
 })
 export class ItemDetailsComponent implements OnInit {
-  readonly min = 0;
+  readonly min = 1;
   readonly max = 50;
 
-  itemQuantity = 0;
+  itemQuantity = 1;
 
   itemID;
   item;
@@ -36,19 +36,21 @@ export class ItemDetailsComponent implements OnInit {
 
 
   onQuantityMinusClick() {
+    if(this.itemQuantity <= this.min){ return; }
     this.itemQuantity--;
   }
 
   onQuantityPlusClick() {
+    if(this.itemQuantity >= this.max){ return; }
     this.itemQuantity++;
   }
 
   onSubmitClick(){
-    console.log("submit");
     
     // check if quantity is of valid size
     if(this.itemQuantity <= 0){
       console.log("cannot submit item to cart of size " + this.itemQuantity);
+      this.itemQuantity = 1;
       return;
     }
     
@@ -62,7 +64,10 @@ export class ItemDetailsComponent implements OnInit {
     }
     else{
       console.log("add to cart");
-      this.browseItemsService.addItemToCart(this.itemID,this.itemQuantity).subscribe();
+      this.browseItemsService.addItemToCart(this.itemID,this.itemQuantity).subscribe(()=>{
+        this.router.navigate(['/cart-page']);
+      });
+      
     }
 
   }
