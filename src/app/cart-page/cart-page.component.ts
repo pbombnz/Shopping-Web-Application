@@ -13,6 +13,7 @@ export class CartPageComponent implements OnInit {
   message = "You cart is empty";
   
   cartItems: CartItem[];
+  originalCartItems: number[]=[];
   total: number = 0;
 
   constructor(private cartPageService: CartPageService, private router: Router) {
@@ -23,10 +24,16 @@ export class CartPageComponent implements OnInit {
   }
 
   getCartItems(): void {
+    console.log("Get cart items");
     this.cartPageService.getCartItems()
       .subscribe(items => {
         this.cartItems = items;
-        console.log(this.cartItems)
+
+        // clone array
+        for(let i = 0; i < this.cartItems.length; i++){
+          this.originalCartItems.push(this.cartItems[i].quantity);
+        }
+
         this.calculateTotalPrice();
       })
   }
@@ -73,6 +80,28 @@ export class CartPageComponent implements OnInit {
   }
 
   checkout(){
+    let modifiedQuantity = false;
+
+    for(let i = 0; i < this.cartItems.length; i++){
+      console.log("LOOP");
+      console.log("original: " + this.originalCartItems[i] + " | normal: " + this.cartItems[i].quantity);
+      if(this.cartItems[i].quantity !== this.originalCartItems[i]){ 
+        modifiedQuantity = true;
+        break;
+      }
+    }
+
+    if(!modifiedQuantity){
+      console.log(" did not modified quantity");
       this.router.navigate(['/payment-page']);
+    }
+    else{
+      console.log("modified quantity")
+      this.cartPageService.updateCartItems(this.cartItems).subscribe(()=>{
+        this.router.navigate(['/payment-page']);
+      }
+    );
+    }
+    
   }
 }
