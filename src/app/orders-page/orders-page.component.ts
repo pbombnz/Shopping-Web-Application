@@ -12,7 +12,7 @@ import { NgbdModalContent } from '../admin/manage-user/manage-user.component';
 })
 export class OrdersPageComponent implements OnInit {
   user: any;
-  loading: boolean = false;
+  loading = false;
 
   successMessage: string = null;
   dangerMessage: string = null;

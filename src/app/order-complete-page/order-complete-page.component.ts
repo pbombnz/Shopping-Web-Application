@@ -13,7 +13,7 @@ export class OrderCompletePageComponent implements OnInit {
   ngOnInit() {
   }
 
-  viewOrders(){
+  viewOrders() {
     this.router.navigate(['/orders-page']);
   }
 }

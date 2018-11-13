@@ -36,6 +36,7 @@
     "cookie-parser": "^1.4.3",
     "core-js": "^2.5.4",
     "cors": "^2.8.4",
+    "express-curl": "^1.0.1",
     "express-session": "^1.15.6",
     "moment": "^2.22.2",
     "morgan": "^1.9.1",

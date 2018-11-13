@@ -16,8 +16,8 @@ import { PaymentService } from './payment.service';
 export class PaymentPageComponent implements OnInit {
   loading = false;
   cartItems: CartItem[];
-  total: number = 0;
-  numItems: number = 0;
+  total = 0;
+  numItems = 0;
   error: any;
   userAccountInformation: any;
 
@@ -35,7 +35,7 @@ export class PaymentPageComponent implements OnInit {
       }
     }
   ];
-  
+
   form: FormGroup = new FormGroup({
     first_name: new FormControl('', Validators.required),
     last_name: new FormControl('', Validators.required),
@@ -49,8 +49,8 @@ export class PaymentPageComponent implements OnInit {
     card_name: new FormControl('', [Validators.required, Validators.pattern('^[a-zA-Z ]+$')]),
     card_cvv: new FormControl('', [Validators.required, CustomValidators.digits, CustomValidators.rangeLength([3, 3])])
   });
-  
-  constructor(private router: Router, private cartPageService: CartPageService, 
+
+  constructor(private router: Router, private cartPageService: CartPageService,
     private apiService: APIService, private paymentService: PaymentService) { }
 
   ngOnInit() {
@@ -78,22 +78,22 @@ export class PaymentPageComponent implements OnInit {
         this.cartItems = items;
         this.calculateTotalPrice();
         this.numItems = this.cartItems.length;
-      })
+      });
   }
 
   calculateTotalPrice() {
     this.total = 0;
-    for (var i = 0; i < this.cartItems.length; i++) {
+    for (let i = 0; i < this.cartItems.length; i++) {
       console.log(this.cartItems[i]);
       this.total += (this.cartItems[i].item_price * this.cartItems[i].quantity);
     }
   }
 
-  backToCart(){
+  backToCart() {
     this.router.navigate(['/cart-page']);
   }
 
-  onSubmit(){
+  onSubmit() {
     this.error = undefined;
     this.loading = true;
 
@@ -106,6 +106,6 @@ export class PaymentPageComponent implements OnInit {
         this.loading = false;
         this.error = error;
       }
-    )
+    );
   }
 }

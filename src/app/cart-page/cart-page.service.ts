@@ -15,13 +15,11 @@ export class CartPageService {
     return this.http.get<CartItem[]>('api/current_user_cart')
       .pipe(
         map(result => {
-          for(let i =0; i < result.length;i++) {
+          for (let i = 0; i < result.length; i++) {
             result[i].item_price = Number.parseFloat(result[i].item_price.toString().substr(1));
           }
-
           return result;
         })
-       
       );
   }
 
@@ -30,9 +28,9 @@ export class CartPageService {
    * record in the DB
    */
   updateCartItems(cartItems: CartItem[]): Observable<Object> {
-      let body = {
+      const body = {
         items: cartItems
-      }
-      return this.http.patch('api/updateCart',body);
+      };
+      return this.http.patch('api/updateCart', body);
   }
 }

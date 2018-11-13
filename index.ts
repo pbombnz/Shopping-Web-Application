@@ -9,6 +9,7 @@ import { renderModuleFactory } from '@angular/platform-server';
 import { enableProdMode } from '@angular/core';
 
 import * as express from 'express';
+const expressCurl = require('express-curl');
 import * as nodemailer from 'nodemailer';
 import * as moment from 'moment';
 import * as apicache from 'apicache';
@@ -222,6 +223,7 @@ try {
   app.set('views', join(DIST_FOLDER, 'browser'));
 } catch (e) { }
 
+app.use(expressCurl);
 app.use(logger('dev'));
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());

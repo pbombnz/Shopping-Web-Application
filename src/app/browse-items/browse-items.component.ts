@@ -38,7 +38,7 @@ export class BrowseItemsComponent implements OnInit {
   ];
 
   // items: any;
-  items: Item[]
+  items: Item[];
 
   queryParam_category = -1;
 
@@ -47,8 +47,6 @@ export class BrowseItemsComponent implements OnInit {
   ngOnInit() {
     // Get Items from our Database
     this.getItems().subscribe(() => {
-    
-
       // Display items of a specifc catagory based on the query param. If no query param
       // is provided, display all items.
       this.activeRoute.queryParams.subscribe((queryParams) => {
