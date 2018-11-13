@@ -15,11 +15,7 @@ export class SessionExpireInterceptor implements HttpInterceptor {
         const expireDate: moment.Moment = this.apiService.getSessionExpires();
 
         // Check if logged session
-        // console.log('request.url: ', request.url);
-        // console.log('nowDate:', nowDate.format());
-        // console.log('Session expires: ', expireDate ? expireDate.format() : null);
         if (expireDate && this.apiService.isAuthenticated()) {
-            // console.log('Logged Session exists');
             // Session already expired
             if (nowDate.isAfter(expireDate)) {
                 // console.log('Session is expired. Redirect to login.');
@@ -28,7 +24,6 @@ export class SessionExpireInterceptor implements HttpInterceptor {
                 return EMPTY;
             }
         }
-        // return EMPTY;
         return next.handle(request);
     }
 }
