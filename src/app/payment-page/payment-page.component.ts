@@ -58,8 +58,19 @@ export class PaymentPageComponent implements OnInit {
     this.getCartItems();
     this.apiService.getUserInformation().subscribe((result) => {
       this.loading = false;
+
+      delete result['email'];
+      if (this.apiService.isUserAdmin()) {
+        delete result['user_id'];
+        delete result['password'];
+        delete result['google_id'];
+        delete result['password_reset_token'];
+        delete result['password_reset_token_expiry'];
+        delete result['admin'];
+      }
+
       this.userAccountInformation = Object.assign({card_number: '378282246310005', card_name: '', card_cvv: ''}, result);
-      delete this.userAccountInformation['email'];
+
       // Need to convert the Address Postcode to string to make Form validation happy.
       this.userAccountInformation.address_postcode = this.userAccountInformation.address_postcode.toString();
       this.form.setValue(this.userAccountInformation);
@@ -95,8 +106,13 @@ export class PaymentPageComponent implements OnInit {
 
   onSubmit() {
     this.error = undefined;
-    this.loading = true;
+    this.loading = false;
 
+    if (!this.form.valid) {
+      return;
+    }
+
+    this.loading = true;
     this.paymentService.placeOrder(undefined).subscribe(
       (result) => {
         this.loading = false;
