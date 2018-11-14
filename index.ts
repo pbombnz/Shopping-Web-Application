@@ -11,7 +11,7 @@ import { enableProdMode } from '@angular/core';
 import * as express from 'express';
 import * as nodemailer from 'nodemailer';
 import * as moment from 'moment';
-import * as apicache from 'apicache';
+// import * as apicache from 'apicache';
 const crypto = require('crypto');
 const queryString = require('query-string');
 const cors = require('cors');
@@ -30,17 +30,38 @@ const LocalStrategy = require('passport-local').Strategy;
 const GoogleStrategy = require('passport-google-oauth').OAuth2Strategy;
 
 
-// let doNotCache = apicache.options({
+// let apicache_noCaching = apicache.newInstance({
+//   debug: true,
 //   headers: {
 //     'cache-control': 'no-store'
 //   }
-// }).middleware;
+//  }).middleware;
+
 // let validationCache = apicache.options({
 //   headers: {
 //     'cache-control': 'no-cache'
 //   }
 // }).middleware;
+const cachingControl_noStore = (req, res, next) => {
+  res.set({
+    'cache-control': 'no-store'
+  });
+  next();
+};
 
+const cachingControl_revalidation = (req, res, next) => {
+  res.set({
+    'cache-control': 'public, no-cache, max-age=0'
+  });
+  next();
+};
+
+const cachingControl_cachedFor1month_revalidation = (req, res, next) => {
+  res.set({
+    'cache-control': 'public, must-revalidate, max-age=2630000'
+  });
+  next();
+};
 
 
 var transporter = nodemailer.createTransport({
@@ -374,7 +395,7 @@ app.put('/auth/google/register', authRequired, async (req, res) => {
 //   Called when the Angular Application is loaded. Allows us to check if the client session id
 //   is still valid to use based on the response the server gives back. This also is helpful for
 //   to retreive back their valid sessionId if the user closes the browser.
-app.get('/auth/loggedin',  authIgnore, (req, res) => {
+app.get('/auth/loggedin', authIgnore, cachingControl_revalidation, (req, res) => {
   if (req.isAuthenticated()) {
     const userData: any = {
       first_name: req.user.first_name,
@@ -396,7 +417,7 @@ app.get('/auth/loggedin',  authIgnore, (req, res) => {
 // POST /auth/logout
 //   Logs the user out. This route is suitable to use for logging a user out regardless of
 //   the Strategy used for authentication.
-app.get('/auth/logout',  authRequired, (req, res) => {
+app.get('/auth/logout', authRequired, cachingControl_noStore, (req, res) => {
   req.logout();
   res.status(200).json({ message: 'Logout successful.' });
 });
@@ -628,7 +649,7 @@ app.put('/auth/password-reset', authNotAllowed, async (req, res) => {
 
 // GET /api/items
 //  Retrieves all grocery items.
-app.get('/api/items', async (req, res) => {
+app.get('/api/items', cachingControl_revalidation, async (req, res) => {
   try {
     const client = await pool.connect();
     var result = await client.query('SELECT * FROM items');
@@ -654,7 +675,7 @@ app.get('/api/items', async (req, res) => {
 
 // GET /api/items/fruits
 //  Retrieves all fruit-related grocery items.
-app.get('/api/items/fruits', async (req, res) => {
+app.get('/api/items/fruits', cachingControl_revalidation, async (req, res) => {
   try {
     const client = await pool.connect();
     var result = await client.query('SELECT * FROM items WHERE item_category=2 ');
@@ -679,7 +700,7 @@ app.get('/api/items/fruits', async (req, res) => {
 
 // GET /api/items/meats
 //  Retrieves all meat-related grocery items.
-app.get('/api/items/meats', async (req, res) => {
+app.get('/api/items/meats', cachingControl_revalidation, async (req, res) => {
   try {
     const client = await pool.connect();
     var result = await client.query('SELECT * FROM items WHERE item_category=1 ');
@@ -704,7 +725,7 @@ app.get('/api/items/meats', async (req, res) => {
 
 // GET /api/items/veges
 //  Retrieves all vege-related grocery items.
-app.get('/api/items/veges', async (req, res) => {
+app.get('/api/items/veges', cachingControl_revalidation, async (req, res) => {
   try {
     const client = await pool.connect();
     var result = await client.query('SELECT * FROM items WHERE item_category=3 ');
@@ -732,7 +753,7 @@ app.get('/api/items/veges', async (req, res) => {
 
 // GET /api/items/(id)
 //  Retrieves a item specified by ID.
-app.get('/api/items/:id', async (req, res) => {
+app.get('/api/items/:id', cachingControl_revalidation, async (req, res) => {
   try {
     let id = req.params.id;
     const client = await pool.connect();
@@ -761,7 +782,7 @@ app.get('/api/items/:id', async (req, res) => {
 //   otherwise it will retrieve information of the user based on the 'id' used as the parameter. This 'id' parameter has to
 //   match their their own id associated with the account they currently authenticated with. Only an admininistrator can
 //   access other users' information.
-app.get('/api/users/:id?', authRequired, async (req, res) => {
+app.get('/api/users/:id?', authRequired, cachingControl_revalidation, async (req, res) => {
   try {
     const requestedAllUser: boolean = req.params.id === 'all';
     const id: number = req.params.id || req.user.user_id;
@@ -805,7 +826,7 @@ app.get('/api/users/:id?', authRequired, async (req, res) => {
 //  The 'id' parameter can be set to 'undefined' which allows us to retrieve all orders of the authenticated user
 //  calling the route, otherwise, if the user can supply their own user id if its known to them. If the user is not an admin
 //  changing the 'id' to another user's id will not be allowed, only users who are admin user can do as such.
-app.get('/api/users/:id/orders', authRequired, async (req, res) => {
+app.get('/api/users/:id/orders', authRequired, cachingControl_cachedFor1month_revalidation, async (req, res) => {
   try {
     // let id = req.params.id;
     const id = req.params.id === 'undefined' ? req.user.user_id : req.params.id;
@@ -840,7 +861,7 @@ app.get('/api/users/:id/orders', authRequired, async (req, res) => {
 //  The 'id' parameter can be set to 'undefined' which allows us to retrieve all orders of the authenticated user
 //  calling the route, otherwise, if the user can supply their own user id if its known to them. If the user is not an admin
 //  changing the 'id' to another user's id will not be allowed, only users who are admin user can do as such.
-app.get('/api/users/:id/orders/delivered', authRequired, async (req, res) => {
+app.get('/api/users/:id/orders/delivered', authRequired, cachingControl_cachedFor1month_revalidation, async (req, res) => {
   try {
     const id = req.params.id === 'undefined' ? req.user.user_id : req.params.id;
     const isAdmin = req.user.admin || false;
@@ -874,7 +895,7 @@ app.get('/api/users/:id/orders/delivered', authRequired, async (req, res) => {
 //  The 'id' parameter can be set to 'undefined' which allows us to retrieve all orders of the authenticated user
 //  calling the route, otherwise, if the user can supply their own user id if its known to them. If the user is not an admin
 //  changing the 'id' to another user's id will not be allowed, only users who are admin user can do as such.
-app.get('/api/users/:id/orders/dispatched', authRequired, async (req, res) => {
+app.get('/api/users/:id/orders/dispatched', authRequired, cachingControl_cachedFor1month_revalidation, async (req, res) => {
   try {
     const id = req.params.id === 'undefined' ? req.user.user_id : req.params.id;
     const isAdmin = req.user.admin || false;
@@ -908,7 +929,7 @@ app.get('/api/users/:id/orders/dispatched', authRequired, async (req, res) => {
 //  The 'id' parameter can be set to 'undefined' which allows us to retrieve all orders of the authenticated user
 //  calling the route, otherwise, if the user can supply their own user id if its known to them. If the user is not an admin
 //  changing the 'id' to another user's id will not be allowed, only users who are admin user can do as such.
-app.get('/api/users/:id/orders/:orderid', authRequired, async (req, res) => {
+app.get('/api/users/:id/orders/:orderid', authRequired, cachingControl_cachedFor1month_revalidation, async (req, res) => {
   try {
     const id = req.params.id === 'undefined' ? req.user.user_id : req.params.id;
     const orderId = req.params.orderid;
@@ -944,7 +965,7 @@ app.get('/api/users/:id/orders/:orderid', authRequired, async (req, res) => {
 
 // GET /api/current_user_cart
 //  Retrieves a specific users current shopping cart.
-app.get('/api/current_user_cart', async (req, res) => {
+app.get('/api/current_user_cart', authRequired, cachingControl_noStore, async (req, res) => {
   try {
     // FIXME: fix this hard coded thing
     let id = req.user.user_id;
@@ -1255,21 +1276,21 @@ app.patch('/api/updateCart', async(req, res) => {
 });
 
 // All non-implemented API routes that a user may request for will be immediately responded with a 501 Not Implemented response.
-app.all('/api/*', (req, res) => {
+app.all('/api/*', cachingControl_cachedFor1month_revalidation, (req, res) => {
   res.status(501).end();
 });
 
 // All non-implemented Auth routes that a user may request immediately responded with a 501 Not Implemented response.
-app.all('/auth/*', (req, res) => {
+app.all('/auth/*', cachingControl_cachedFor1month_revalidation, (req, res) => {
   res.status(501).end();
 });
 
 
 // Server static files from /browser
-app.get('*.*', express.static(join(DIST_FOLDER, 'browser')));
+app.get('*.*', cachingControl_cachedFor1month_revalidation, express.static(join(DIST_FOLDER, 'browser')));
 
 // All regular routes use the Universal engine
-app.get('*', (req, res) => {
+app.get('*', cachingControl_cachedFor1month_revalidation, (req, res) => {
   res.render(join(DIST_FOLDER, 'browser', 'index.html'), { req });
 });
 
