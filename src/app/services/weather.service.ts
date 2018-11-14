@@ -96,7 +96,7 @@ export class WeatherService {
                 this.city = <string> result.address_city;
                 this.country = 'nz';
                 this.units = '&units=metric';
-                this.externalURL = 'http://api.openweathermap.org/data/2.5/weather?q=' + this.city + ',' + this.country + this.units + '&APPID=' + this.appId;
+                this.externalURL = 'https://api.openweathermap.org/data/2.5/weather?q=' + this.city + ',' + this.country + this.units + '&APPID=' + this.appId;
 
                 resolve();
             });
