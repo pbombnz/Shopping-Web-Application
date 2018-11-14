@@ -3,6 +3,7 @@ import { HttpClient } from '@angular/common/http';
 import { map } from 'rxjs/operators';
 import { Injectable } from '@angular/core';
 import { THIS_EXPR } from '@angular/compiler/src/output/output_ast';
+import { APIService } from './api.service';
 
 enum Weather {
     THUNDER = 'Thunderstorm',
@@ -39,21 +40,16 @@ export class WeatherService {
     public weatherCondition: string;
 
 
-    public constructor(private http: HttpClient) {
-        // APP Key from my account
-        this.appId = 'd5fe3061eb1bc6a1d724d33ae9417b92';
-        this.weatherData = [];
-        this.city = 'Wellington';
-        this.country = 'nz';
-        this.units = '&units=metric';
-        this.externalURL = 'http://api.openweathermap.org/data/2.5/weather?q=' + this.city + ',' + this.country + this.units + '&APPID=' + this.appId;
+    public constructor(private http: HttpClient, private apiService: APIService) {
 
     }
 
     // promise the weather condition
     public getWeatherCondition() {
-        return this.requestWeatherData().then( (result) => {
-            return this.assessWeatherCondition(result);
+        return this.getUserAddressCity().then( ()=>{
+            return this.requestWeatherData().then( (result) => {
+                return this.assessWeatherCondition(result);
+            })
         });
     }
 
@@ -71,6 +67,7 @@ export class WeatherService {
     private assessWeatherCondition = function(weatherData) {
         return new Promise((resolve, reject) => {
             const weatherID = weatherData.weather[0].id;
+            console.log(weatherID);
 
             // if not a valid weather from the API docs (Which shouldn't happen)
             if (weatherID < 200 || weatherID >= 900) { this.weatherCondition = Weather.DEFAULT; }
@@ -86,5 +83,24 @@ export class WeatherService {
             resolve(this.weatherCondition);
         });
     };
+
+    private getUserAddressCity = function(){
+        return new Promise((resolve, reject) =>{
+            this.apiService.getUserInformation().subscribe((result) =>{
+                console.log(result);
+    
+                // APP Key from my account
+                this.appId = 'd5fe3061eb1bc6a1d724d33ae9417b92';
+                this.weatherData = [];
+                // this.city = 'Wellington';
+                this.city = <string> result.address_city;
+                this.country = 'nz';
+                this.units = '&units=metric';
+                this.externalURL = 'http://api.openweathermap.org/data/2.5/weather?q=' + this.city + ',' + this.country + this.units + '&APPID=' + this.appId;
+
+                resolve();
+            });
+        });
+    }
 
 }
