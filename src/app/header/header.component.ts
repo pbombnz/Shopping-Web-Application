@@ -9,7 +9,7 @@ import { WeatherService } from '../services/weather.service';
   styleUrls: ['./header.component.css']
 })
 export class HeaderComponent implements OnInit {
-  title = 'Supermarket Shopping Site';
+  title = 'Limited Produce Ltd.';
   isCollapsed = true;
 
   constructor(private router: Router, public apiService: APIService, public weatherService: WeatherService) { }
