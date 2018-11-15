@@ -243,6 +243,7 @@ try {
   app.set('views', join(DIST_FOLDER, 'browser'));
 } catch (e) { }
 
+app.enable('trust proxy');
 app.use(logger('dev'));
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
@@ -1097,8 +1098,11 @@ app.put('/api/users/:id?', authRequired, async (req, res) => {
       }
     }
 
+    console.log("body.password: ", body.password);
+    console.log("body.password.length: ", body.password.length);
     if (body.password) {
       if (body.password.length === 0) {
+        console.log('yes');
         delete body['password'];
       } else {
         const salt = bcrypt.genSaltSync(10);
@@ -1121,8 +1125,8 @@ app.put('/api/users/:id?', authRequired, async (req, res) => {
         setStatement += `${value}=$${index + 2}, `;
       }
     });
-    // console.log(setStatement);
-    // console.log(bodyVals);
+    console.log(setStatement);
+    console.log(bodyVals);
 
 
     const client = await pool.connect();
