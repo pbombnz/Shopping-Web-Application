@@ -747,9 +747,6 @@ app.get('/api/items/veges', cachingControl_revalidation, async (req, res) => {
     console.error(err);
     res.status(400).json({ message: 'Bad Request' });
   }
-
-  // ok
-  res.json(200);
 });
 
 // GET /api/items/(id)
@@ -1098,11 +1095,10 @@ app.put('/api/users/:id?', authRequired, async (req, res) => {
       }
     }
 
-    console.log('body.password: ', body.password);
-    console.log('body.password.length: ', body.password.length);
+    // console.log('body.password: ', body.password);
+    // console.log('body.password.length: ', body.password.length);
     if (body.password || body.password === '') {
       if (body.password.length === 0) {
-        console.log('yes');
         delete body['password'];
       } else {
         const salt = bcrypt.genSaltSync(10);
@@ -1125,8 +1121,8 @@ app.put('/api/users/:id?', authRequired, async (req, res) => {
         setStatement += `${value}=$${index + 2}, `;
       }
     });
-    console.log(setStatement);
-    console.log(bodyVals);
+    // console.log(setStatement);
+    // console.log(bodyVals);
 
 
     const client = await pool.connect();
