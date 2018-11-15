@@ -1098,9 +1098,9 @@ app.put('/api/users/:id?', authRequired, async (req, res) => {
       }
     }
 
-    console.log("body.password: ", body.password);
-    console.log("body.password.length: ", body.password.length);
-    if (body.password) {
+    console.log('body.password: ', body.password);
+    console.log('body.password.length: ', body.password.length);
+    if (body.password || body.password === '') {
       if (body.password.length === 0) {
         console.log('yes');
         delete body['password'];
