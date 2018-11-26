@@ -90,7 +90,7 @@ export class WeatherService {
                 console.log(result);
     
                 // APP Key from my account
-                this.appId = 'd5fe3061eb1bc6a1d724d33ae9417b92';
+                this.appId = ''; // Removed API key - Get your own please
                 this.weatherData = [];
                 // this.city = 'Wellington';
                 this.city = <string> result.address_city;

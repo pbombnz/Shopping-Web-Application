@@ -67,8 +67,8 @@ const cachingControl_cachedFor1month_revalidation = (req, res, next) => {
 var transporter = nodemailer.createTransport({
   service: 'yahoo', // no need to set host or port etc.
   auth: {
-    user: 'nwen.supermarket@yahoo.com',
-    pass: 'w5mL0!JtmGsc'
+    user: '', // Email Removed - Get your own yahoo mail please
+    pass: '', // Password Removed - Get your own yahoo mail please
   },
   debug: false,
   logger: true
