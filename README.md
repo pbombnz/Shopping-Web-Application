@@ -1,6 +1,9 @@
-# Nwen304GroupProject
+# Shopping Web Application
 
 This project was generated with [Angular CLI](https://github.com/angular/angular-cli) version 6.2.4.
+
+## Archive Uses only
+This application in its current form does not work as API keys and passwords have been removed from public display making this application here to demostrate our coding capabilities rather than for practical uses.
 
 ## Development Instructions
 
